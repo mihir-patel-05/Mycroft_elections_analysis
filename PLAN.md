@@ -969,6 +969,14 @@ Every open `war-room-2.0` issue, in the order to work on it, plus nine tasks the
 
 **Where we stand on Nov 10.** No launch issue has been started; the commits since Nov 3 are planning only. #136 (planned Nov 6 to 8) and #137 (Nov 9 to 10) are late, so the schedule below is rebuilt from today. It has about two days of slack before the Nov 20 checkpoint.
 
+**Where we stand on Nov 14.** Checked against the code and commits; GitHub issue states were not checked.
+
+- **Done:** #190 (Nov 12) and #136 (built Nov 12). #136 still needs its five state spot checks recorded in `docs/plans/lock-2026-record.md`, a check that its settings are on `Backend` with the night loop off, and each state's certification deadline entered in the admin dashboard.
+- **Late:** #137 and #138 are not started. `import-mit-results.ts` (April) loads House and Senate only, with no historical results table or presidential rows. Replay, swing and the scorecard wait on these two, so they run in parallel next.
+- **Due now:** the domain decision for #192 (Nov 13; "Mycroft" appears nowhere in the code, and the War Room title still reads "VoteInformed") and the #196 sign-up (Nov 15).
+- **Not started:** everything else in the launch set. The shell still counts down to Nov 3 (#191), and there is no analytics or error reporting (#193), no privacy or terms page (#195) and no feedback form (#194).
+- **Start in launch week:** the storage part of #178 and the daily archive of #175, since neither can be backfilled.
+
 **Found in Railway on Nov 10:**
 
 - **The election-night data was captured.** Testing's `Backend` logs from 9 PM ET on Nov 3 show civicAPI polls and 805 Kalshi markets stored that hour; some county-detail requests returned 502, so county coverage on the night has gaps. The ingestor still runs and reads 470 races.
