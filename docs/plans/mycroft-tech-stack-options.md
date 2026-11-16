@@ -15,7 +15,7 @@ Written Nov 16, 2026, for the post-election product. This is a decision document
   3. **Geography as data:** precinct results, new district lines and their lean (#162, #171) and cartograms (#157). These need **PostGIS** and vector map tiles.
 - **Recommendation: Option B, "TypeScript product, Python models".** Keep TypeScript for everything people touch. Add a small Python layer for models. Upgrade Postgres to Postgres + TimescaleDB + PostGIS + pgvector. Split the one big process into a few services. There's no rewrite.
 - **Stay on Railway, and put Cloudflare in front.** AWS and Google Cloud can do all of this, but at our size they'd take more time to learn and run than they'd save. Section 7.5 lists the signs that would change that.
-- **Don't change the stack before the Nov 25 launch.** Start in December with the one thing that can't wait: storing price ticks, because they can't be collected after the fact.
+- **Don't change the stack before the Nov 25 launch.** The one thing that can't wait is storing price ticks (#178) and the daily signal archive (#175), because neither can be collected after the fact. PLAN.md (Nov 14) already starts them in launch week. Do that in ordinary Postgres tables now, and move them into TimescaleDB in December.
 
 ## Contents
 
@@ -926,11 +926,12 @@ gantt
     axisFormat %b %d
     section Phase 0
     Launch War Room 2.0 on today's stack :p0, 2026-11-16, 2026-11-25
+    Start storing ticks and the signal archive :p0b, 2026-11-18, 2026-11-25
     Launch day :milestone, m0, 2026-11-25, 0d
     section Phase 1
     Split Backend into services and add Redis :p1a, 2026-12-01, 12d
     Postgres with TimescaleDB and PostGIS :p1b, 2026-12-03, 12d
-    Tick storage and the signal archive :p1c, after p1b, 7d
+    Move ticks and the archive into hypertables :p1c, after p1b, 7d
     section Phase 2
     Python layer and model_runs :p2a, 2026-12-14, 14d
     First model is the seat simulation :p2b, after p2a, 21d
@@ -946,12 +947,13 @@ gantt
 **Phase 0, now to Nov 25: launch on today's stack.** No stack changes. Only the launch items that are also good architecture:
 - #193: Sentry, cookieless analytics and an uptime check.
 - #192: once the domain is chosen, point its DNS through Cloudflare.
-- *Done when:* the launch ships, errors show up in Sentry, and stopping the API sends an alert.
+- The storage part of #178 and the daily archive of #175, which PLAN.md (Nov 14) starts in launch week because neither can be backfilled. Use ordinary Postgres tables, partitioned by month if you like. Phase 1 moves them into hypertables without losing a row.
+- *Done when:* the launch ships, errors show up in Sentry, stopping the API sends an alert, and ticks and the daily archive are being stored.
 
 **Phase 1, December: split the process and upgrade the database.**
 - Run the same `backend/` code as `api`, `market-feed`, `results-ingestor`, `workers` and cron services. Add Redis for pub/sub and rate limits. This closes H2 and M9.
 - Stand up Postgres with TimescaleDB, PostGIS and pgvector beside the old database. Rehearse the move with a dump and restore, then switch `DATABASE_URL`. Keep the old database read-only for two weeks.
-- Start tick storage (#178) and the daily signal archive (#175). They come first because neither can be backfilled.
+- Move the tick table (#178) and the signal archive (#175) from Phase 0 into hypertables, and add compression and the 1-minute and 1-hour continuous aggregates.
 - *Done when:* `api` runs two replicas with one Kalshi socket, ticks are landing in a compressed hypertable, and a restore of the new database has been proven.
 
 **Phase 2, mid-December to January: the Python layer.**
