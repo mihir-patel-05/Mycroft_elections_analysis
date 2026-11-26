@@ -1,8 +1,10 @@
-# Mycroft (Whitehall) tech stack review
+# Mycroft tech stack review
 
 Written Nov 16, 2026, for the post-election product. This is a decision document: it changes no code. Once you pick an option, the chosen parts move into PLAN.md §5.
 
-> **Name check.** The repo calls the post-election product **Mycroft**: the War Room plus Markets, legAI, Money, Referee and Simulator, behind one hub and one API (PLAN.md §5.6). "Whitehall" isn't used anywhere in the repo or the issues, so this report treats it as your name for that same suite.
+> **Status (Nov 26, 2026).** **Option B is accepted**, scoped to Whitehall: PLAN.md §0.5 has the phases as they now stand, and it wins where it differs from this review. The Nov 25 launch in Phase 0 was dropped; Whitehall's first public release is proposed for Jan 15, 2027. The nightly CSV and Parquet export moved from Phase 2 to Phase 1, so `/data` has it before the release. Phase 3's suite pieces (Better Auth, API keys, OpenAPI clients, the hub, the MCP server) are deferred until Whitehall ships.
+>
+> **Names.** **Mycroft** is the suite. **Whitehall** ("Mycroft Whitehall") is its U.S. election analysis tool, the app this review calls the War Room. An earlier note here treated "Whitehall" as the suite's name. That was wrong.
 
 ---
 
