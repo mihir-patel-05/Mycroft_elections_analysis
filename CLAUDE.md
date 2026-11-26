@@ -1,4 +1,9 @@
-# VoteInformed
+# Mycroft (Whitehall first)
 
+- **Names:** Mycroft is the suite of political and policy analysis tools. Whitehall ("Mycroft Whitehall") is its U.S. election analysis tool, the app formerly called the War Room (`CODE/`). VoteInformed was the pre-election site; older docs and code still use that name and "War Room".
+- **Scope:** Whitehall first, and only Whitehall for now. Don't start work for another Mycroft app (Markets, legAI, Money, Referee, Simulator) or suite-wide pieces (shared accounts, public API keys, the hub) until Whitehall ships. See `PLAN.md` section 0.
 - **Branches:** `Mycroft_post_election_branch` is the main branch for the Mycroft post-election product and the one that gets deployed. All work merges into it: branch from it, open every pull request against it (never `main` or `2026Midterm_intel_v2`), and merge `origin/Mycroft_post_election_branch` into your branch to resolve conflicts.
-- **The plan:** `PLAN.md` is the plan, the product ideas, and the working agreements (section 7, including the checks to run before merging). Feature plans live in `docs/plans/`.
+- **Hosting:** the Railway project "Mycroft" is the primary project. "attractive-victory" and "impartial-expression" are legacy: add nothing to them.
+- **Tech stack:** Option B from `docs/plans/mycroft-tech-stack-options.md` (TypeScript product, Python models; Postgres with TimescaleDB, PostGIS and pgvector; Cloudflare; Railway), built only as far as Whitehall needs (`PLAN.md` section 0.5).
+- **The plan:** `PLAN.md` is the plan, the product ideas, and the working agreements (section 7, including the checks to run before merging). Section 0 is the current plan; sections 1 to 4.12 are history. Feature plans live in `docs/plans/`.
+- **Specs:** features go through Spec Kit (`/speckit-specify` → `/speckit-clarify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze` → `/speckit-implement`). The constitution lives at `.specify/memory/constitution.md`, specs go in `specs/NNN-name/`, and feature IDs (F-nn) match `PLAN.md` section 0.4.

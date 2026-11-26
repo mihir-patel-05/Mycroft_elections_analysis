@@ -1,13 +1,114 @@
-# VoteInformed: plan, product ideas, and tech stack
+# Mycroft: plan, product ideas, and tech stack (Whitehall first)
 
-Last updated: November 10, 2026
+Last updated: November 26, 2026
 Election day: Tuesday, November 3, 2026
 
-This is the single planning document for the repo. It replaces all earlier plans, day reports, PRDs, and deployment guides. Those plans covered AWS, Supabase, and Vercel. **Everything now runs on Railway.**
+This is the single planning document for the repo. It replaces all earlier plans, day reports, PRDs, and deployment guides. Those plans covered AWS, Supabase, and Vercel. **Everything now runs on Railway, in the "Mycroft" project.**
+
+**Section 0 is the current plan.** Sections 1 to 4.12 record VoteInformed, the pre-election site, and how its features were built. They use the old names: "VoteInformed" for the site and "War Room" for the app that is now **Whitehall**. Where they conflict with section 0, section 0 wins.
 
 ---
 
-## 1. What we are building
+## 0. Now: Whitehall first (Nov 26, 2026)
+
+### 0.1 Names and scope
+
+- **Mycroft** is the suite: tools for U.S. political and policy analysis on one data platform (section 5.6). It is also the name of this repo, the working branch (`Mycroft_post_election_branch`) and the primary Railway project.
+- **Whitehall** ("Mycroft Whitehall") is Mycroft's U.S. election analysis tool. It covers results, maps, swing, replay, the signal scorecard, special elections and election nights. It is the app formerly called the War Room (app 0), built in `CODE/`.
+- **Scope:** all development is for Whitehall first, and only Whitehall for now.
+  - The other apps are deferred until Whitehall ships: Markets, legAI, Money, Referee, Simulator, and the voter guide as its own app.
+  - So are the suite-wide pieces: shared accounts, the public API with keys, OpenAPI clients, the hub's showcase and sign-in, and the `shared` UI package.
+  - Whitehall is still built to the suite architecture (one API, one database, section 5.6), so later apps can join without a rewrite.
+- **The Nov 25 launch was dropped.** No code was committed after Nov 14, so the launch set (section 4.14) is not built. It becomes Whitehall's first public release (F-09 below), proposed for **Jan 15, 2027**.
+
+### 0.2 Decisions (Nov 26)
+
+| Decision | Detail |
+|---|---|
+| Suite and app names | Mycroft (suite); Whitehall (the U.S. election analysis tool, formerly the War Room) |
+| Scope | Whitehall only, until it ships |
+| Tech stack | **Option B** from `docs/plans/mycroft-tech-stack-options.md`: TypeScript product, Python models; Postgres with TimescaleDB, PostGIS and pgvector; Cloudflare in front; stay on Railway. Only the parts Whitehall uses are built now (0.5) |
+| Hosting | The Railway project **"Mycroft"** is primary. "attractive-victory" (Testing, main-prod) and "impartial-expression" (landing page) are legacy, to retire once their data is confirmed in Mycroft |
+| Business model | Free now, paid later. All of Whitehall is free; paid tiers come only with the suite and only after partner demand is validated. We never monetize vote intentions or reading profiles |
+
+### 0.3 Where we are (checked Nov 26)
+
+- **Railway "Mycroft" project** (`production` only, us-east4). It runs:
+  - `web` (Whitehall) and `api`, both deploying from `Mycroft_post_election_branch`
+  - `Postgres` (18) and `polling` (18), each on a 5 GB volume
+  - `db-backup` (nightly at 08:30 UTC) and `db-restore`
+  - the `db-backups` bucket
+
+  It has no `admin`, Redis, workers, cron services, raw-payload bucket or `staging` environment yet.
+- **The Nov 3 record and the #136 lock** are known to be in the legacy `Testing_database`. It isn't confirmed that they were restored into Mycroft's `Postgres`; check this before F-10.
+- **Not stored yet:** price ticks (only hourly snapshots exist) and the daily signal archive. Both are lost every day they don't run.
+- **CI** (`ci.yml`) runs only on `main` and `develop`, not on PRs into `Mycroft_post_election_branch`.
+- **Security:** the anonymous Gemini chat is still an open LLM proxy (M4), and the researcher login has no lockout (M5).
+
+### 0.4 Whitehall features, in order
+
+The feature IDs match the Spec Kit inputs (`06-features.md`). Each feature becomes one `/speckit-specify` run, one `specs/NNN-name/` folder and, where possible, one PR.
+
+| Order | ID | Feature | Issues | Priority | Proposed date |
+|---|---|---|---|---|---|
+| 1 | F-20 | Market price tick capture (storage only) | #178 (storage) | NOW | Week of Nov 30 |
+| 2 | F-50 | Daily signal archive (capture) | #175 (archive) | NOW | Week of Nov 30 |
+| 3 | F-04 | Monitoring, analytics, uptime and stale-data alerts | #193 | P1 | Dec 4 |
+| 4 | F-13 | Certification updates | #153 | P1 | Through December, as states certify |
+| 5 | F-10 | Election-night replay | #139, #137, #138 | P1 | December |
+| 6 | F-11 | Swing explorer | #140 | P1 | December |
+| 7 | F-12 | Signal scorecard | #141 | P1 | Late December |
+| 8 | F-15 | CSV export | #143 | P1 | Early January |
+| 9 | F-03 | `/data` page: downloads and methodology | #144 | P1 | Early January |
+| 10 | F-05 | Trust pages: privacy, terms, attribution, "report a data error" | #194, #195 | P1 | Early January |
+| 11 | F-09 | **Whitehall public release:** post-election mode, research rail, the Whitehall name, domain, production on Railway, security re-check, freeze and QA | #145, #142, #191, #192, #197, #146, #196 | P1 | **Jan 15, 2027** |
+| 12 | F-14 | Special elections tracker | #176 | P2 | Before the first 2027 special it covers |
+| 13 | F-60 | Monte Carlo seats and tipping points (the first Python model) | #150 | P2 | January to February 2027 |
+| 14 | — | Whitehall backlog: share links #198, "what's still out" #177, redistricting tracker #162, "as of" #179, the 2028 map #148 and #161, then #158, #172, #184, #147, #170, #169 and #171, #174 | — | P2–P3 | Spring 2027 on |
+
+**Never cut from the release:** F-20 and F-50 (data we can't recover), the locked record, replay (F-10), and the map and table of swing (F-11). If the release runs late, the stretch goals go first (comparison mode #147 and the 2028 map #148), then, following #146, the scorecard's calibration chart and then the swing scatter.
+
+**Deferred** (kept in `06-features.md`, not built now): F-01 accounts, F-02 public API with keys, F-06 research assistant, Markets (F-21, F-22, F-23), legAI (F-30, F-31, F-32), Money (F-40, F-41, F-42), Referee (F-51, F-52), Simulator (F-61, F-62), and the voter guide app (F-70).
+
+### 0.5 Tech stack for Whitehall (Option B, scoped)
+
+| Phase | What | When |
+|---|---|---|
+| 0 | Tick and archive tables (plain Postgres); Sentry, cookieless analytics, uptime and stale-data alerts | Now to Dec 4 |
+| 1 | Split `Backend` into `api` (2+ replicas), `market-feed` (exactly 1), `results-ingestor` (exactly 1, election nights), `workers` and `cron-*` (the `node-cron` jobs move out of `api`); Redis for fan-out, cache and rate limits; Postgres with TimescaleDB, PostGIS and pgvector (`timescaledb-ha`, pinned tag, proven restore), with polls moved in as a schema; ticks, snapshots and the archive as hypertables; nightly CSV and Parquet exports for `/data`; `Cache-Control` on every public GET; Cloudflare once the domain is chosen | December 2026; the database move is done by Jan 4, 2027 |
+| 2 | Python `models/` folder (uv, ruff, pytest, Polars, DuckDB, NumPy, SciPy, statsmodels, scikit-learn, GeoPandas), run as Railway cron jobs writing `model_*` tables with a `model_runs` log. First model: F-60 | January to February 2027 |
+| Later, for Whitehall | Share images (#198); PostGIS geometry and PMTiles for the redistricting tracker (#162) | Spring 2027 |
+| Deferred with the suite | Better Auth accounts and API keys, OpenAPI clients, hub server rendering, the MCP server, DuckDB ask the data, the `shared` package | After Whitehall ships |
+
+Rules between TypeScript and Python are in the tech stack review, section 8.3:
+- Prisma migrations are the only schema changes.
+- Python writes only `model_*` tables.
+- Shared shapes are generated from Zod.
+- Python never serves users.
+- A CI contract test checks the two sides agree.
+
+### 0.6 How specs work now (Spec Kit)
+
+- **The constitution** comes from `mycroft-spec-inputs/01-constitution.md`. Once `/speckit-constitution` runs, it lives at `.specify/memory/constitution.md`. Section 1's principles are in it, plus engineering rules from section 7.
+- **The spec inputs** are in `mycroft-spec-inputs/`, a local drafting folder that git ignores:
+  - `01-constitution.md` to `07-open-questions.md`
+  - the product overview, tech stack, database, data sources, features and open questions
+- **Order of commands per feature:** `/speckit-specify`, `/speckit-clarify`, `/speckit-plan`, `/speckit-tasks`, `/speckit-analyze`, `/speckit-implement`. The generated specs live in `specs/NNN-name/`, and design write-ups that aren't specs stay in `docs/plans/`.
+- **Open questions that block Whitehall:**
+  - the domain (it blocks F-09)
+  - whether the Nov 3 record is in the Mycroft database
+  - which ratings and models go into the archive
+  - the scorecard's cut-off time
+  - adding a `staging` environment
+  - running CI on PRs into `Mycroft_post_election_branch`
+  - removing the Gemini chat
+  - when the code's `war-room` names change
+
+---
+
+## 1. What we are building (VoteInformed, before the election)
+
+*History. The current product, Mycroft Whitehall, is in section 0. These principles carry over unchanged into the constitution (section 0.6).*
 
 VoteInformed is a U.S. election intelligence site. It goes deep on every 2026 federal race instead of wide on the world.
 
@@ -34,6 +135,8 @@ Differentiators:
 ---
 
 ## 2. Where we are (as of Oct 14)
+
+*History. For the current state, see section 0.3.*
 
 **Shipped**
 
@@ -148,6 +251,8 @@ Differentiators:
 
 ## 3. Plan to November 3
 
+*History: the pre-election plan. The current plan is section 0.4.*
+
 | When | Work |
 |---|---|
 | **Oct 8–14** | **Set up production on Railway first** (section 5.3). ~~Market history API and sparklines. Biggest movers feed.~~ (done Oct 14). NYT and AP news ingestion into `articles` (section 4.6). Agent foundation, then Agent 1 (news triage). DB batch 2. ~~FRED indicators if time allows.~~ |
@@ -242,7 +347,7 @@ Shared requirements for all of these:
 
 - **Indexes, each with a published methodology:** a polarization index (DW-NOMINATE gap, party-line votes, affective polarization, split-ticket districts) and a democratic-institutions tracker (V-Dem, Freedom House, Bright Line Watch).
 - **Phase 2: Elections Monitor.** 2027 governor races, the 2028 primaries, and a global calendar of major foreign elections. We are not expanding into general geopolitics.
-- **War Room frontend.** A redesign of the monitor as an operations dashboard (Command, Race dossier, Election night, and Signals screens). It is built at `/war-room` behind `VITE_FEATURE_WAR_ROOM` (off by default) and becomes the home page only after the election. Tipping-point panels stay "Coming soon" until the simulation exists. Plan: `docs/plans/war-room-frontend.md`.
+- **War Room frontend (now Whitehall).** A redesign of the monitor as an operations dashboard (Command, Race dossier, Election night, and Signals screens). It is built at `/war-room` behind `VITE_FEATURE_WAR_ROOM` (off by default) and becomes the home page only after the election. Tipping-point panels stay "Coming soon" until the simulation exists. Plan: `docs/plans/war-room-frontend.md`.
 - **Analyst workbench mockups (Nov 13).** A lighter, analyst-facing alternative to the War Room look, with five screens in light and dark themes: Desk, Race file, Swing explorer, Signal scorecard, and Notebook. Static exports, screenshots and the design tokens are in `docs/prototypes/analyst-workbench/`. They are design references only and change nothing in `CODE/`.
 - **Business model:** core voter information stays free. Institutional embeds and research exports come only after we validate partner demand. We will never monetize vote intentions or reading profiles.
 
@@ -932,7 +1037,9 @@ There is no address-lookup tool, because the privacy rules forbid storing addres
 - Create the Google OAuth client and consent screen, and register the Testing and production `web` origins.
 - Publish a privacy policy page for the consent screen, covering what we keep (Google ID, email, name, and one day of chats).
 
-### 4.13 War Room 2.0: backlog review and new ideas (Nov 10)
+### 4.13 War Room 2.0 (now Whitehall): backlog review and new ideas (Nov 10)
+
+*The ideas here are assigned to apps in section 5.6. With the Whitehall-only scope (section 0.1), only Whitehall's issues are worked on now.*
 
 War Room 2.0 is tracked in GitHub issues under the `war-room-2.0` label: the Nov 25 launch set (#136 to #146) and the post-launch backlog (#147 to #174). This section records the Nov 10 review of that backlog and ten added ideas (#175 to #184).
 
@@ -963,7 +1070,9 @@ War Room 2.0 is tracked in GitHub issues under the `war-room-2.0` label: the Nov
 
 The first two fill the main gap in the backlog: a reason to visit between December 2026 and the 2028 primaries. #178 starts early because finer price history cannot be backfilled.
 
-### 4.14 War Room 2.0: ranked launch list (Nov 10)
+### 4.14 War Room 2.0 (now Whitehall): ranked launch list (Nov 10)
+
+*Superseded on Nov 26 by section 0.4. The Nov 25 launch was dropped, this launch set became Whitehall's first public release (F-09), and post-launch items for other apps are deferred. Kept for its notes on each issue.*
 
 Every open `war-room-2.0` issue, in the order to work on it, plus nine tasks the launch set was missing (#190 to #198). The launch date is still Nov 25.
 
@@ -1057,6 +1166,8 @@ Every open `war-room-2.0` issue, in the order to work on it, plus nine tasks the
 
 ## 5. Tech stack: Railway only
 
+*Nov 26: **Option B** (`docs/plans/mycroft-tech-stack-options.md`) is accepted, scoped to Whitehall; see section 0.5. The primary Railway project is **"Mycroft"** (section 0.3). Sections 5.1 to 5.5 describe the stack as it was built for election night.*
+
 ### 5.1 Code
 
 | Layer | Tech | Path |
@@ -1064,7 +1175,7 @@ Every open `war-room-2.0` issue, in the order to work on it, plus nine tasks the
 | Public web | React 18, Vite, TypeScript, Tailwind, shadcn/ui, MapLibre, served by nginx | `CODE/` |
 | Admin web | React, Vite, TypeScript, Tailwind, served by nginx | `admin-dashboard/` |
 | API | Node 20, Express, TypeScript, Zod, node-cron, `ws` | `backend/` |
-| Database | PostgreSQL 16 with Prisma 6 | `backend/prisma/` |
+| Database | PostgreSQL with Prisma 6 (Postgres 18 in the Mycroft project; 16 in the legacy project). Target: Postgres with TimescaleDB, PostGIS and pgvector (section 0.5) | `backend/prisma/` |
 | AI | Anthropic Claude (`@anthropic-ai/sdk`) for chat (section 4.12) and the agents, through one provider layer. Gemini (`@google/generative-ai`) runs today's chat until 4.12 ships. | `backend/src/` |
 | Local development | `docker-compose.yml` (Postgres, backend, frontend, admin) | repo root |
 
@@ -1146,16 +1257,18 @@ Testing's main database (`Testing_database`, a 0.5 GB volume) is nearly full. Fr
 - **Results fixtures:** `ingest-day0-fixture` (the fictional `/api/v1` results).
 - **Deadlines:** enter them again in the admin dashboard.
 
-### 5.6 Mycroft: suite architecture (after the Nov 25 launch)
+### 5.6 Mycroft: suite architecture
+
+*Nov 26: the suite is Mycroft, and app 0, formerly the War Room, is **Whitehall**, Mycroft's U.S. election analysis tool. Only Whitehall is built for now (section 0.1). The architecture below is the target that later apps join; their work is deferred.*
 
 The War Room becomes the first app in **Mycroft**, a suite of tools for political and policy analysis. Each app gets its own address, and one hub site showcases them and links to each. Apart from the landing page below, none of this starts before the Nov 25 launch; it comes before any second app is built.
 
-- **The name** (decided Nov 10) comes from Mycroft Holmes, through whom every government department's conclusions pass. Apps are named under it: Mycroft War Room, Mycroft Markets. Domains and trademarks have not been checked.
+- **The name** (decided Nov 10) comes from Mycroft Holmes, through whom every government department's conclusions pass. Apps are named under it: Mycroft Whitehall (the U.S. election analysis tool, formerly the War Room), Mycroft Markets. Domains and trademarks have not been checked.
 - **The landing page is live.** Repo `Landing_page_suite`: a static Astro site in the War Room's style, deployed on Railway on Nov 10. It lists the six apps with their status, all marked coming soon, and collects nothing from visitors. To launch an app there, set its `status` to `live` and add its `url` in `src/data/site.ts`. This repo grows into the hub.
 
 ```
 <domain>              hub: landing, app showcase, sign-in, /data, race and candidate pages (server-rendered)
-warroom.<domain>      War Room (the existing Vite app)
+whitehall.<domain>    Whitehall, formerly the War Room (the existing Vite app)
 <app>.<domain>        each later app (Vite)
 admin.<domain>        admin
 api.<domain>          one core API, /api/v1 (the existing Express app)
@@ -1177,13 +1290,13 @@ Behind the API: Postgres (warehouse and users), Redis (fan-out, rate limits, loc
 - **One identity.** Merge `AdminUser`, `ResearcherUser` and the chat users (section 4.12) into one users table with roles and an entitlements table. The session cookie is set on the parent domain, so one sign-in covers every app. This is #151, built for the suite.
 - **The hub is server-rendered** (Astro; today's landing page is its static first version) so the showcase, race memos (#152) and object pages (#156) can be indexed by search engines. Apps stay Vite single-page apps.
 - **Subdomains, not paths.** Each app is its own Railway service with its own deploys, and no reverse proxy is needed.
-- **Railway.** One project, `staging` and `production` environments, as in section 5.2, with one `web`-style service per app. The in-process `node-cron` schedules move to cron services (section 5.3) before `api` runs more than one replica.
+- **Railway.** One project, **"Mycroft"** (primary since Nov 26), with `staging` and `production` environments, as in section 5.2, with one `web`-style service per app. The in-process `node-cron` schedules move to cron services (section 5.3) before `api` runs more than one replica.
 
 **App lineup** (decided Nov 10). Each app has one audience and one job; issues move to the app that owns them.
 
 | Order | App | What it does | For | Issues |
 |---|---|---|---|---|
-| 0 | **War Room** | Results, maps, swing analysis, replay and election night | Analysts and junkies | The launch set, #140, #162, #176, #177 |
+| 0 | **Whitehall** (formerly the War Room) | The U.S. election analysis tool: results, maps, swing analysis, replay, the scorecard, special elections and election night | Analysts and junkies | The launch set, #140, #141, #150 (its panels), #162, #176, #177. **The only app in scope now** |
 | 1 | **Markets** | Political prediction markets in one place: prices across venues, spreads, thin-market warnings, movers with cited explanations | Traders and daily readers | #166, #167, #178 |
 | 2 | **legAI** | Congress tracker tied to elections: bills, members, roll-call votes, cited AI summaries | Analysts, advocacy staff | #164, P12 |
 | 3 | **Money** | Campaign finance explorer: outside-spending network, donor geography, digital ad spend | Journalists, students, researchers | #163, #181, #182 |
@@ -1203,7 +1316,7 @@ Behind the API: Postgres (warehouse and users), Redis (fan-out, rate limits, loc
 - **Build order:** 1) member pages over the legislators, ideology and FEC data we already hold, plus a roll-call votes feed; 2) the election link: how often each member votes against their district's lean, who funds a bill's sponsors, and each incumbent's votes on their War Room race page; 3) cited AI summaries that quote the bill text, with a review state; 4) follows and alerts.
 - **Dropped from its plan:** vote prediction (most votes are party-line, so a model adds little), sentiment analysis and reading-level scores.
 
-**Order:** 1) launch on Nov 25 unchanged; 2) shared accounts and the OpenAPI description; 3) hub: sign-in, `/data` and server-rendered race pages added to the landing page repo; 4) Markets, in its own repo, with the `shared` package; 5) legAI moved onto the core API; then the rest of the lineup.
+**Order** (Nov 26: step 1 is now Whitehall's first public release, F-09, and everything after it is deferred until Whitehall ships): 1) ~~launch on Nov 25 unchanged~~ Whitehall's public release; 2) shared accounts and the OpenAPI description; 3) hub: sign-in, `/data` and server-rendered race pages added to the landing page repo; 4) Markets, in its own repo, with the `shared` package; 5) legAI moved onto the core API; then the rest of the lineup.
 
 ---
 
@@ -1224,6 +1337,9 @@ Conventions:
 | 2 | Oct 8–14 (news tables Oct 27, `docs/plans/news-agents.md`) | `articles` (Apify, then NYT and AP; unique on source and external ID), `article_tags`, `agent_outputs` (with review status), `agent_output_citations`, `race_signal_events`, `win_probability_values` |
 | 3 | Oct 15–24 | `polls`, `poll_results`, `early_vote_reports`, `control_simulations`, `historical_results` (with `PRESIDENT` rows and new columns on `county_results`, section 4.9), `users`, `user_sessions`, `chat_conversations`, `chat_messages`, `chat_usage_daily` (section 4.12) |
 | 4 | Oct 25–30 | `race_calls` (a media projection, kept separate from `certification_events`), then a schema freeze |
+| 5 (Whitehall) | From Nov 30, 2026 (section 0.4) | `market_ticks` (F-20) and `signal_archive` (F-50) first, as plain tables, then hypertables in Phase 1; `historical_results` with `PRESIDENT` rows (#137); read models for replay, swing and the scorecard (#138); `data_error_reports` and `corrections` (F-05); `exports` (F-03); `special_elections` or special `ElectionEvent` rows (F-14); `model_runs` and `model_*` (F-60). Polls move in as a `polls` schema in Phase 1 |
+
+*Nov 26: batches 2 and 3 were only partly built. Of batch 2, only `news_stories` exists (national top stories, Oct 28). None of batch 3's tables exists. Batch 3's `historical_results` moves to batch 5. Its `users`, `user_sessions` and `chat_*` tables, and batch 2's news and agent-output tables, are deferred with the suite (accounts F-01, chat F-06, why it moved F-21). Full list: `mycroft-spec-inputs/04-database.md`.*
 
 Schema cleanup to do after the election:
 
@@ -1249,4 +1365,7 @@ If no provider is licensed in time, the site links to official state results and
 - **Verify before merging.** In `CODE/`, run `npm run lint -- --max-warnings 0 && npm run typecheck && npm run check:build-args && npm run build`. In `backend/`, run `npm run typecheck && npm run build && npm run test:results`.
 - **Feature flags** gate every new module. `VITE_*` flags need a rebuild of `web`, and each one needs an `ARG` line in `CODE/Dockerfile` or its Railway value never reaches the build.
 - **No secrets in frontend bundles.** All keys live in Railway service variables.
-- **This file is the plan.** Update it here instead of adding new planning docs.
+- **Whitehall first.** Until Whitehall ships, only work on Whitehall's features (section 0.4) and the platform work they need. Don't start work for another Mycroft app.
+- **Spec Kit.** Each feature goes through `/speckit-specify` → `/speckit-clarify` → `/speckit-plan` → `/speckit-tasks` → `/speckit-analyze` → `/speckit-implement` (section 0.6). Specs live in `specs/NNN-name/`, and every plan includes a constitution check. The constitution (`.specify/memory/constitution.md`) carries section 1's principles and these working agreements; when one changes, change both in the same PR.
+- **Railway.** Deploy only to the **"Mycroft"** project. The legacy projects get no new services.
+- **This file is the plan.** Update it here instead of adding new planning docs. Keep section 0 and `mycroft-spec-inputs/` in step: the same feature IDs, the same order, and the same tech stack.
