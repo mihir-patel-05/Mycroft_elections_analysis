@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Mycroft Whitehall prototype</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="whitehall.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="wh" data-theme="{{theme}}" style="min-height: 900px">
+
+  <div class="band">
+    <div class="wrap">
+      <span class="t">Illustrative data</span>
+      <span>Prototype. Every figure here is invented. Candidates are shown by party and role.</span>
+    </div>
+  </div>
+
+  <header class="wrap" style="display: flex; flex-wrap: wrap; gap: 12px 32px; align-items: flex-end; justify-content: space-between; padding-top: 22px; padding-bottom: 18px">
+    <button type="button" onClick="{{goHome}}" aria-label="Whitehall, the result" style="display: flex; flex-direction: column; gap: 2px; align-items: flex-start; background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink)">
+      <span class="eyebrow">Mycroft</span>
+      <span style="font-weight: 800; font-stretch: 66%; font-size: 54px; line-height: .9; letter-spacing: -.01em">Whitehall</span>
+    </button>
+    <p style="flex: 1 1 260px; margin: 0; font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink-2); max-width: 44ch">The record of the 2026 U.S. federal elections: how each race was counted, how it moved, and how the forecasts did.</p>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center">
+      <div style="font-size: 13px; line-height: 1.3">
+        <div class="eyebrow">Record as of</div>
+        <div class="num" style="font-weight: 700">Nov 26, 2026, 9:00 AM ET</div>
+      </div>
+      <button type="button" class="btn sm" onClick="{{toggleTheme}}" aria-pressed="{{darkPressed}}">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6"></circle><path d="M8 2v12" ></path><path d="M8 2a6 6 0 0 1 0 12z" fill="currentColor"></path></svg>
+        {{themeLabel}}
+      </button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <nav class="nav" aria-label="Sections">
+      <sc-for list="{{navItems}}" as="item" hint-placeholder-count="7">
+        <button type="button" onClick="{{item.go}}" aria-current="{{item.cur}}">{{item.label}}</button>
+      </sc-for>
+    </nav>
+  </div>
+
+  <main class="wrap" style="padding-top: 8px">
+    <sc-if value="{{isHome}}" hint-placeholder-val="{{true}}">
+      <dc-import name="Home" on-nav="{{nav}}" hint-size="100%,1800px"></dc-import>
+    </sc-if>
+    <sc-if value="{{isReplay}}" hint-placeholder-val="{{false}}">
+      <dc-import name="Replay" on-nav="{{nav}}" hint-size="100%,1800px"></dc-import>
+    </sc-if>
+    <sc-if value="{{isSwing}}" hint-placeholder-val="{{false}}">
+      <dc-import name="Swing" on-nav="{{nav}}" hint-size="100%,1800px"></dc-import>
+    </sc-if>
+    <sc-if value="{{isScore}}" hint-placeholder-val="{{false}}">
+      <dc-import name="Scorecard" on-nav="{{nav}}" hint-size="100%,1800px"></dc-import>
+    </sc-if>
+    <sc-if value="{{isRace}}" hint-placeholder-val="{{false}}">
+      <dc-import name="Race" on-nav="{{nav}}" hint-size="100%,1800px"></dc-import>
+    </sc-if>
+    <sc-if value="{{isSpecials}}" hint-placeholder-val="{{false}}">
+      <dc-import name="Specials" on-nav="{{nav}}" hint-size="100%,1800px"></dc-import>
+    </sc-if>
+    <sc-if value="{{isData}}" hint-placeholder-val="{{false}}">
+      <dc-import name="Data" on-nav="{{nav}}" hint-size="100%,1800px"></dc-import>
+    </sc-if>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap cols-3">
+      <div class="stack">
+        <p class="eyebrow">How to read this record</p>
+        <p class="prose" style="font-size: 15px">Every number carries its source and an "as of" time. Market prices are prices, not forecasts. Race calls are civicAPI's decision desk's, not ours. Missing is never shown as zero.</p>
+      </div>
+      <div class="stack">
+        <p class="eyebrow">Trust</p>
+        <div class="stack" style="gap: 2px; align-items: flex-start">
+          <button type="button" class="lnk" style="min-height: 32px" onClick="{{goRace}}">Report a data error</button>
+          <button type="button" class="lnk" style="min-height: 32px" onClick="{{goData}}">Sources and attributions</button>
+          <span style="min-height: 32px; display: flex; align-items: center; font-weight: 600">Privacy</span>
+          <span style="min-height: 32px; display: flex; align-items: center; font-weight: 600">Terms</span>
+        </div>
+      </div>
+      <div class="stack">
+        <p class="eyebrow">Mycroft Whitehall</p>
+        <p class="prose" style="font-size: 15px">Free and nonpartisan. No endorsements. We never collect anyone's intended vote.</p>
+        <p class="small">Prototype for the Jan 15, 2027 release. Not live data.</p>
+      </div>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"start":{"editor":"enum","options":["home","replay","swing","score","race","specials","data"],"default":"home"},"startTheme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1360,"height":3300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const screen = st.screen || this.props.start || 'home';
+    const theme = st.theme || this.props.startTheme || 'light';
+    const nav = (id) => this.setState({ screen: id });
+    const items = [
+      ['home', 'The result'],
+      ['replay', 'Election night'],
+      ['swing', 'Swing'],
+      ['score', 'Scorecard'],
+      ['race', 'Races'],
+      ['specials', 'Special elections'],
+      ['data', 'Data']
+    ];
+    return {
+      theme,
+      themeLabel: theme === 'dark' ? 'Light theme' : 'Dark theme',
+      darkPressed: theme === 'dark' ? 'true' : 'false',
+      toggleTheme: () => this.setState({ theme: theme === 'dark' ? 'light' : 'dark' }),
+      nav,
+      goHome: () => nav('home'),
+      goRace: () => nav('race'),
+      goData: () => nav('data'),
+      navItems: items.map((it) => ({ label: it[1], go: () => nav(it[0]), cur: screen === it[0] ? 'page' : 'false' })),
+      isHome: screen === 'home',
+      isReplay: screen === 'replay',
+      isSwing: screen === 'swing',
+      isScore: screen === 'score',
+      isRace: screen === 'race',
+      isSpecials: screen === 'specials',
+      isData: screen === 'data'
+    };
+  }
+}
+</script>
+</body>
+</html>

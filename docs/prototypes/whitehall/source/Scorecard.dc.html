@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Signal scorecard</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="whitehall.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="wh" style="padding: {{pad}}">
+
+  <div style="padding-top: 36px; display: flex; flex-direction: column; gap: 14px">
+    <p class="eyebrow">Signal scorecard · 2026 general election</p>
+    <h1 class="h1">How the signals did.</h1>
+    <p class="lede">Whitehall keeps score; it does not forecast. Each signal is scored only on the races where it had a value at the cut-off, and its coverage sits beside its score.</p>
+  </div>
+
+  <div style="display: grid; gap: 0 40px; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); margin-top: 28px; border-top: 3px solid var(--ink)">
+    <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Cut-off</div><div class="num" style="font-weight: 700; font-size: 19px; font-stretch: 85%">6:00 PM ET, Nov 3, 2026</div><div class="small">The last value at or before it counts</div></div>
+    <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Scoring rule</div><div style="font-weight: 700; font-size: 19px; font-stretch: 85%">Brier score. <span class="hl">Lower is better</span></div><div class="small">0 is perfect. 0.25 is a coin flip</div></div>
+    <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Races</div><div class="num" style="font-weight: 700; font-size: 19px; font-stretch: 85%">470 federal races</div><div class="small">435 House, 35 Senate</div></div>
+    <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Status</div><div style="font-weight: 700; font-size: 19px; font-stretch: 85%"><span class="chip dot" style="vertical-align: 2px">Provisional</span></div><div class="small">212 races certified, 258 scored on the locked count</div></div>
+  </div>
+
+  <section class="sec" style="margin-top: 44px">
+    <div class="sec-h">
+      <h2 class="h2"><span class="sec-n">§1</span>The scores</h2>
+      <div class="row">
+        <div class="seg" role="group" aria-label="Which races">
+          <button type="button" class="btn sm" onClick="{{setAll}}" aria-pressed="{{allP}}">Every race a signal covered</button>
+          <button type="button" class="btn sm" onClick="{{setCommon}}" aria-pressed="{{commonP}}">Only the 92 races both covered</button>
+        </div>
+        <button type="button" class="btn sm" aria-label="Export this table as CSV">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8M4.5 7 8 10.5 11.5 7M2.5 13.5h11"></path></svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
+    <div class="tbl-box">
+      <table class="tbl" style="min-width: 920px">
+        <thead><tr>
+          <th><button type="button" class="sort" onClick="{{sName}}">Signal <span aria-hidden="true">{{aName}}</span></button></th>
+          <th>Type</th>
+          <th class="r"><button type="button" class="sort" onClick="{{sBrier}}">Brier (lower is better) <span aria-hidden="true">{{aBrier}}</span></button></th>
+          <th class="r"><button type="button" class="sort" onClick="{{sRight}}">Races called right <span aria-hidden="true">{{aRight}}</span></button></th>
+          <th class="r"><button type="button" class="sort" onClick="{{sErr}}">Average error <span aria-hidden="true">{{aErr}}</span></button></th>
+          <th style="min-width: 200px"><button type="button" class="sort" onClick="{{sCov}}">Coverage, of 470 <span aria-hidden="true">{{aCov}}</span></button></th>
+        </tr></thead>
+        <tbody>
+          <sc-for list="{{rows}}" as="r" hint-placeholder-count="3">
+            <tr>
+              <td><div style="font-weight: 700">{{r.name}}</div><div class="small">{{r.detail}}</div></td>
+              <td><span class="chip">{{r.type}}</span></td>
+              <td class="r"><span class="{{r.brierCls}}">{{r.brier}}</span></td>
+              <td class="r"><div class="num" style="font-weight: 700">{{r.right}}</div><div class="small num">{{r.rightPct}}</div></td>
+              <td class="r"><span class="{{r.errCls}}">{{r.err}}</span></td>
+              <td>
+                <div class="num" style="font-weight: 700">{{r.cov}}</div>
+                <div class="hatch-bg" style="height: 8px; margin-top: 5px; display: flex; border: 1px solid var(--ink)" role="img" aria-label="{{r.covAria}}"><span style="width: {{r.covW}}; background: var(--ink)"></span></div>
+                <div class="small" style="margin-top: 3px">{{r.covNote}}</div>
+              </td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+    <div class="tbl-foot">
+      <dc-import name="SourceLine" src="Kalshi hourly price snapshots; VoteHub poll averages; locked and certified results" asof="Nov 26, 2026, 6:00 AM ET" what="Signal scores" note="Provisional until all 470 races are certified" hint-size="100%,22px"></dc-import>
+    </div>
+    <p class="prose" style="margin-top: 16px; font-size: 15.5px">A signal that covers only well-polled or heavily traded races is being tested on different races from one that covers all of them. Compare scores on the 92 races both covered before saying one beat the other.</p>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h">
+      <h2 class="h2"><span class="sec-n">§2</span>Biggest misses</h2>
+      <span class="small">Where a signal was most confident and wrong</span>
+    </div>
+    <div class="tbl-box">
+      <table class="tbl" style="min-width: 820px">
+        <thead><tr><th>Race</th><th>Signal</th><th>What it said at the cut-off</th><th>What happened</th><th>Result status</th></tr></thead>
+        <tbody>
+          <tr><td style="font-weight: 700">NC Senate</td><td>Market price (Kalshi)</td><td><span class="pm r"></span>Republican incumbent, <span class="num">81¢</span></td><td><span class="pm d"></span>Democratic challenger won, <span class="num">D+0.9</span></td><td><span class="chip dot">Provisional</span></td></tr>
+          <tr><td style="font-weight: 700">TX-15</td><td>Market price (Kalshi)</td><td><span class="pm d"></span>Democratic challenger, <span class="num">78¢</span></td><td><span class="pm r"></span>Republican incumbent won, <span class="num">R+2.2</span></td><td><span class="chip dot">Provisional</span></td></tr>
+          <tr><td style="font-weight: 700">IA-01</td><td>Poll average (VoteHub)</td><td><span class="pm r"></span>Republican incumbent, <span class="num">R+5.4</span></td><td><span class="pm d"></span>Democratic challenger won, <span class="num">D+1.1</span></td><td><span class="chip solid">Certified Nov 23</span></td></tr>
+          <tr><td style="font-weight: 700">ME Senate</td><td>Market price (Kalshi)</td><td><span class="pm r"></span>Republican incumbent, <span class="num">72¢</span></td><td><span class="pm d"></span>Democratic challenger won, <span class="num">D+1.3</span></td><td><span class="chip dot">Provisional</span></td></tr>
+          <tr><td style="font-weight: 700">NJ-07</td><td>Poll average (VoteHub)</td><td><span class="pm d"></span>Democratic challenger, <span class="num">D+3.8</span></td><td><span class="pm r"></span>Republican incumbent won, <span class="num">R+1.9</span></td><td><span class="chip dot">Provisional</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="src" style="margin-top: 10px"><b>Source</b>Kalshi price snapshot fetched 6:00 PM ET, Nov 3; VoteHub average published Nov 3. Results as of Nov 26, 2026, 6:00 AM ET.</p>
+  </section>
+
+  <section class="sec">
+    <div class="sec-h">
+      <h2 class="h2"><span class="sec-n">§3</span>Calibration of the market price</h2>
+      <span class="small">Market price (Kalshi, hourly) · 388 races</span>
+    </div>
+    <div class="split">
+      <div class="main">
+        <div style="font-size: 12.5px; font-weight: 700; margin-bottom: 4px">↑ Share of those favourites that won</div>
+        <svg class="ch" width="100%" height="320" style="height: 320px" role="img" aria-label="Calibration chart. Favourites priced 50 to 60 cents won 57 percent of the time; 60 to 70 cents, 63 percent; 70 to 80 cents, 81 percent; 80 to 90 cents, 88 percent; 90 to 95 cents, 94 percent; 95 to 100 cents, 99.5 percent.">
+          <line class="gr" x1="0" x2="100%" y1="20" y2="20"></line>
+          <line class="gr" x1="0" x2="100%" y1="160" y2="160"></line>
+          <text x="6" y="34">100%</text>
+          <text x="6" y="174">75%</text>
+          <text x="6" y="292">50%</text>
+          <line class="dash" x1="0" y1="300" x2="100%" y2="20"></line>
+          <sc-for list="{{bins}}" as="b" hint-placeholder-count="6">
+            <line class="li" x1="{{b.x}}" x2="{{b.x}}" y1="{{b.y}}" y2="{{b.yIdeal}}" style="stroke-width: 1"></line>
+            <circle class="{{b.cls}}" cx="{{b.x}}" cy="{{b.y}}" r="7"></circle>
+            <text class="lab" x="{{b.x}}" y="{{b.yLab}}" text-anchor="middle">{{b.label}}</text>
+          </sc-for>
+          <line class="ax" x1="0" x2="100%" y1="300" y2="300"></line>
+          <line class="ax" x1="0" x2="0" y1="20" y2="300"></line>
+        </svg>
+        <div class="num" style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); margin-top: 4px"><span>50¢</span><span>60¢</span><span>70¢</span><span>80¢</span><span>90¢</span><span>100¢</span></div>
+        <div style="font-size: 12.5px; font-weight: 700; margin-top: 2px; text-align: right">Price of the favourite at the cut-off →</div>
+      </div>
+      <div class="side stack" style="gap: 12px">
+        <p class="prose" style="font-size: 15.5px">Each dot groups the races whose favourite was priced in that band. A dot on the dashed line means the price matched how often those favourites won. Below the line, the market was too confident.</p>
+        <div class="legend" style="flex-direction: column; align-items: flex-start">
+          <span><i style="background: var(--ink); border-radius: 50%"></i>Band with 20 or more races</span>
+          <span><i style="border: 1.6px solid var(--ink); border-radius: 50%"></i>Fewer than 20 races: read with care</span>
+          <span><i style="border-top: 1.5px dashed var(--ink-3); height: 2px"></i>Perfect calibration</span>
+        </div>
+        <dl class="kv">
+          <dt>50 to 60¢</dt><dd class="num">8 of 14 won</dd>
+          <dt>60 to 70¢</dt><dd class="num">12 of 19 won</dd>
+          <dt>70 to 80¢</dt><dd class="num">22 of 27 won</dd>
+          <dt>80 to 90¢</dt><dd class="num">36 of 41 won</dd>
+          <dt>90 to 95¢</dt><dd class="num">64 of 68 won</dd>
+          <dt>95 to 100¢</dt><dd class="num">218 of 219 won</dd>
+        </dl>
+        <p class="small" style="margin: 0">A price is what a contract last traded for. It is not a forecast, and thin markets can sit at stale prices.</p>
+      </div>
+    </div>
+  </section>
+
+  <section style="margin-top: 48px">
+    <details class="disc">
+      <summary>How the score works</summary>
+      <div class="stack" style="gap: 14px">
+        <p class="formula">Brier = average of (probability given − outcome)², where outcome is 1 if it happened and 0 if not</p>
+        <ul class="rule-list" style="font-size: 15px; max-width: 72ch">
+          <li><strong>Lower is better.</strong> Saying 90% for a winner scores 0.01. Saying 90% for a loser scores 0.81. Always saying 50% scores 0.25.</li>
+          <li><strong>Cut-off.</strong> A signal is scored on its last value at or before 6:00 PM ET on Nov 3, 2026. A race with no value by then is not scored for that signal. It is never counted as a 0.</li>
+          <li><strong>Types.</strong> A market price is read as a probability (71¢ is 71%). A poll average gives a margin, not a probability, so it has no Brier score; it is scored on races called right and on average error in points.</li>
+          <li><strong>Provisional.</strong> Races not yet certified are scored on the locked count and marked provisional. Scores are final when all 470 are certified.</li>
+          <li><strong>Runoffs and ranked choice.</strong> A runoff is scored on the runoff. Ranked-choice races are scored on the final round.</li>
+          <li><strong>Race ratings</strong> were not archived for 2026, so they cannot be scored. The daily archive that began on Nov 30, 2026 fixes this for later elections.</li>
+        </ul>
+        <p class="small">Method version 1.0. These are other people's signals. None of them is Whitehall's forecast.</p>
+      </div>
+    </details>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"onNav":{"editor":null,"tsType":"(id: string) => void"},"$preview":{"width":1360,"height":2700}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const standalone = !this.props.onNav;
+    const mode = st.mode || 'all';
+    const sort = st.sort || { key: 'cov', dir: -1 };
+    const all = [
+      { name: 'Kalshi last price', detail: 'Hourly snapshot fetched 6:00 PM ET, Nov 3', type: 'Market price', brier: 0.071, right: 360, n: 388, err: null, errWhy: 'Gives no margin' },
+      { name: 'VoteHub poll average', detail: 'Average published Nov 3', type: 'Poll average', brier: null, brierWhy: 'Gives no probability', right: 79, n: 92, err: 3.8 },
+      { name: 'Race ratings', detail: 'Not archived for 2026', type: 'Rating', none: true, n: 0 }
+    ];
+    const common = [
+      { name: 'Kalshi last price', detail: 'Hourly snapshot fetched 6:00 PM ET, Nov 3', type: 'Market price', brier: 0.142, right: 78, n: 92, err: null, errWhy: 'Gives no margin' },
+      { name: 'VoteHub poll average', detail: 'Average published Nov 3', type: 'Poll average', brier: null, brierWhy: 'Gives no probability', right: 79, n: 92, err: 3.8 }
+    ];
+    const src = mode === 'all' ? all : common;
+    const key = (r) => (sort.key === 'name' ? r.name : sort.key === 'cov' ? r.n : sort.key === 'right' ? (r.none ? null : r.right / r.n) : r[sort.key]);
+    const sorted = src.slice().sort((a, b) => {
+      const x = key(a), y = key(b);
+      if (x == null && y == null) return 0;
+      if (x == null) return 1;
+      if (y == null) return -1;
+      return (x < y ? -1 : x > y ? 1 : 0) * sort.dir;
+    });
+    const rows = sorted.map((r) => ({
+      name: r.name, detail: r.detail, type: r.type,
+      brier: r.none ? 'Not scored' : r.brier == null ? r.brierWhy : r.brier.toFixed(3),
+      brierCls: r.none || r.brier == null ? 'chip dash' : 'mid num',
+      right: r.none ? '' : r.right + ' of ' + r.n,
+      rightPct: r.none ? '' : ((r.right / r.n) * 100).toFixed(1) + '%',
+      err: r.none ? 'Not scored' : r.err == null ? r.errWhy : r.err.toFixed(1) + ' points',
+      errCls: r.none || r.err == null ? 'chip dash' : 'num',
+      cov: r.n + ' of 470',
+      covW: ((r.n / 470) * 100).toFixed(1) + '%',
+      covAria: r.n + ' of 470 races scored',
+      covNote: r.none ? 'No values held. Shown as not scored, never as 0' : (470 - r.n) + ' races had no value at the cut-off'
+    }));
+    const setSort = (k) => () => this.setState({ sort: { key: k, dir: sort.key === k ? -sort.dir : k === 'name' || k === 'brier' || k === 'err' ? 1 : -1 } });
+    const ar = (k) => (sort.key === k ? (sort.dir === 1 ? '↑' : '↓') : '');
+    const binsRaw = [[55, 57, 14], [65, 63, 19], [75, 81, 27], [85, 88, 41], [92.5, 94, 68], [97.5, 99.5, 219]];
+    const y = (p) => +(300 - ((p - 50) / 50) * 280).toFixed(1);
+    const bins = binsRaw.map((b) => ({
+      x: (((b[0] - 50) / 50) * 100).toFixed(1) + '%', y: y(b[1]), yIdeal: y(b[0]),
+      yLab: y(b[1]) + (b[1] < b[0] ? 24 : -13), label: b[1] + '%',
+      cls: b[2] >= 20 ? 'ink' : 'hollow'
+    }));
+    return {
+      pad: standalone ? '0 40px 60px' : '0',
+      rows, bins,
+      setAll: () => this.setState({ mode: 'all' }), setCommon: () => this.setState({ mode: 'common' }),
+      allP: mode === 'all' ? 'true' : 'false', commonP: mode === 'common' ? 'true' : 'false',
+      sName: setSort('name'), sBrier: setSort('brier'), sRight: setSort('right'), sErr: setSort('err'), sCov: setSort('cov'),
+      aName: ar('name'), aBrier: ar('brier'), aRight: ar('right'), aErr: ar('err'), aCov: ar('cov')
+    };
+  }
+}
+</script>
+</body>
+</html>

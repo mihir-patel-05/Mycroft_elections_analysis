@@ -1,0 +1,472 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Election night replay</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="whitehall.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="wh" style="padding: {{pad}}">
+
+  <div style="padding-top: 36px; display: flex; flex-direction: column; gap: 14px">
+    <p class="eyebrow">Election night replay · Nov 3 to Nov 12, 2026</p>
+    <h1 class="h1">The night, as it was recorded.</h1>
+    <p class="lede">Move through the night from the first polls closing to the last call. The map, the seat counts, the call log and the market prices all show the newest snapshot stored at or before the moment you pick.</p>
+  </div>
+
+  <!-- the control: time, play, scrubber -->
+  <section style="margin-top: 32px; border-top: 3px solid var(--ink); border-bottom: 1.5px solid var(--ink); padding: 16px 0 12px; background: var(--paper)">
+    <div style="display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: center; justify-content: space-between">
+      <div aria-live="polite">
+        <div class="eyebrow">The moment shown</div>
+        <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px">
+          <span class="hl" style="font-weight: 800; font-stretch: 70%; font-size: clamp(40px, 6cqi, 60px); line-height: 1.05">{{clock}}</span>
+          <span style="font-weight: 700; font-stretch: 85%; font-size: 17px">{{clockDay}}</span>
+        </div>
+      </div>
+      <div class="row" style="gap: 8px">
+        <button type="button" class="btn" onClick="{{back}}" aria-label="Back one step">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M11 2 4 8l7 6z"></path></svg>
+        </button>
+        <button type="button" class="btn solid" onClick="{{togglePlay}}" style="min-width: 108px; justify-content: center">
+          <sc-if value="{{playing}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3 2h4v12H3zM9 2h4v12H9z"></path></svg></sc-if>
+          <sc-if value="{{paused}}" hint-placeholder-val="{{true}}"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2l10 6-10 6z"></path></svg></sc-if>
+          {{playLabel}}
+        </button>
+        <button type="button" class="btn" onClick="{{fwd}}" aria-label="Forward one step">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M5 2l7 6-7 6z"></path></svg>
+        </button>
+        <button type="button" class="btn" onClick="{{copy}}">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6.5 9.5a3 3 0 0 0 4.2 0l2.3-2.3a3 3 0 0 0-4.2-4.2l-.8.8M9.5 6.5a3 3 0 0 0-4.2 0L3 8.8A3 3 0 0 0 7.2 13l.8-.8"></path></svg>
+          {{copyLabel}}
+        </button>
+      </div>
+    </div>
+
+    <div style="margin-top: 10px">
+      <label for="wh-scrub" class="eyebrow" style="display: block">Scrub the record</label>
+      <input id="wh-scrub" class="scrub" type="range" min="0" max="57" step="1" value="{{step}}" onChange="{{onScrub}}" aria-valuetext="{{clockFull}}">
+      <div style="position: relative; height: 14px" aria-hidden="true">
+        <span class="hatch-bg" title="County detail missing" style="position: absolute; top: 0; height: 10px; left: calc(8px + (100% - 16px) * 0.5088); width: calc((100% - 16px) * 0.0526); background-color: var(--zero); border: 1px solid var(--ink)"></span>
+        <span style="position: absolute; top: 0; height: 10px; left: calc(8px + (100% - 16px) * 0.842); border-left: 1.5px dashed var(--ink)"></span>
+      </div>
+      <div style="position: relative; height: 20px; font-size: 12px; color: var(--ink-3); font-stretch: 88%" aria-hidden="true">
+        <sc-for list="{{ticks}}" as="t" hint-placeholder-count="8">
+          <span style="position: absolute; top: 0; left: calc(8px + (100% - 16px) * {{t.f}}); transform: translateX({{t.shift}}); white-space: nowrap">{{t.label}}</span>
+        </sc-for>
+      </div>
+      <div class="legend" style="margin-top: 6px">
+        <span><i class="hatch-bg" style="background-color: var(--zero); border: 1px solid var(--ink)"></i>1:15 to 2:00 AM: county detail missing from the feed</span>
+        <span><i style="border-left: 1.5px dashed var(--ink); width: 2px"></i>After 6:00 AM, one step is one day</span>
+        <span>Polls closed in <strong class="num">{{closedN}}</strong> of 50 states · <strong class="num">{{calledN}}</strong> of 470 races called</span>
+      </div>
+    </div>
+  </section>
+
+  <sc-if value="{{inGap}}" hint-placeholder-val="{{false}}">
+    <div role="status" class="hatch-bg" style="margin-top: 16px; border: 1.5px solid var(--ink); padding: 3px">
+      <div style="background: var(--paper); padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline">
+        <span class="chip solid">Gap in the record</span>
+        <span>County detail was not stored between 1:15 and 2:00 AM ET because the feed returned errors. Statewide totals and calls continued. County figures show their last snapshot, 1:00 AM, and nothing is filled in.</span>
+      </div>
+    </div>
+  </sc-if>
+
+  <div class="row" style="margin-top: 24px; justify-content: space-between">
+    <div class="seg" role="group" aria-label="What to replay">
+      <button type="button" class="btn" onClick="{{viewNight}}" aria-pressed="{{nightPressed}}">The whole night</button>
+      <button type="button" class="btn" onClick="{{viewRace}}" aria-pressed="{{racePressed}}">One race: NH-01</button>
+    </div>
+    <sc-if value="{{isNight}}" hint-placeholder-val="{{true}}">
+      <div class="seg" role="group" aria-label="Chamber on the map">
+        <button type="button" class="btn sm" onClick="{{chSenate}}" aria-pressed="{{senPressed}}">Senate map</button>
+        <button type="button" class="btn sm" onClick="{{chHouse}}" aria-pressed="{{housePressed}}">House map</button>
+      </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{isNight}}" hint-placeholder-val="{{true}}">
+    <div>
+      <div class="split" style="margin-top: 24px">
+        <div class="main stack" style="gap: 28px">
+
+          <div class="cols" style="gap: 24px 40px">
+            <div class="stack" style="gap: 8px">
+              <div class="row" style="justify-content: space-between"><h3 class="h3">House seats called</h3><span class="small">218 for a majority</span></div>
+              <div style="display: flex; justify-content: space-between; align-items: flex-end">
+                <div><span class="mid num">{{hD}}</span> <span style="font-weight: 700"><span class="pm d" style="margin-left: 4px"></span>Dem.</span></div>
+                <div class="small num" style="font-weight: 700">{{hU}} not called</div>
+                <div><span style="font-weight: 700"><span class="pm r"></span>Rep.</span> <span class="mid num">{{hR}}</span></div>
+              </div>
+              <div class="seatbar" role="img" aria-label="{{hAria}}">
+                <span style="width: {{hDw}}; background: var(--dem)"></span>
+                <span class="hatch-bg" style="flex: 1"></span>
+                <span style="width: {{hRw}}; background: var(--rep)"></span>
+                <span class="maj" style="left: 50.1%"></span>
+              </div>
+            </div>
+            <div class="stack" style="gap: 8px">
+              <div class="row" style="justify-content: space-between"><h3 class="h3">Senate seats</h3><span class="small">51 for a majority</span></div>
+              <div style="display: flex; justify-content: space-between; align-items: flex-end">
+                <div><span class="mid num">{{sD}}</span> <span style="font-weight: 700"><span class="pm d" style="margin-left: 4px"></span>Dem.</span></div>
+                <div class="small num" style="font-weight: 700">{{sU}} not called</div>
+                <div><span style="font-weight: 700"><span class="pm r"></span>Rep.</span> <span class="mid num">{{sR}}</span></div>
+              </div>
+              <div class="seatbar" role="img" aria-label="{{sAria}}">
+                <span style="width: 34%; background: var(--d2)"></span>
+                <span style="width: {{sDw}}; background: var(--dem)"></span>
+                <span class="hatch-bg" style="flex: 1"></span>
+                <span style="width: {{sRw}}; background: var(--rep)"></span>
+                <span style="width: 31%; background: var(--r2)"></span>
+                <span class="maj" style="left: 50.5%"></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack" style="gap: 12px">
+            <sc-if value="{{isSenate}}" hint-placeholder-val="{{true}}">
+              <div class="tm" style="max-width: 680px" role="img" aria-label="{{mapAria}}">
+                <sc-for list="{{tiles}}" as="t" hint-placeholder-count="50">
+                  <div class="{{t.scls}}" style="grid-row: {{t.row}}; grid-column: {{t.col}}">{{t.ab}}</div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{isHouse}}" hint-placeholder-val="{{false}}">
+              <div class="tm" style="max-width: 680px" role="img" aria-label="{{mapAria}}">
+                <sc-for list="{{tiles}}" as="t" hint-placeholder-count="50">
+                  <div class="{{t.hcls}}" style="grid-row: {{t.row}}; grid-column: {{t.col}}; background: {{t.hbg}}"><span>{{t.ab}}</span><span class="sub">{{t.hsub}}</span></div>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{isSenate}}" hint-placeholder-val="{{true}}">
+              <div class="legend">
+                <span><i style="background: var(--dem)"></i>Called, Democrat</span>
+                <span><i style="background: var(--rep); border-radius: 50%"></i>Called, Republican</span>
+                <span><i class="hatch-bg" style="background-color: var(--zero)"></i>Counting, no call</span>
+                <span><i style="border: 1.5px dashed var(--ink-3)"></i>Polls open</span>
+                <span><i style="border: 1px solid var(--hair)"></i>No Senate race</span>
+                <span><i style="box-shadow: 0 0 0 2px var(--mark), 0 0 0 3px var(--ink); margin-left: 3px"></i>Just called</span>
+              </div>
+            </sc-if>
+            <sc-if value="{{isHouse}}" hint-placeholder-val="{{false}}">
+              <div class="legend">
+                <span>Each square: seats called out of the state's seats. The strip along the bottom fills from the left for Democrats and from the right for Republicans.</span>
+                <span><i style="border: 1.5px dashed var(--ink-3)"></i>Polls open</span>
+              </div>
+            </sc-if>
+            <dc-import name="SourceLine" src="civicAPI result snapshots and race calls, from the locked Nov 3 record" asof="{{clockFull}}" what="Replay map and seat counts" note="Calls are civicAPI's decision desk's, not Whitehall's" hint-size="100%,22px"></dc-import>
+          </div>
+        </div>
+
+        <aside class="side stack" style="gap: 28px">
+          <div class="stack" style="gap: 10px">
+            <div style="border-top: 3px solid var(--ink); padding-top: 12px">
+              <h3 class="h3">Market prices at this moment</h3>
+              <p class="small" style="margin: 2px 0 0">Market price (Kalshi, hourly). Last traded price. Prices are not forecasts.</p>
+            </div>
+            <sc-for list="{{markets}}" as="m" hint-placeholder-count="2">
+              <div style="border-top: 1px solid var(--hair); padding-top: 10px">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px">
+                  <span style="font-weight: 700">{{m.name}}</span>
+                  <span class="mid num">{{m.price}}</span>
+                </div>
+                <svg class="ch" width="100%" height="52" style="height: 52px; margin-top: 4px" aria-hidden="true">
+                  <line class="dash" x1="0" x2="100%" y1="26" y2="26"></line>
+                  <sc-for list="{{m.bars}}" as="b" hint-placeholder-count="0">
+                    <line class="li" x1="{{b.x1}}" x2="{{b.x2}}" y1="{{b.y}}" y2="{{b.y}}"></line>
+                  </sc-for>
+                  <line class="ax" x1="0" x2="100%" y1="50" y2="50"></line>
+                </svg>
+                <p class="small" style="margin: 4px 0 0">{{m.asof}}. One mark per hourly snapshot; the dashed line is 50¢.</p>
+              </div>
+            </sc-for>
+          </div>
+
+          <div class="stack" style="gap: 6px">
+            <div style="border-top: 3px solid var(--ink); padding-top: 12px">
+              <h3 class="h3">Call log</h3>
+              <p class="small" style="margin: 2px 0 0">Calls by civicAPI's decision desk. Whitehall does not call races.</p>
+            </div>
+            <sc-if value="{{noCalls}}" hint-placeholder-val="{{false}}">
+              <p class="nodata" style="margin: 6px 0 0">No race has been called yet at this moment.</p>
+            </sc-if>
+            <ul class="rule-list" style="font-size: 14.5px">
+              <sc-for list="{{log}}" as="c" hint-placeholder-count="8">
+                <li style="display: grid; grid-template-columns: 76px 1fr; gap: 10px; padding: 9px 0">
+                  <span class="num" style="color: var(--ink-3)">{{c.time}}</span>
+                  <span><strong>{{c.race}}</strong> · <span class="{{c.pm}}"></span>{{c.text}}</span>
+                </li>
+              </sc-for>
+            </ul>
+            <p class="small" style="margin: 4px 0 0">Showing the {{logN}} newest calls at or before {{clock}}.</p>
+          </div>
+        </aside>
+      </div>
+
+      <section class="sec">
+        <div class="sec-h">
+          <h2 class="h2"><span class="sec-n">§1</span>The closest Senate races at {{clock}}</h2>
+          <button type="button" class="btn sm" aria-label="Export this moment as CSV">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8M4.5 7 8 10.5 11.5 7M2.5 13.5h11"></path></svg>
+            Export this moment as CSV
+          </button>
+        </div>
+        <div class="tbl-box">
+          <table class="tbl" style="min-width: 720px">
+            <thead><tr>
+              <th><button type="button" class="sort" onClick="{{sortRace}}">Race <span aria-hidden="true">{{arRace}}</span></button></th>
+              <th>Status</th>
+              <th>Leader</th>
+              <th class="r"><button type="button" class="sort" onClick="{{sortMargin}}">Margin <span aria-hidden="true">{{arMargin}}</span></button></th>
+              <th class="r"><button type="button" class="sort" onClick="{{sortCounted}}">Counted (estimate) <span aria-hidden="true">{{arCounted}}</span></button></th>
+              <th>Snapshot as of</th>
+            </tr></thead>
+            <tbody>
+              <sc-for list="{{rows}}" as="r" hint-placeholder-count="9">
+                <tr>
+                  <td style="font-weight: 700">{{r.name}}</td>
+                  <td><span class="{{r.chip}}">{{r.status}}</span></td>
+                  <td><span class="{{r.pm}}"></span>{{r.leader}}</td>
+                  <td class="r num" style="font-weight: 700">{{r.margin}}</td>
+                  <td class="r num">{{r.counted}}</td>
+                  <td class="num">{{r.asof}}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+        <div class="tbl-foot">
+          <p class="src"><b>Source</b>civicAPI snapshots. Alaska shows first-choice votes only. Counted share is an estimate, never a call.</p>
+          <span class="small">The CSV matches this table and this moment exactly.</span>
+        </div>
+      </section>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{isRace}}" hint-placeholder-val="{{false}}">
+    <section style="margin-top: 24px">
+      <div class="sec-h" style="border-top: 3px solid var(--ink); padding-top: 14px">
+        <h2 class="h2">NH-01 · U.S. House, New Hampshire's 1st district</h2>
+        <button type="button" class="lnk" onClick="{{goRace}}">Open the full race page</button>
+      </div>
+      <dc-import name="Timeline" step="{{step}}" hint-size="100%,700px"></dc-import>
+      <div style="margin-top: 16px">
+        <dc-import name="SourceLine" src="civicAPI snapshots (votes, share counted, call) and Kalshi hourly price snapshots, from the locked Nov 3 record" asof="{{clockFull}}" what="NH-01 night timeline" hint-size="100%,22px"></dc-import>
+      </div>
+    </section>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"onNav":{"editor":null,"tsType":"(id: string) => void"},"startStep":{"editor":"range","min":0,"max":57,"step":1,"default":26},"$preview":{"width":1360,"height":2900}}'>
+class Component extends DCLogic {
+  componentWillUnmount() { if (this._timer) clearInterval(this._timer); }
+
+  sim() {
+    if (this._sim) return this._sim;
+    const hash = (str) => { let x = 2166136261; for (let i = 0; i < str.length; i++) { x ^= str.charCodeAt(i); x = Math.imul(x, 16777619); } return ((x >>> 0) % 10007) / 10007; };
+    const raw = 'AK:1:0:1:28:r:1:1 ME:2:2:0:8:d:1:11 VT:1:1:0:4:-:2:10 NH:2:2:0:8:d:2:11 WA:10:8:0:20:-:3:1 ID:2:0:0:20:r:3:2 MT:2:0:0:16:r:3:3 ND:1:0:0:12:-:3:4 MN:8:4:0:12:d:3:5 IL:17:14:0:8:d:3:6 WI:8:2:0:12:-:3:7 MI:13:7:0:12:d:3:8 NY:26:20:0:12:-:3:9 RI:2:2:0:8:d:3:10 MA:9:9:0:8:d:3:11 OR:6:5:0:20:d:4:1 NV:4:3:0:16:-:4:2 WY:1:0:0:12:r:4:3 SD:1:0:0:12:r:4:4 IA:4:1:0:16:r:4:5 IN:9:2:0:0:-:4:6 OH:15:5:0:6:r:4:7 PA:17:9:0:8:-:4:8 NJ:12:9:0:8:d:4:9 CT:5:5:0:8:-:4:10 CA:52:43:1:20:-:5:1 UT:4:0:0:16:-:5:2 CO:8:4:0:12:d:5:3 NE:3:0:0:12:r:5:4 MO:8:2:0:8:-:5:5 KY:6:1:0:0:r:5:6 WV:2:0:0:6:r:5:7 VA:11:6:0:4:d:5:8 MD:8:7:0:8:-:5:9 DE:1:1:0:8:d:5:10 AZ:9:4:1:12:-:6:2 NM:3:3:0:12:d:6:3 KS:4:1:0:12:r:6:4 AR:4:0:0:10:r:6:5 TN:9:1:0:8:r:6:6 NC:14:4:0:6:d:6:7 SC:7:1:0:4:r:6:8 OK:5:0:0:8:r:7:4 LA:6:2:0:12:r:7:5 MS:4:1:0:8:r:7:6 AL:7:2:0:8:r:7:7 GA:14:5:0:4:d:7:8 HI:2:2:0:24:-:8:1 TX:38:13:0:12:r:8:4 FL:28:8:0:4:r:8:9';
+    const senCall = { GA: 30, NC: 51, ME: 50, MI: 38, NH: 22, OH: 26, IA: 27, TX: 24, AK: 55, MN: 20, VA: 12, FL: 14, NM: 18, CO: 16 };
+    const states = raw.split(' ').map((s) => {
+      const p = s.split(':');
+      return { ab: p[0], n: +p[1], d: +p[2], unc: +p[3], close: +p[4], sen: p[5], row: +p[6], col: +p[7] };
+    });
+    const calls = [];
+    states.forEach((st) => {
+      const order = [];
+      for (let i = 1; i <= st.n; i++) order.push({ i, h: hash(st.ab + i) });
+      order.sort((a, b) => a.h - b.h);
+      order.forEach((o, k) => {
+        const party = k < st.d ? 'd' : k < st.d + st.unc ? 'u' : 'r';
+        if (party === 'u') return;
+        const h2 = hash('c' + st.ab + o.i), h3 = hash('l' + st.ab + o.i);
+        const lateShare = st.ab === 'CA' ? 0.3 : 0.1;
+        let step = st.close + 1 + Math.floor(h2 * (6 + st.n * 0.4));
+        if (h3 < lateShare) step = 49 + Math.floor(hash('d' + st.ab + o.i) * 9);
+        step = Math.min(57, step);
+        if (st.ab === 'NH' && o.i === 1) step = 31;
+        calls.push({ step, ab: st.ab, race: st.n === 1 ? st.ab + ' at large' : st.ab + '-' + (o.i < 10 ? '0' + o.i : o.i), party, gain: hash('g' + st.ab + o.i) < 0.07, ch: 'h' });
+      });
+      if (st.sen !== '-') {
+        st.senStep = senCall[st.ab] || st.close + 1;
+        calls.push({ step: st.senStep, ab: st.ab, race: st.ab + ' Senate', party: st.sen, gain: st.ab === 'NC' || st.ab === 'ME', ch: 's' });
+      }
+    });
+    calls.sort((a, b) => b.step - a.step || (a.race < b.race ? -1 : 1));
+    this._sim = { states, calls };
+    return this._sim;
+  }
+
+  renderVals() {
+    const st = this.state || {};
+    const nav = this.props.onNav || (() => {});
+    const standalone = !this.props.onNav;
+    const T = st.step ?? this.props.startStep ?? 26;
+    const playing = !!st.playing;
+    const view = st.view || 'night';
+    const chamber = st.chamber || 'senate';
+    const sort = st.sort || { key: 'margin', dir: 1 };
+    const { states, calls } = this.sim();
+
+    const tlabel = (s) => {
+      if (s > 48) return 'Nov ' + (4 + (s - 49));
+      const m = 18 * 60 + s * 15;
+      const h24 = Math.floor(m / 60) % 24, mm = m % 60;
+      const h = h24 % 12 === 0 ? 12 : h24 % 12;
+      return h + ':' + (mm < 10 ? '0' : '') + mm + (h24 < 12 ? ' AM' : ' PM');
+    };
+    const dlabel = (s) => (s > 48 ? 'End of day, ET' : s >= 24 ? 'ET · Wednesday, Nov 4' : 'ET · Tuesday, Nov 3');
+    const setStep = (v) => this.setState({ step: Math.max(0, Math.min(57, v)) });
+    const stop = () => { if (this._timer) { clearInterval(this._timer); this._timer = null; } };
+    const togglePlay = () => {
+      if (playing) { stop(); this.setState({ playing: false }); return; }
+      const from = T >= 57 ? 0 : T;
+      this.setState({ playing: true, step: from });
+      stop();
+      this._timer = setInterval(() => {
+        const cur = (this.state || {}).step ?? from;
+        if (cur >= 57) { stop(); this.setState({ playing: false }); } else { this.setState({ step: cur + 1 }); }
+      }, 480);
+    };
+
+    // counts at T
+    let hD = 0, hR = 0, sD = 0, sR = 0;
+    const per = {};
+    const upto = [];
+    calls.forEach((c) => {
+      if (c.step > T) return;
+      upto.push(c);
+      if (c.ch === 'h') {
+        if (c.party === 'd') hD++; else hR++;
+        const p = per[c.ab] || (per[c.ab] = { d: 0, r: 0 });
+        p[c.party]++;
+      } else if (c.party === 'd') sD++; else sR++;
+    });
+    const tiles = states.map((s) => {
+      const open = T < s.close;
+      let scls = 'tile none';
+      if (s.sen !== '-') {
+        if (open) scls = 'tile open';
+        else if (T >= s.senStep) scls = 'tile ' + (s.sen === 'd' ? 'cd' : 'cr') + (T - s.senStep <= 1 ? ' just' : '');
+        else scls = 'tile count';
+      }
+      const p = per[s.ab] || { d: 0, r: 0 };
+      const a = (p.d / s.n) * 100, b = 100 - (p.r / s.n) * 100;
+      return {
+        ab: s.ab, row: s.row, col: s.col, scls,
+        hcls: open ? 'tile open' : 'tile',
+        hsub: open ? '' : (p.d + p.r) + '/' + s.n,
+        hbg: open ? 'transparent' : 'linear-gradient(90deg, var(--dem) 0 ' + a.toFixed(1) + '%, transparent ' + a.toFixed(1) + '% ' + b.toFixed(1) + '%, var(--rep) ' + b.toFixed(1) + '% 100%) bottom / 100% 22% no-repeat, var(--zero)'
+      };
+    });
+    const closedN = states.filter((s) => T >= s.close).length;
+
+    // markets
+    const mk = (name, hourly, daily) => {
+      const bars = [];
+      let now = null, at = 0;
+      const X = (s) => (s / 57) * 100;
+      hourly.forEach((p, i) => {
+        const s = i * 4;
+        if (s > T) return;
+        now = p; at = s;
+        bars.push({ x1: X(s).toFixed(2) + '%', x2: Math.min(X(s + 3.4), Math.max(X(T), X(s) + 1)).toFixed(2) + '%', y: +(50 - (p / 100) * 48).toFixed(1) });
+      });
+      daily.forEach((p, i) => {
+        const s = 49 + i;
+        if (s > T) return;
+        now = p; at = s;
+        bars.push({ x1: (X(s) - 0.6).toFixed(2) + '%', x2: (X(s) + 0.6).toFixed(2) + '%', y: +(50 - (p / 100) * 48).toFixed(1) });
+      });
+      return { name, price: now + '¢', bars, asof: 'Kalshi, fetched ' + tlabel(at) + (at > 48 ? '' : ' ET') };
+    };
+    const markets = [
+      mk('Democrats win the House', [71, 70, 66, 61, 68, 77, 86, 91, 94, 96, 97, 97, 98], [98, 99, 99, 99, 99, 99, 99, 99, 99]),
+      mk('Republicans keep the Senate', [68, 69, 72, 74, 70, 66, 63, 61, 64, 71, 78, 83, 88], [93, 96, 97, 98, 98, 99, 99, 99, 99])
+    ];
+
+    // closest Senate races
+    const sen = [
+      ['NC', 'North Carolina', 0.9, -7, 'Democratic challenger', 'Republican incumbent'],
+      ['GA', 'Georgia', 1.8, -6, 'Democratic incumbent', 'Republican challenger'],
+      ['ME', 'Maine', 1.3, -3, 'Democratic challenger', 'Republican incumbent'],
+      ['MI', 'Michigan (open seat)', 2.6, -5, 'Democratic nominee', 'Republican nominee'],
+      ['NH', 'New Hampshire (open seat)', 4.1, -2, 'Democratic nominee', 'Republican nominee'],
+      ['OH', 'Ohio (special)', -3.4, 5, 'Democratic challenger', 'Republican incumbent'],
+      ['IA', 'Iowa (open seat)', -4.8, 2, 'Democratic nominee', 'Republican nominee'],
+      ['TX', 'Texas', -5.2, 6, 'Democratic challenger', 'Republican incumbent'],
+      ['AK', 'Alaska (first choices)', -3.9, -4, 'Democratic challenger', 'Republican incumbent']
+    ];
+    const byAb = {}; states.forEach((s) => { byAb[s.ab] = s; });
+    let rows = sen.map((r) => {
+      const s = byAb[r[0]];
+      const open = T <= s.close;
+      const c = open ? null : (T <= 48 ? 0.97 * (1 - Math.exp(-(T - s.close) / 9)) : 0.975 + ((T - 48) / 9) * 0.02);
+      const m = open ? null : r[2] + r[3] * Math.pow(1 - c, 1.5);
+      const called = T >= s.senStep;
+      const gap = T >= 29 && T <= 32;
+      return {
+        name: r[1], c, m,
+        status: open ? 'Polls open' : called ? 'Called · civicAPI' : 'Counting',
+        chip: open ? 'chip dash' : called ? 'chip solid' : 'chip hatch',
+        pm: open ? 'pm n' : 'pm ' + (m >= 0 ? 'd' : 'r'),
+        leader: open ? 'No results yet' : (m >= 0 ? r[4] : r[5]),
+        margin: open ? 'Not known' : Math.abs(m) < 0.05 ? 'Even' : (m > 0 ? 'D+' : 'R+') + Math.abs(m).toFixed(1),
+        counted: open ? 'Not known' : Math.round(c * 100) + '%',
+        asof: open ? 'First snapshot after ' + tlabel(s.close) : tlabel(gap ? 28 : T) + (T > 48 ? '' : ' ET') + (gap ? ' (stale)' : '')
+      };
+    });
+    const val = (r) => (sort.key === 'race' ? r.name : sort.key === 'counted' ? (r.c == null ? -1 : r.c) : (r.m == null ? 99 : Math.abs(r.m)));
+    rows = rows.slice().sort((a, b) => { const x = val(a), y = val(b); return (x < y ? -1 : x > y ? 1 : 0) * sort.dir; });
+    const setSort = (key) => this.setState({ sort: { key, dir: sort.key === key ? -sort.dir : 1 } });
+    const arrow = (key) => (sort.key === key ? (sort.dir === 1 ? '↑' : '↓') : '');
+
+    const log = upto.slice(0, 9).map((c) => ({
+      time: tlabel(c.step), race: c.race, pm: 'pm ' + c.party,
+      text: (c.party === 'd' ? 'Democratic ' : 'Republican ') + (c.gain ? 'gain' : 'hold')
+    }));
+    const ticks = [[0, '6 PM'], [8, '8 PM'], [16, '10 PM'], [24, '12 AM'], [32, '2 AM'], [40, '4 AM'], [48, '6 AM'], [57, 'Nov 12']]
+      .map((t) => ({ f: (t[0] / 57).toFixed(4), label: t[1], shift: t[0] === 0 ? '0' : t[0] === 57 ? '-100%' : '-50%' }));
+    const clock = tlabel(T);
+    const clockFull = T > 48 ? clock + ', 2026, end of day' : clock + ' ET, ' + (T >= 24 ? 'Nov 4' : 'Nov 3') + ', 2026';
+
+    return {
+      pad: standalone ? '0 40px 60px' : '0',
+      step: T, clock, clockDay: dlabel(T), clockFull,
+      playing, paused: !playing, playLabel: playing ? 'Pause' : T >= 57 ? 'Replay' : 'Play',
+      togglePlay,
+      back: () => { stop(); this.setState({ playing: false, step: Math.max(0, T - 1) }); },
+      fwd: () => { stop(); this.setState({ playing: false, step: Math.min(57, T + 1) }); },
+      onScrub: (e) => { stop(); this.setState({ playing: false, step: +e.target.value }); },
+      copy: () => this.setState({ copied: T }),
+      copyLabel: st.copied === T ? 'Link to this moment copied' : 'Copy link to this moment',
+      ticks, closedN, calledN: hD + hR + sD + sR,
+      inGap: T >= 29 && T <= 32,
+      isNight: view === 'night', isRace: view === 'race',
+      nightPressed: view === 'night' ? 'true' : 'false', racePressed: view === 'race' ? 'true' : 'false',
+      viewNight: () => this.setState({ view: 'night' }), viewRace: () => this.setState({ view: 'race' }),
+      isSenate: chamber === 'senate', isHouse: chamber === 'house',
+      senPressed: chamber === 'senate' ? 'true' : 'false', housePressed: chamber === 'house' ? 'true' : 'false',
+      chSenate: () => this.setState({ chamber: 'senate' }), chHouse: () => this.setState({ chamber: 'house' }),
+      hD, hR, hU: 435 - hD - hR, hDw: ((hD / 435) * 100).toFixed(2) + '%', hRw: ((hR / 435) * 100).toFixed(2) + '%',
+      hAria: 'House seats called: Democrats ' + hD + ', Republicans ' + hR + ', not called ' + (435 - hD - hR),
+      sD: 34 + sD, sR: 31 + sR, sU: 35 - sD - sR, sDw: sD + '%', sRw: sR + '%',
+      sAria: 'Senate seats: Democrats ' + (34 + sD) + ', Republicans ' + (31 + sR) + ', not called ' + (35 - sD - sR),
+      mapAria: 'Tile map of the states at ' + clockFull,
+      tiles, markets, rows, log, logN: log.length, noCalls: log.length === 0,
+      sortRace: () => setSort('race'), sortMargin: () => setSort('margin'), sortCounted: () => setSort('counted'),
+      arRace: arrow('race'), arMargin: arrow('margin'), arCounted: arrow('counted'),
+      goRace: () => nav('race')
+    };
+  }
+}
+</script>
+</body>
+</html>

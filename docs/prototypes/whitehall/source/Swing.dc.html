@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Swing explorer</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="whitehall.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="wh" style="padding: {{pad}}">
+
+  <div style="padding-top: 36px; display: flex; flex-direction: column; gap: 14px">
+    <p class="eyebrow">Swing explorer · 2024 to 2026</p>
+    <h1 class="h1">Where places moved, and by how much.</h1>
+    <p class="lede">Swing is the 2026 margin minus the 2024 baseline margin, in points. A place can swing toward either party; both directions use the same words and the same scale.</p>
+  </div>
+
+  <!-- filters -->
+  <section style="margin-top: 28px; border-top: 3px solid var(--ink); border-bottom: 1.5px solid var(--ink); padding: 14px 0 16px">
+    <div style="display: grid; gap: 14px 20px; grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); align-items: end">
+      <label class="field">Places
+        <select class="sel" value="{{setId}}" onChange="{{onSet}}">
+          <option value="pa-county">Pennsylvania · counties</option>
+          <option value="pa-district">Pennsylvania · House districts</option>
+          <option value="ct-region">Connecticut · planning regions</option>
+        </select>
+      </label>
+      <label class="field">Race
+        <select class="sel" defaultValue="house">
+          <option value="house">U.S. House, 2026</option>
+          <option value="senate" disabled>U.S. Senate (no 2026 race here)</option>
+        </select>
+      </label>
+      <label class="field">Density (ACS)
+        <select class="sel" value="{{fDen}}" onChange="{{onDen}}">
+          <option value="all">All places</option>
+          <option value="2">Most dense third</option>
+          <option value="1">Middle third</option>
+          <option value="0">Least dense third</option>
+        </select>
+      </label>
+      <label class="field">Median income (ACS)
+        <select class="sel" value="{{fInc}}" onChange="{{onInc}}">
+          <option value="all">All places</option>
+          <option value="2">Highest third</option>
+          <option value="1">Middle third</option>
+          <option value="0">Lowest third</option>
+        </select>
+      </label>
+      <label class="field">College degree (ACS)
+        <select class="sel" value="{{fEdu}}" onChange="{{onEdu}}">
+          <option value="all">All places</option>
+          <option value="2">Highest third</option>
+          <option value="1">Middle third</option>
+          <option value="0">Lowest third</option>
+        </select>
+      </label>
+    </div>
+    <p class="small" style="margin: 12px 0 0"><strong style="color: var(--ink)">Baseline:</strong> {{baseline}} · <strong style="color: var(--ink)">2026 counts:</strong> {{certNote}}</p>
+  </section>
+
+  <!-- summary -->
+  <div style="display: grid; gap: 20px 40px; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); margin-top: 28px">
+    <div><div class="eyebrow">Median swing</div><div class="mid num"><span class="{{medPm}}"></span>{{median}}</div><div class="small">{{medNote}}</div></div>
+    <div><div class="eyebrow">Compared</div><div class="mid num">{{nShown}}</div><div class="small">of {{nAll}} places, after filters</div></div>
+    <div><div class="eyebrow">Excluded</div><div class="mid num">{{nEx}}</div><div class="small">Unopposed 2026 race. Counted here, left out of every figure</div></div>
+    <div><div class="eyebrow">Not comparable</div><div class="mid num">{{nNa}}</div><div class="small">Boundaries changed between 2024 and 2026</div></div>
+  </div>
+
+  <div class="split" style="margin-top: 36px">
+    <div class="main stack" style="gap: 14px">
+      <h2 class="h3">{{mapTitle}}</h2>
+      <div style="display: grid; grid-template-columns: repeat({{gridCols}}, minmax(0, 1fr)); gap: 3px; max-width: {{gridMax}}">
+        <sc-for list="{{tiles}}" as="t" hint-placeholder-count="60">
+          <button type="button" class="{{t.cls}}" style="grid-row: {{t.row}}; grid-column: {{t.col}}; background-color: {{t.bg}}; opacity: {{t.op}}" onClick="{{t.pick}}" aria-label="{{t.aria}}" title="{{t.aria}}"></button>
+        </sc-for>
+      </div>
+      <!-- symmetric scale -->
+      <div style="max-width: 560px">
+        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px">
+          <span style="height: 14px; background: var(--d3)"></span><span style="height: 14px; background: var(--d2)"></span><span style="height: 14px; background: var(--d1)"></span><span style="height: 14px; background: var(--zero)"></span><span style="height: 14px; background: var(--r1)"></span><span style="height: 14px; background: var(--r2)"></span><span style="height: 14px; background: var(--r3)"></span>
+        </div>
+        <div class="num" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 12px; color: var(--ink-2); text-align: center; margin-top: 3px">
+          <span>6+</span><span>3 to 6</span><span>1 to 3</span><span>under 1</span><span>1 to 3</span><span>3 to 6</span><span>6+</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 700; margin-top: 4px">
+          <span><span class="pm d"></span>Points toward Democrats</span><span>Points toward Republicans<span class="pm r" style="margin: 0 0 0 6px"></span></span>
+        </div>
+      </div>
+      <div class="legend">
+        <span><i class="hatch-bg" style="background-color: var(--zero)"></i>Excluded: unopposed 2026 race</span>
+        <span><i style="border: 1.5px dashed var(--ink-3)"></i>Boundaries changed; not comparable</span>
+      </div>
+      <p class="small" style="margin: 0">Each square is one place, set roughly where it sits on a map. Squares are equal so small places are as easy to read as large ones. Select a square to see its numbers.</p>
+    </div>
+
+    <aside class="side stack" style="gap: 12px">
+      <div style="border-top: 3px solid var(--ink); padding-top: 12px">
+        <p class="eyebrow">Selected place</p>
+        <h3 class="h2" style="font-size: 30px">{{selName}}</h3>
+      </div>
+      <sc-if value="{{selOk}}" hint-placeholder-val="{{true}}">
+        <dl class="kv">
+          <dt>Swing</dt><dd class="num" style="font-weight: 700"><span class="{{selPm}}"></span>{{selSwing}}</dd>
+          <dt>2024 baseline margin</dt><dd class="num">{{selBase}}</dd>
+          <dt>2026 margin</dt><dd class="num">{{selNow}} <span class="chip dot" style="margin-left: 6px">Uncertified</span></dd>
+          <dt>Votes cast, 2026</dt><dd class="num">{{selVotes}}</dd>
+          <dt>College degree</dt><dd class="num">{{selEdu}}</dd>
+          <dt>Median household income</dt><dd class="num">{{selInc}}</dd>
+          <dt>People per square mile</dt><dd class="num">{{selDen}}</dd>
+        </dl>
+      </sc-if>
+      <sc-if value="{{selEx}}" hint-placeholder-val="{{false}}">
+        <p class="nodata" style="margin: 0"><strong>Excluded.</strong> The 2026 House race here was unopposed, so there is no two-sided margin to compare. This place is counted as excluded and left out of the median, the scatter and the scale.</p>
+      </sc-if>
+      <sc-if value="{{selNa}}" hint-placeholder-val="{{false}}">
+        <p class="nodata" style="margin: 0"><strong>Boundaries changed; not comparable.</strong> This area's code does not exist in both years: 2024 results were reported for the old counties, 2026 results for planning regions. We do not estimate a swing across the change.</p>
+      </sc-if>
+      <dc-import name="SourceLine" src="{{srcText}}" asof="Nov 25, 2026, 11:40 PM ET" what="{{selWhat}}" hint-size="100%,22px"></dc-import>
+    </aside>
+  </div>
+
+  <!-- table -->
+  <section class="sec">
+    <div class="sec-h">
+      <h2 class="h2"><span class="sec-n">§1</span>The table</h2>
+      <button type="button" class="btn sm" aria-label="Export this table as CSV">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8M4.5 7 8 10.5 11.5 7M2.5 13.5h11"></path></svg>
+        Export CSV ({{nRows}} rows, these filters)
+      </button>
+    </div>
+    <div class="tbl-box" style="max-height: 560px; overflow-y: auto">
+      <table class="tbl" style="min-width: 860px">
+        <thead><tr>
+          <th><button type="button" class="sort" onClick="{{sName}}">Place <span aria-hidden="true">{{aName}}</span></button></th>
+          <th class="r"><button type="button" class="sort" onClick="{{sSwing}}">Swing (points) <span aria-hidden="true">{{aSwing}}</span></button></th>
+          <th class="r"><button type="button" class="sort" onClick="{{sBase}}">2024 baseline <span aria-hidden="true">{{aBase}}</span></button></th>
+          <th class="r"><button type="button" class="sort" onClick="{{sNow}}">2026 margin <span aria-hidden="true">{{aNow}}</span></button></th>
+          <th class="r"><button type="button" class="sort" onClick="{{sVotes}}">Votes, 2026 <span aria-hidden="true">{{aVotes}}</span></button></th>
+          <th class="r"><button type="button" class="sort" onClick="{{sEdu}}">College <span aria-hidden="true">{{aEdu}}</span></button></th>
+          <th>Status</th>
+        </tr></thead>
+        <tbody>
+          <sc-for list="{{rows}}" as="r" hint-placeholder-count="12">
+            <tr class="{{r.trCls}}">
+              <td><button type="button" class="lnk" onClick="{{r.pick}}">{{r.name}}</button></td>
+              <td class="r num" style="font-weight: 700"><span class="{{r.pm}}"></span>{{r.swing}}</td>
+              <td class="r num">{{r.base}}</td>
+              <td class="r num">{{r.now}}</td>
+              <td class="r num">{{r.votes}}</td>
+              <td class="r num">{{r.edu}}</td>
+              <td><span class="{{r.chip}}">{{r.status}}</span></td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+    <div class="tbl-foot">
+      <p class="src"><b>Source</b>{{srcText}}. As of Nov 25, 2026, 11:40 PM ET. Every row matches the CSV export.</p>
+      <span class="small">Blank cells in the CSV stay blank, with the reason in a status column. Never 0.</span>
+    </div>
+  </section>
+
+  <!-- scatter -->
+  <section class="sec">
+    <div class="sec-h">
+      <h2 class="h2"><span class="sec-n">§2</span>Swing against a characteristic</h2>
+      <div class="seg" role="group" aria-label="Characteristic">
+        <button type="button" class="btn sm" onClick="{{xEdu}}" aria-pressed="{{xEduP}}">College degree</button>
+        <button type="button" class="btn sm" onClick="{{xInc}}" aria-pressed="{{xIncP}}">Median income</button>
+        <button type="button" class="btn sm" onClick="{{xDen}}" aria-pressed="{{xDenP}}">Density</button>
+      </div>
+    </div>
+    <sc-if value="{{hasDots}}" hint-placeholder-val="{{true}}">
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 700; margin-bottom: 4px"><span><span class="pm d"></span>↑ Toward Democrats</span><span class="small">{{nShown}} places plotted · each dot is one place</span></div>
+        <div style="position: relative; height: 320px; border-left: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink)">
+          <sc-for list="{{yGrid}}" as="g" hint-placeholder-count="5">
+            <div style="position: absolute; left: 0; right: 0; top: {{g.y}}; border-top: {{g.bd}}"><span class="num" style="position: absolute; left: 6px; top: -17px; font-size: 12px; color: var(--ink-3)">{{g.label}}</span></div>
+          </sc-for>
+          <sc-for list="{{dots}}" as="d" hint-placeholder-count="0">
+            <button type="button" onClick="{{d.pick}}" aria-label="{{d.aria}}" title="{{d.aria}}" style="position: absolute; left: calc({{d.x}} - 7px); top: calc({{d.y}} - 7px); width: 14px; height: 14px; padding: 0; border-radius: 50%; border: 1.5px solid var(--ink); background: {{d.bg}}; cursor: pointer; z-index: {{d.z}}"></button>
+          </sc-for>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-top: 4px"><span style="font-weight: 700"><span class="pm r"></span>↓ Toward Republicans</span><span class="num" style="color: var(--ink-3)">{{xMin}} ← {{xLabel}} → {{xMax}}</span></div>
+        <p class="prose" style="font-size: 15px; margin-top: 12px">The chart describes what happened in 2026. It is not a prediction of how any place will vote.</p>
+      </div>
+    </sc-if>
+    <sc-if value="{{noDots}}" hint-placeholder-val="{{false}}">
+      <p class="nodata" style="margin: 0">No comparable places to plot. {{noDotsWhy}}</p>
+    </sc-if>
+  </section>
+
+  <section style="margin-top: 48px">
+    <details class="disc">
+      <summary>How this is calculated</summary>
+      <div class="stack" style="gap: 14px">
+        <p class="formula">swing = 2026 margin − 2024 baseline margin</p>
+        <ul class="rule-list" style="font-size: 15px; max-width: 72ch">
+          <li><strong>Margin</strong> is the Democratic share minus the Republican share, using shares of <em>all</em> votes cast, not the two-party vote. A positive swing is toward Democrats; a negative swing is toward Republicans. We show both the same way.</li>
+          <li><strong>Baseline.</strong> Counties use the 2024 presidential result. Districts use the 2024 House result, and only where the 2024 and 2026 lines are the same. In redistricted states, only counties are compared.</li>
+          <li><strong>Unopposed races</strong> have no two-sided margin. Their places are excluded and the count of exclusions is shown.</li>
+          <li><strong>Boundaries changed; not comparable.</strong> A place whose FIPS code does not exist in both years is listed but not scored. Connecticut's planning regions are the main case.</li>
+          <li><strong>Alaska</strong> reports by state house district, not county, and is shown that way.</li>
+          <li><strong>Uncertified counts</strong> are labelled until the state certifies. The swing may change by a tenth of a point when it does.</li>
+        </ul>
+        <p class="small">Method version 1.0 · Characteristics: Census Bureau, American Community Survey 2020 to 2024 five-year estimates.</p>
+      </div>
+    </details>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"onNav":{"editor":null,"tsType":"(id: string) => void"},"$preview":{"width":1360,"height":2900}}'>
+class Component extends DCLogic {
+  data() {
+    if (this._d) return this._d;
+    const hash = (str) => { let x = 2166136261; for (let i = 0; i < str.length; i++) { x ^= str.charCodeAt(i); x = Math.imul(x, 16777619); } return ((x >>> 0) % 10007) / 10007; };
+    const paRows = [
+      ['Erie', 'Crawford', 'Warren', 'McKean', 'Potter', 'Tioga', 'Bradford', 'Susquehanna', 'Wayne'],
+      ['Mercer', 'Venango', 'Forest', 'Elk', 'Cameron', 'Clinton', 'Lycoming', 'Sullivan', 'Wyoming', 'Lackawanna', 'Pike'],
+      ['Lawrence', 'Butler', 'Clarion', 'Jefferson', 'Clearfield', 'Centre', 'Union', 'Montour', 'Columbia', 'Luzerne', 'Monroe'],
+      ['Beaver', 'Armstrong', 'Indiana', 'Cambria', 'Blair', 'Mifflin', 'Snyder', 'Northumberland', 'Schuylkill', 'Carbon', 'Northampton'],
+      ['Allegheny', 'Westmoreland', 'Huntingdon', 'Juniata', 'Perry', 'Dauphin', 'Lebanon', 'Berks', 'Lehigh', 'Bucks'],
+      ['Washington', 'Fayette', 'Somerset', 'Bedford', 'Fulton', 'Franklin', 'Cumberland', 'Adams', 'York', 'Lancaster', 'Chester', 'Montgomery'],
+      ['Greene', 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Delaware', 'Philadelphia']
+    ];
+    const dense = 'Philadelphia Delaware Montgomery Bucks Chester Allegheny Lehigh Northampton Lancaster Dauphin Berks York Erie Lackawanna Luzerne Cumberland Centre Monroe Westmoreland Lebanon Beaver Washington'.split(' ');
+    const unopp = 'Clearfield Jefferson Elk Cameron Clarion Forest'.split(' ');
+    const make = (name, row, col, kind) => {
+      const h = (k) => hash(k + name);
+      const isDense = dense.indexOf(name) >= 0 || kind === 'district' && h('dd') > 0.45;
+      const den = name === 'Philadelphia' ? 11900 : isDense ? Math.round(300 + h('den') * 2600) : Math.round(18 + h('den') * 210);
+      const edu = isDense ? 28 + h('edu') * 24 : 13 + h('edu') * 13;
+      const inc = isDense ? 66 + h('inc') * 34 : 47 + h('inc') * 22;
+      const base = name === 'Philadelphia' ? 57.8 : isDense ? -12 + h('b') * 36 : -56 + h('b') * 40;
+      const swing = 1.6 + (edu - 26) * 0.16 + (h('n') - 0.5) * 6.4;
+      const votes = name === 'Philadelphia' ? 512300 : isDense ? Math.round(52000 + h('v') * 330000) : Math.round(2600 + h('v') * 41000);
+      return { name: kind === 'county' ? name + ' County' : name, key: name, row, col, den, edu, inc, base, swing, now: base + swing, votes, st: unopp.indexOf(name) >= 0 ? 'ex' : 'ok' };
+    };
+    const pa = [];
+    paRows.forEach((r, ri) => r.forEach((n, ci) => { if (n) pa.push(make(n, ri + 1, ci + 1, 'county')); }));
+    const dist = [];
+    for (let i = 1; i <= 17; i++) {
+      const p = make('PA-' + (i < 10 ? '0' + i : i), Math.floor((i - 1) / 6) + 1, ((i - 1) % 6) + 1, 'district');
+      if (i === 13 || i === 15) p.st = 'ex';
+      dist.push(p);
+    }
+    const ct = ['Capitol', 'Greater Bridgeport', 'Lower Connecticut River Valley', 'Naugatuck Valley', 'Northeastern Connecticut', 'Northwest Hills', 'South Central Connecticut', 'Southeastern Connecticut', 'Western Connecticut']
+      .map((n, i) => ({ name: n + ' Planning Region', key: n, row: Math.floor(i / 3) + 1, col: (i % 3) + 1, st: 'na' }));
+    const terc = (list, f) => {
+      const ok = list.filter((p) => p.st !== 'na').map(f).sort((a, b) => a - b);
+      const a = ok[Math.floor(ok.length / 3)], b = ok[Math.floor((ok.length * 2) / 3)];
+      return (v) => (v < a ? 0 : v < b ? 1 : 2);
+    };
+    [pa, dist].forEach((list) => {
+      const td = terc(list, (p) => p.den), ti = terc(list, (p) => p.inc), te = terc(list, (p) => p.edu);
+      list.forEach((p) => { p.tDen = td(p.den); p.tInc = ti(p.inc); p.tEdu = te(p.edu); });
+    });
+    this._d = {
+      'pa-county': { list: pa, cols: 12, max: '640px', title: "Pennsylvania's 67 counties", baseline: '2024 presidential result, by county', src: 'Pennsylvania Department of State (2026, unofficial); MIT Election Data and Science Lab (2024 president by county); Census Bureau ACS', sel: 'Bucks' },
+      'pa-district': { list: dist, cols: 6, max: '330px', title: "Pennsylvania's 17 House districts", baseline: '2024 House result. District lines are the same in 2024 and 2026', src: 'Pennsylvania Department of State (2026, unofficial; 2024 House); Census Bureau ACS', sel: 'PA-07' },
+      'ct-region': { list: ct, cols: 3, max: '170px', title: "Connecticut's 9 planning regions", baseline: 'None available. 2024 results were reported for the old counties', src: 'Connecticut Secretary of the State; Census Bureau', sel: 'Capitol' }
+    };
+    return this._d;
+  }
+
+  renderVals() {
+    const st = this.state || {};
+    const standalone = !this.props.onNav;
+    const setId = st.setId || 'pa-county';
+    const D = this.data()[setId];
+    const f = { den: st.fDen || 'all', inc: st.fInc || 'all', edu: st.fEdu || 'all' };
+    const sort = st.sort || { key: 'swing', dir: -1 };
+    const xKey = st.xKey || 'edu';
+    const selKey = st.sel && D.list.some((p) => p.key === st.sel) ? st.sel : D.sel;
+    const pass = (p) => p.st === 'na' || ((f.den === 'all' || p.tDen === +f.den) && (f.inc === 'all' || p.tInc === +f.inc) && (f.edu === 'all' || p.tEdu === +f.edu));
+    const mfmt = (m) => (Math.abs(m) < 0.05 ? 'Even' : (m > 0 ? 'D+' : 'R+') + Math.abs(m).toFixed(1));
+    const sfmt = (s) => (Math.abs(s) < 0.05 ? '0.0' : '+' + Math.abs(s).toFixed(1) + (s > 0 ? ' D' : ' R'));
+    const color = (s) => { const a = Math.abs(s); if (a < 1) return 'var(--zero)'; const k = a < 3 ? 1 : a < 6 ? 2 : 3; return 'var(--' + (s > 0 ? 'd' : 'r') + k + ')'; };
+    const pick = (key) => () => this.setState({ sel: key });
+
+    const shown = D.list.filter(pass);
+    const ok = shown.filter((p) => p.st === 'ok');
+    const sw = ok.map((p) => p.swing).sort((a, b) => a - b);
+    const med = sw.length ? (sw.length % 2 ? sw[(sw.length - 1) / 2] : (sw[sw.length / 2 - 1] + sw[sw.length / 2]) / 2) : null;
+
+    const tiles = D.list.map((p) => ({
+      row: p.row, col: p.col,
+      cls: 'ctile' + (p.st === 'na' ? ' na' : p.st === 'ex' ? ' ex' : '') + (p.key === selKey ? ' sel' : ''),
+      bg: p.st === 'ok' ? color(p.swing) : p.st === 'ex' ? 'var(--zero)' : 'transparent',
+      op: pass(p) ? '1' : '.22',
+      aria: p.name + ': ' + (p.st === 'ok' ? 'swing ' + sfmt(p.swing) : p.st === 'ex' ? 'excluded, unopposed race' : 'boundaries changed; not comparable'),
+      pick: pick(p.key)
+    }));
+
+    const val = (p) => (sort.key === 'name' ? p.name : p.st !== 'ok' ? null : p[sort.key]);
+    const rowsSrc = shown.slice().sort((a, b) => {
+      const x = val(a), y = val(b);
+      if (x == null && y == null) return a.name < b.name ? -1 : 1;
+      if (x == null) return 1;
+      if (y == null) return -1;
+      return (x < y ? -1 : x > y ? 1 : 0) * sort.dir;
+    });
+    const rows = rowsSrc.map((p) => ({
+      name: p.name, pick: pick(p.key), trCls: p.key === selKey ? 'sel' : '',
+      pm: p.st === 'ok' ? 'pm ' + (Math.abs(p.swing) < 0.05 ? 'n' : p.swing > 0 ? 'd' : 'r') : '',
+      swing: p.st === 'ok' ? sfmt(p.swing) : '',
+      base: p.st === 'ok' ? mfmt(p.base) : '',
+      now: p.st === 'ok' ? mfmt(p.now) : '',
+      votes: p.votes ? p.votes.toLocaleString('en-US') : '',
+      edu: p.edu ? p.edu.toFixed(0) + '%' : '',
+      chip: p.st === 'ok' ? 'chip dot' : p.st === 'ex' ? 'chip hatch' : 'chip dash',
+      status: p.st === 'ok' ? 'Uncertified' : p.st === 'ex' ? 'Excluded: unopposed' : 'Boundaries changed; not comparable'
+    }));
+    const setSort = (key) => () => this.setState({ sort: { key, dir: sort.key === key ? -sort.dir : key === 'name' ? 1 : -1 } });
+    const ar = (key) => (sort.key === key ? (sort.dir === 1 ? '↑' : '↓') : '');
+
+    const xs = ok.map((p) => (xKey === 'den' ? Math.log10(p[xKey]) : p[xKey]));
+    const x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs);
+    const yTop = 12, yBot = -8;
+    const yPct = (s) => (((yTop - Math.max(yBot, Math.min(yTop, s))) / (yTop - yBot)) * 100).toFixed(2) + '%';
+    const dots = ok.map((p) => {
+      const xv = xKey === 'den' ? Math.log10(p[xKey]) : p[xKey];
+      return {
+        x: (5 + ((xv - x0) / (x1 - x0 || 1)) * 90).toFixed(2) + '%', y: yPct(p.swing),
+        bg: p.key === selKey ? 'var(--mark)' : 'var(--paper)', z: p.key === selKey ? 2 : 1,
+        aria: p.name + ', swing ' + sfmt(p.swing), pick: pick(p.key)
+      };
+    });
+    const xfmt = (p, k) => (k === 'edu' ? p.edu.toFixed(0) + '%' : k === 'inc' ? '$' + Math.round(p.inc) + 'k' : p.den.toLocaleString('en-US') + ' per sq mi');
+    const byX = ok.slice().sort((a, b) => a[xKey] - b[xKey]);
+    const sel = D.list.find((p) => p.key === selKey);
+    const pressed = (b) => (b ? 'true' : 'false');
+
+    return {
+      pad: standalone ? '0 40px 60px' : '0',
+      setId, fDen: f.den, fInc: f.inc, fEdu: f.edu,
+      onSet: (e) => this.setState({ setId: e.target.value, sel: null }),
+      onDen: (e) => this.setState({ fDen: e.target.value }),
+      onInc: (e) => this.setState({ fInc: e.target.value }),
+      onEdu: (e) => this.setState({ fEdu: e.target.value }),
+      baseline: D.baseline,
+      certNote: setId === 'ct-region' ? 'certified Nov 25, 2026' : 'uncertified. Pennsylvania certifies by Nov 30, 2026',
+      median: med == null ? 'None' : sfmt(med),
+      medPm: med == null ? 'pm n' : 'pm ' + (med > 0 ? 'd' : 'r'),
+      medNote: med == null ? 'No comparable places' : 'points, across ' + ok.length + ' compared places',
+      nShown: ok.length, nAll: D.list.length,
+      nEx: shown.filter((p) => p.st === 'ex').length,
+      nNa: shown.filter((p) => p.st === 'na').length,
+      nRows: rows.length,
+      mapTitle: D.title, gridCols: D.cols, gridMax: D.max, tiles,
+      selName: sel.name, selOk: sel.st === 'ok', selEx: sel.st === 'ex', selNa: sel.st === 'na',
+      selPm: sel.st === 'ok' ? 'pm ' + (sel.swing > 0 ? 'd' : 'r') : 'pm n',
+      selSwing: sel.st === 'ok' ? sfmt(sel.swing) + ' points' : '',
+      selBase: sel.st === 'ok' ? mfmt(sel.base) : '', selNow: sel.st === 'ok' ? mfmt(sel.now) : '',
+      selVotes: sel.votes ? sel.votes.toLocaleString('en-US') : '',
+      selEdu: sel.edu ? sel.edu.toFixed(1) + '% of adults 25 and over' : '',
+      selInc: sel.inc ? '$' + Math.round(sel.inc * 1000).toLocaleString('en-US') : '',
+      selDen: sel.den ? sel.den.toLocaleString('en-US') : '',
+      selWhat: 'Swing for ' + sel.name, srcText: D.src,
+      rows,
+      sName: setSort('name'), sSwing: setSort('swing'), sBase: setSort('base'), sNow: setSort('now'), sVotes: setSort('votes'), sEdu: setSort('edu'),
+      aName: ar('name'), aSwing: ar('swing'), aBase: ar('base'), aNow: ar('now'), aVotes: ar('votes'), aEdu: ar('edu'),
+      xEdu: () => this.setState({ xKey: 'edu' }), xInc: () => this.setState({ xKey: 'inc' }), xDen: () => this.setState({ xKey: 'den' }),
+      xEduP: pressed(xKey === 'edu'), xIncP: pressed(xKey === 'inc'), xDenP: pressed(xKey === 'den'),
+      hasDots: dots.length > 0, noDots: dots.length === 0,
+      noDotsWhy: setId === 'ct-region' ? 'Every place in this set changed boundaries between 2024 and 2026.' : 'Loosen the filters to see more places.',
+      dots,
+      yGrid: [12, 6, 0, -6].map((v) => ({ y: yPct(v), label: v === 0 ? 'No swing' : '+' + Math.abs(v) + (v > 0 ? ' D' : ' R'), bd: v === 0 ? '1.5px solid var(--ink)' : '1px solid var(--hair)' })),
+      xLabel: xKey === 'edu' ? 'adults with a college degree' : xKey === 'inc' ? 'median household income' : 'people per square mile (log scale)',
+      xMin: byX.length ? xfmt(byX[0], xKey) : '', xMax: byX.length ? xfmt(byX[byX.length - 1], xKey) : ''
+    };
+  }
+}
+</script>
+</body>
+</html>

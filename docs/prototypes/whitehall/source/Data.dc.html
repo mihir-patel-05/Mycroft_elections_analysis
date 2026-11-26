@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Data downloads</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="whitehall.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="wh" style="padding: {{pad}}">
+
+  <div style="padding-top: 36px; display: flex; flex-direction: column; gap: 14px">
+    <p class="eyebrow">Data · downloads and methods</p>
+    <h1 class="h1">Take the record with you.</h1>
+    <p class="lede">Every public Whitehall dataset, as CSV and Parquet, with its source, licence and the credit line to use. Free, no account.</p>
+  </div>
+
+  <div style="display: grid; gap: 0 40px; grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr)); margin-top: 28px; border-top: 3px solid var(--ink)">
+    <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Newest export</div><div class="num" style="font-weight: 700; font-size: 19px; font-stretch: 85%">Nov 26, 2026, 2:10 AM ET</div><div class="small">Exports run every night at 2:00 AM ET</div></div>
+    <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Tonight's state</div><div style="font-weight: 700; font-size: 19px; font-stretch: 85%">7 of 8 current</div><div class="small">1 dataset is offering its last good export</div></div>
+    <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Missing values</div><div style="font-weight: 700; font-size: 19px; font-stretch: 85%">Blank, never 0</div><div class="small">A status column says why: unknown, stale, partial, unavailable</div></div>
+  </div>
+
+  <section style="margin-top: 44px">
+    <sc-for list="{{sets}}" as="d" hint-placeholder-count="8">
+      <article style="border-top: 3px solid var(--ink); padding: 16px 0 28px; display: flex; flex-wrap: wrap; gap: 18px 40px">
+        <div style="flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+          <div class="eyebrow num">Dataset {{d.n}} of 8</div>
+          <h2 class="h2" style="font-size: 28px">{{d.name}}</h2>
+          <p class="prose" style="font-size: 15.5px">{{d.desc}}</p>
+          <div class="row" style="gap: 6px">
+            <span class="{{d.chipCls}}">{{d.chip}}</span>
+            <sc-if value="{{d.stale}}" hint-placeholder-val="{{false}}"><span class="chip hatch">Last good export</span></sc-if>
+          </div>
+          <sc-if value="{{d.stale}}" hint-placeholder-val="{{false}}">
+            <p class="nodata" style="margin: 0; font-size: 14.5px"><strong>Last night's export of this dataset failed.</strong> The files offered are the last good export, from Nov 24, 2026, 2:09 AM ET. Two days of corrections are not in them yet.</p>
+          </sc-if>
+        </div>
+        <div style="flex: 2 1 380px; min-width: 0">
+          <dl class="kv">
+            <dt>Source</dt><dd>{{d.source}}</dd>
+            <dt>Licence</dt><dd>{{d.licence}}</dd>
+            <dt>Credit line to use</dt><dd style="font-family: var(--serif); font-style: italic">{{d.credit}}</dd>
+            <dt>Coverage</dt><dd>{{d.coverage}}</dd>
+            <dt>Export as of</dt><dd class="num">{{d.updated}}</dd>
+          </dl>
+        </div>
+        <div style="flex: 0 1 200px; display: flex; flex-direction: column; gap: 8px; align-items: stretch">
+          <button type="button" class="btn solid" style="justify-content: space-between"><span>CSV</span><span class="num" style="font-weight: 500">{{d.csv}}</span></button>
+          <button type="button" class="btn" style="justify-content: space-between"><span>Parquet</span><span class="num" style="font-weight: 500">{{d.pq}}</span></button>
+          <a href="#method" style="min-height: 32px; display: flex; align-items: center; font-size: 14.5px">How it is made</a>
+        </div>
+      </article>
+    </sc-for>
+
+    <article style="border-top: 3px solid var(--ink); padding: 16px 0 28px; display: flex; flex-wrap: wrap; gap: 18px 40px">
+      <div style="flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+        <div class="eyebrow">Listed, not offered</div>
+        <h2 class="h2" style="font-size: 28px">S&amp;P 500 and VIX, daily</h2>
+        <p class="prose" style="font-size: 15.5px">Shown on Whitehall beside market prices for context.</p>
+        <div class="row"><span class="chip dash">No download</span></div>
+      </div>
+      <div style="flex: 2 1 380px; min-width: 0">
+        <dl class="kv">
+          <dt>Source</dt><dd>S&amp;P Dow Jones Indices and Cboe, read through FRED (Federal Reserve Bank of St. Louis)</dd>
+          <dt>Licence</dt><dd>The owners' terms do not allow us to redistribute these series</dd>
+          <dt>Where to get it</dt><dd>Directly from FRED, free, under their terms</dd>
+        </dl>
+      </div>
+      <div style="flex: 0 1 200px">
+        <p class="nodata" style="margin: 0; font-size: 14.5px">We can't offer this file. The reason is the licence, not a fault.</p>
+      </div>
+    </article>
+  </section>
+
+  <section class="sec" id="method">
+    <div class="sec-h"><h2 class="h2"><span class="sec-n">§</span>What every file carries</h2></div>
+    <div class="cols">
+      <ul class="rule-list" style="font-size: 15.5px">
+        <li><strong>A header block.</strong> The first rows of each CSV (and the Parquet metadata) give the source, licence, credit line, "as of" time and the method page's address.</li>
+        <li><strong>A status column.</strong> Blank numbers come with a reason. A blank is never a 0.</li>
+        <li><strong>Provisional rows.</strong> Results from states that have not certified are marked provisional, row by row.</li>
+        <li><strong>The same numbers as the screen.</strong> A table's CSV export and its dataset here come from the same read.</li>
+      </ul>
+      <div class="stack" style="gap: 10px">
+        <p class="eyebrow">The first rows of a file</p>
+        <pre style="margin: 0; padding: 14px 16px; background: var(--paper-2); font-family: ui-monospace, 'SF Mono', Menlo, monospace; font-size: 12.5px; line-height: 1.6; overflow-x: auto; color: var(--ink)"># dataset: results_2026_by_county
+# source: state election offices via civicAPI
+# licence: public record; civicAPI terms, credit required
+# credit: Mycroft Whitehall, from state election offices via civicAPI
+# as_of: 2026-11-26T02:10:00-05:00
+# method: /data/methods/results
+state,county_fips,race,party,votes,status
+NH,33017,NH-01,DEM,27644,certified
+NY,36087,NY-17,DEM,,partial</pre>
+        <p class="small" style="margin: 0">Illustrative rows. The last one shows a blank count with its status.</p>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"onNav":{"editor":null,"tsType":"(id: string) => void"},"$preview":{"width":1360,"height":2500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const standalone = !this.props.onNav;
+    const now = 'Nov 26, 2026, 2:10 AM ET';
+    const raw = [
+      ['2026 results by county and race', 'The locked record of the 2026 general election: every federal race, every county, every candidate.', 'Provisional', 'State and county election offices, via civicAPI', 'Public record; civicAPI terms, credit required', 'Mycroft Whitehall, from state election offices via civicAPI', '470 races · 3,143 counties and equivalents · 212 races certified', now, '18.4 MB', '4.1 MB'],
+      ['Race calls', 'Who called each race and when. The calls are civicAPI’s decision desk’s, not ours.', 'Current', 'civicAPI decision desk', 'civicAPI terms, credit required', 'Race calls by civicAPI’s decision desk, as recorded by Mycroft Whitehall', '467 calls · Nov 3 to Nov 12, 2026 · 3 races not called', now, '62 KB', '21 KB'],
+      ['Certification', 'Each state’s certification date, the official page it came from, and the change from the last unofficial count.', 'Current', 'Official state certification pages, entered by Whitehall editors', 'Public record', 'Mycroft Whitehall, from official state certification pages', '19 of 50 states certified · deadlines for all 50', now, '48 KB', '17 KB'],
+      ['Past results: 2024 president by county', 'The baseline used for swing.', 'Final', 'MIT Election Data and Science Lab', 'CC0; credit requested', 'MIT Election Data and Science Lab, County Presidential Election Returns 2000–2024, Harvard Dataverse', 'All states · 2024 · final', 'Nov 20, 2026, 2:08 AM ET', '9.7 MB', '2.2 MB'],
+      ['Swing tables, 2024 to 2026', 'Swing by county and by district, with the place characteristics used in the explorer.', 'Provisional', 'Derived by Whitehall from the two results datasets and the Census Bureau’s ACS', 'CC BY 4.0', 'Mycroft Whitehall swing tables; results from state election offices and MIT Election Data and Science Lab; characteristics from the U.S. Census Bureau', '3,098 comparable counties · 37 excluded (unopposed) · 8 not comparable', now, '1.3 MB', '410 KB'],
+      ['Market prices, hourly', 'Kalshi prices for chamber control and individual races. Prices, not forecasts.', 'Current', 'Kalshi, hourly snapshots of the last traded price', 'Kalshi terms; credit required', 'Market prices from Kalshi, recorded hourly by Mycroft Whitehall', '388 race markets and 2 chamber markets · Oct 1 to Nov 12, 2026 · hourly only; ticks were not stored', now, '6.8 MB', '1.5 MB'],
+      ['Signal scorecard', 'Each signal’s score, coverage and the race-by-race values behind it at the cut-off.', 'Provisional', 'Derived by Whitehall from Kalshi prices, VoteHub poll averages and results', 'CC BY 4.0', 'Mycroft Whitehall signal scorecard; prices from Kalshi; poll averages from VoteHub', '470 races · cut-off 6:00 PM ET, Nov 3, 2026 · 212 certified', now, '94 KB', '33 KB'],
+      ['Election-night snapshots', 'Every stored snapshot from the night, as the replay uses them. Gaps in the feed are kept as gaps.', 'Current', 'civicAPI result snapshots, stored by Whitehall on the night', 'civicAPI terms, credit required', 'Election-night snapshots recorded by Mycroft Whitehall, from civicAPI', 'Nov 3, 6:00 PM ET to Nov 12 · 15-minute snapshots on the night · county detail missing 1:15 to 2:00 AM', 'Nov 24, 2026, 2:09 AM ET', '212 MB', '38 MB']
+    ];
+    return {
+      pad: standalone ? '0 40px 60px' : '0',
+      sets: raw.map((r, i) => ({
+        n: i + 1, name: r[0], desc: r[1], chip: r[2],
+        chipCls: r[2] === 'Provisional' ? 'chip dot' : r[2] === 'Final' ? 'chip solid' : 'chip',
+        source: r[3], licence: r[4], credit: r[5], coverage: r[6], updated: r[7], csv: r[8], pq: r[9],
+        stale: i === 7
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

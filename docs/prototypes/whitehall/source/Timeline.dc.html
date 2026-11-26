@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Single-race night timeline</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="whitehall.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="wh" style="padding: {{pad}}">
+
+  <div style="display: grid; gap: 16px 28px; grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr)); margin-bottom: 22px">
+    <div>
+      <div class="eyebrow"><span class="pm d"></span>Democratic incumbent</div>
+      <div class="mid num">{{dVotes}}</div>
+      <div class="small">{{countAsOf}}</div>
+    </div>
+    <div>
+      <div class="eyebrow"><span class="pm r"></span>Republican challenger</div>
+      <div class="mid num">{{rVotes}}</div>
+      <div class="small">{{countAsOf}}</div>
+    </div>
+    <div>
+      <div class="eyebrow">Margin</div>
+      <div class="mid num">{{margin}}</div>
+      <div class="small">Share of all votes cast</div>
+    </div>
+    <div>
+      <div class="eyebrow">Counted (estimate)</div>
+      <div class="mid num">{{counted}}</div>
+      <div class="small">{{countAsOf}}</div>
+    </div>
+    <div>
+      <div class="eyebrow">Market price</div>
+      <div class="mid num">{{price}}</div>
+      <div class="small">{{priceAsOf}}</div>
+    </div>
+  </div>
+
+  <div class="row" style="margin-bottom: 18px">
+    <span class="{{callCls}}">{{callText}}</span>
+    <sc-if value="{{inGap}}" hint-placeholder-val="{{false}}">
+      <span class="chip hatch">No snapshots at this moment. Showing 11:00 PM</span>
+    </sc-if>
+    <sc-if value="{{beforeClose}}" hint-placeholder-val="{{false}}">
+      <span class="chip dash">Polls open until 8:00 PM ET</span>
+    </sc-if>
+  </div>
+
+  <div class="stack" style="gap: 4px">
+    <div class="row" style="justify-content: space-between; gap: 4px 16px">
+      <h4 class="eyebrow">Votes counted</h4>
+      <span class="legend"><span><span class="pm d"></span>Democratic incumbent</span><span><span class="pm r"></span>Republican challenger</span></span>
+    </div>
+    <svg class="ch" width="100%" height="160" style="height: 160px" role="img" aria-label="Votes counted for each candidate over the night, as a stepped line. No snapshots between 11:15 PM and midnight.">
+      <line class="gr" x1="0" x2="100%" y1="20" y2="20"></line>
+      <line class="gr" x1="0" x2="100%" y1="85" y2="85"></line>
+      <text x="0" y="16">200,000</text>
+      <text x="0" y="81">100,000</text>
+      <sc-if value="{{showGap}}" hint-placeholder-val="{{false}}">
+        <rect class="gap" x="{{gapX}}" width="{{gapW}}" y="20" height="130"></rect>
+      </sc-if>
+      <sc-for list="{{rLines}}" as="s" hint-placeholder-count="0"><line class="lr" x1="{{s.x1}}" x2="{{s.x2}}" y1="{{s.y1}}" y2="{{s.y2}}"></line></sc-for>
+      <sc-for list="{{dLines}}" as="s" hint-placeholder-count="0"><line class="ld" x1="{{s.x1}}" x2="{{s.x2}}" y1="{{s.y1}}" y2="{{s.y2}}"></line></sc-for>
+      <sc-if value="{{called}}" hint-placeholder-val="{{false}}"><line class="dash" x1="{{callX}}" x2="{{callX}}" y1="6" y2="150"></line></sc-if>
+      <line class="ax" x1="0" x2="100%" y1="150" y2="150"></line>
+      <line class="play" x1="{{playX}}" x2="{{playX}}" y1="0" y2="160"></line>
+      <circle class="fm" cx="{{playX}}" cy="6" r="5"></circle>
+    </svg>
+
+    <h4 class="eyebrow" style="margin-top: 14px">Share counted (estimate, never a call)</h4>
+    <svg class="ch" width="100%" height="84" style="height: 84px" role="img" aria-label="Estimated share of votes counted over the night">
+      <line class="gr" x1="0" x2="100%" y1="10" y2="10"></line>
+      <text x="0" y="24">100%</text>
+      <sc-if value="{{showGap}}" hint-placeholder-val="{{false}}">
+        <rect class="gap" x="{{gapX}}" width="{{gapW}}" y="10" height="60"></rect>
+      </sc-if>
+      <sc-for list="{{cLines}}" as="s" hint-placeholder-count="0"><line class="li" x1="{{s.x1}}" x2="{{s.x2}}" y1="{{s.y1}}" y2="{{s.y2}}"></line></sc-for>
+      <sc-if value="{{called}}" hint-placeholder-val="{{false}}"><line class="dash" x1="{{callX}}" x2="{{callX}}" y1="0" y2="70"></line></sc-if>
+      <line class="ax" x1="0" x2="100%" y1="70" y2="70"></line>
+      <line class="play" x1="{{playX}}" x2="{{playX}}" y1="0" y2="84"></line>
+    </svg>
+
+    <h4 class="eyebrow" style="margin-top: 14px">Market price (Kalshi, hourly) · "Democratic incumbent wins" contract, last price</h4>
+    <svg class="ch" width="100%" height="96" style="height: 96px" role="img" aria-label="Kalshi market price for the Democratic incumbent, one mark per hourly snapshot. Marks are not joined.">
+      <line class="gr" x1="0" x2="100%" y1="10" y2="10"></line>
+      <line class="dash" x1="0" x2="100%" y1="45" y2="45"></line>
+      <text x="0" y="24">100¢</text>
+      <text x="0" y="59">50¢</text>
+      <sc-for list="{{mBars}}" as="s" hint-placeholder-count="0">
+        <line class="li" x1="{{s.x1}}" x2="{{s.x2}}" y1="{{s.y}}" y2="{{s.y}}"></line>
+        <circle class="ink" cx="{{s.x1}}" cy="{{s.y}}" r="3.2"></circle>
+      </sc-for>
+      <sc-if value="{{called}}" hint-placeholder-val="{{false}}"><line class="dash" x1="{{callX}}" x2="{{callX}}" y1="0" y2="80"></line></sc-if>
+      <line class="ax" x1="0" x2="100%" y1="80" y2="80"></line>
+      <line class="play" x1="{{playX}}" x2="{{playX}}" y1="0" y2="96"></line>
+    </svg>
+
+    <div style="position: relative; height: 34px; font-size: 12px; color: var(--ink-3); font-stretch: 88%" aria-hidden="true">
+      <sc-for list="{{ticks}}" as="t" hint-placeholder-count="8">
+        <span style="position: absolute; top: 2px; left: {{t.x}}; transform: translateX({{t.shift}}); white-space: nowrap">{{t.label}}</span>
+      </sc-for>
+      <span style="position: absolute; top: 18px; left: 1%; font-weight: 700; letter-spacing: .06em; text-transform: uppercase">Election night, 15-minute steps</span>
+      <span style="position: absolute; top: 18px; right: 0; font-weight: 700; letter-spacing: .06em; text-transform: uppercase">Days after</span>
+    </div>
+  </div>
+
+  <ul class="rule-list" style="margin-top: 14px; font-size: 14.5px">
+    <li><strong>Each step holds until the next stored snapshot.</strong> Nothing between snapshots is drawn in.</li>
+    <li><span class="chip hatch" style="margin-right: 8px">Gap</span>11:15 PM to midnight: the feed for this race returned errors and no snapshot was stored. The lead changed during this gap; we do not know the minute.</li>
+    <li><strong>Dashed vertical line:</strong> called for the Democratic incumbent by civicAPI's decision desk at 1:42 AM ET, Nov 4. Whitehall does not call races.</li>
+    <li><strong>Market marks are prices, not forecasts,</strong> and are not joined into a line. Tick-level prices were not stored on the night.</li>
+  </ul>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"step":{"editor":"range","min":0,"max":57,"step":1,"default":36},"$preview":{"width":900,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const standalone = this.props.step == null;
+    const T = Math.max(0, Math.min(57, this.props.step ?? 36));
+    const X = (s) => (s <= 48 ? 1 + (s / 48) * 80 : 83 + ((s - 48) / 9) * 16);
+    const pc = (v) => v.toFixed(2) + '%';
+    const TOTAL = 372400, CLOSE = 8, CALL = 31;
+    const isGap = (s) => s >= 21 && s <= 24;
+    const cOf = (s) => (s <= 48 ? 0.96 * (1 - Math.exp(-(s - CLOSE) / 8)) : 0.955 + ((s - 48) / 9) * 0.04);
+    const snap = (s) => {
+      if (s < CLOSE + 1 || isGap(s)) return null;
+      const c = cOf(s);
+      const dS = 0.468 + 0.034 * c;
+      return { s, c, d: Math.round(TOTAL * c * dS), r: Math.round(TOTAL * c * (0.988 - dS)) };
+    };
+    const tlabel = (s) => {
+      if (s > 48) return 'Nov ' + (4 + (s - 49)) + ', end of day';
+      const m = 18 * 60 + s * 15;
+      const h24 = Math.floor(m / 60) % 24, mm = m % 60;
+      const h = h24 % 12 === 0 ? 12 : h24 % 12;
+      return h + ':' + (mm < 10 ? '0' : '') + mm + (h24 < 12 ? ' AM' : ' PM') + (m >= 24 * 60 ? ', Nov 4' : '');
+    };
+    const snaps = [];
+    for (let s = CLOSE + 1; s <= T; s++) { const p = snap(s); if (p) snaps.push(p); }
+    const last = snaps.length ? snaps[snaps.length - 1] : null;
+    const inGap = isGap(T);
+    const build = (yFn) => {
+      const out = [];
+      for (let i = 0; i < snaps.length; i++) {
+        const a = snaps[i], b = snaps[i + 1];
+        const ya = yFn(a);
+        if (b) {
+          if (b.s - a.s > 1) continue;
+          const yb = yFn(b);
+          out.push({ x1: pc(X(a.s)), x2: pc(X(b.s)), y1: ya, y2: ya });
+          out.push({ x1: pc(X(b.s)), x2: pc(X(b.s)), y1: ya, y2: yb });
+        } else if (!inGap && T > a.s) {
+          out.push({ x1: pc(X(a.s)), x2: pc(X(T)), y1: ya, y2: ya });
+        }
+      }
+      return out;
+    };
+    const yA = (v) => +(150 - (v / 200000) * 130).toFixed(1);
+    const prices = [58, 57, 57, 52, 44, 41, 49, 61, 83, 95, 97, 98, 98];
+    const mBars = [];
+    let pNow = null, pAt = 0;
+    for (let i = 0; i < prices.length; i++) {
+      const s = i * 4;
+      if (s > T) break;
+      pNow = prices[i]; pAt = s;
+      const end = s < 48 ? Math.min(X(s + 4) - 0.7, X(T)) : X(s) + 0.4;
+      mBars.push({ x1: pc(X(s)), x2: pc(Math.max(end, X(s))), y: +(80 - (prices[i] / 100) * 70).toFixed(1) });
+    }
+    for (let s = 49; s <= T; s++) {
+      pNow = 99; pAt = s;
+      mBars.push({ x1: pc(X(s)), x2: pc(X(s) + 0.8), y: 10.7 });
+    }
+    const fmt = (n) => n.toLocaleString('en-US');
+    const m = last ? ((last.d - last.r) / (TOTAL * last.c)) * 100 : 0;
+    const ticks = [[0, '6 PM'], [8, '8 PM'], [16, '10 PM'], [24, '12 AM'], [32, '2 AM'], [40, '4 AM'], [48, '6 AM'], [57, 'Nov 12']]
+      .map((t) => ({ x: pc(X(t[0])), label: t[1], shift: t[0] === 0 ? '0' : t[0] === 57 ? '-100%' : '-50%' }));
+    return {
+      pad: standalone ? '28px 32px' : '0',
+      dVotes: last ? fmt(last.d) : 'No results yet',
+      rVotes: last ? fmt(last.r) : 'No results yet',
+      margin: last ? (Math.abs(m) < 0.05 ? 'Even' : (m > 0 ? 'D+' : 'R+') + Math.abs(m).toFixed(1)) : 'Not known',
+      counted: last ? Math.round(last.c * 100) + '%' : 'Not known',
+      countAsOf: last ? 'State feed, as of ' + tlabel(last.s) : 'First snapshot at 8:15 PM',
+      price: pNow == null ? 'No price' : pNow + '¢',
+      priceAsOf: pNow == null ? 'Kalshi, no snapshot yet' : 'Kalshi, hourly, fetched ' + tlabel(pAt).replace(', end of day', ''),
+      called: T >= CALL,
+      callCls: T >= CALL ? 'chip solid' : 'chip dash',
+      callText: T >= CALL ? 'Called 1:42 AM ET · civicAPI decision desk' : 'No call yet',
+      callX: pc(X(CALL)),
+      inGap,
+      beforeClose: T < CLOSE,
+      showGap: T >= 21,
+      gapX: pc(X(20)),
+      gapW: pc(X(Math.min(T, 25)) - X(20)),
+      playX: pc(X(T)),
+      dLines: build((p) => yA(p.d)),
+      rLines: build((p) => yA(p.r)),
+      cLines: build((p) => +(70 - p.c * 60).toFixed(1)),
+      mBars,
+      ticks
+    };
+  }
+}
+</script>
+</body>
+</html>

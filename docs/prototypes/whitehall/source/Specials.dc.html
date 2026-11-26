@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Special elections tracker</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="whitehall.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="wh" style="padding: {{pad}}">
+
+  <div style="padding-top: 36px; display: flex; flex-direction: column; gap: 14px">
+    <p class="eyebrow">Special elections tracker · since Jan 1, 2027</p>
+    <h1 class="h1">Special elections, measured against 2024.</h1>
+    <div class="row"><span class="chip hatch">Shown as it would look on Apr 20, 2027</span><span class="small">This tracker opens after the Jan 15 release. Every contest and number here is invented.</span></div>
+    <p class="lede">Each special election is set beside the 2024 presidential margin in the same district. The difference is its overperformance. The index is the plain average of those differences.</p>
+  </div>
+
+  <div class="split" style="margin-top: 36px">
+    <section class="side stack" style="gap: 12px; border-top: 3px solid var(--ink); padding-top: 14px">
+      <p class="eyebrow">Overperformance index</p>
+      <div><span class="big num">{{indexNum}}</span></div>
+      <div style="font-weight: 700; font-size: 18px; font-stretch: 85%"><span class="{{indexPm}}"></span>{{indexText}}</div>
+      <p class="formula" style="font-size: 16px">index = mean of (special margin − 2024 presidential margin), unweighted</p>
+      <dl class="kv">
+        <dt>Covers</dt><dd><strong class="num">{{nScored}}</strong> of {{nHeld}} specials held</dd>
+        <dt>Left out</dt><dd><span class="num">{{nUnc}}</span> uncontested · <span class="num">{{nNoBase}}</span> with no baseline</dd>
+        <dt>Since</dt><dd class="num">Jan 1, 2027</dd>
+      </dl>
+      <p class="small" style="margin: 0">Special elections have small, unusual electorates. The index describes what happened in them. It is not a forecast of 2028.</p>
+    </section>
+
+    <section class="main stack" style="gap: 6px; border-top: 3px solid var(--ink); padding-top: 14px">
+      <div class="row" style="justify-content: space-between; gap: 4px 16px">
+        <h2 class="h3">Each special, and the running index</h2>
+        <span class="legend"><span><i style="border: 1.6px solid var(--ink); border-radius: 50%; background: var(--paper)"></i>One special</span><span><i style="border-top: 2px solid var(--ink); height: 2px"></i>Running index</span></span>
+      </div>
+      <div style="font-size: 12.5px; font-weight: 700"><span class="pm d"></span>↑ Ran ahead of 2024, toward Democrats</div>
+      <svg class="ch" width="100%" height="300" style="height: 300px" role="img" aria-label="{{chartAria}}">
+        <line class="gr" x1="0" x2="100%" y1="20" y2="20"></line>
+        <line class="gr" x1="0" x2="100%" y1="85" y2="85"></line>
+        <line class="gr" x1="0" x2="100%" y1="215" y2="215"></line>
+        <line class="gr" x1="0" x2="100%" y1="280" y2="280"></line>
+        <line class="ax" x1="0" x2="100%" y1="150" y2="150"></line>
+        <text x="4" y="16">+12 D</text><text x="4" y="81">+6 D</text><text x="4" y="146">Same as 2024</text><text x="4" y="211">+6 R</text><text x="4" y="276">+12 R</text>
+        <sc-for list="{{runLines}}" as="s" hint-placeholder-count="0"><line class="li" x1="{{s.x1}}" x2="{{s.x2}}" y1="{{s.y1}}" y2="{{s.y2}}"></line></sc-for>
+        <sc-for list="{{pts}}" as="p" hint-placeholder-count="9">
+          <circle class="hollow" cx="{{p.x}}" cy="{{p.y}}" r="6"></circle>
+        </sc-for>
+      </svg>
+      <div style="font-size: 12.5px; font-weight: 700"><span class="pm r"></span>↓ Ran ahead of 2024, toward Republicans</div>
+      <div class="num" style="display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-3); margin-top: 4px"><span>Jan 12</span><span>in date order, evenly spaced</span><span>Apr 13</span></div>
+      <dc-import name="SourceLine" src="Official state and county results pages; 2024 president by district from state redistricting data" asof="Apr 20, 2027, 9:00 AM ET" what="Overperformance index" hint-size="100%,22px"></dc-import>
+    </section>
+  </div>
+
+  <section class="sec">
+    <div class="sec-h">
+      <h2 class="h2"><span class="sec-n">§1</span>Every special since Jan 1, 2027</h2>
+      <button type="button" class="btn sm" aria-label="Export this table as CSV">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8M4.5 7 8 10.5 11.5 7M2.5 13.5h11"></path></svg>
+        Export CSV
+      </button>
+    </div>
+    <div class="tbl-box">
+      <table class="tbl" style="min-width: 860px">
+        <thead><tr>
+          <th><button type="button" class="sort" onClick="{{sDate}}">Date <span aria-hidden="true">{{aDate}}</span></button></th>
+          <th>Contest</th>
+          <th class="r">Special margin</th>
+          <th class="r">2024 president, same district</th>
+          <th class="r"><button type="button" class="sort" onClick="{{sOver}}">Overperformance <span aria-hidden="true">{{aOver}}</span></button></th>
+          <th>Status</th>
+        </tr></thead>
+        <tbody>
+          <sc-for list="{{rows}}" as="r" hint-placeholder-count="12">
+            <tr>
+              <td class="num">{{r.date}}</td>
+              <td><div style="font-weight: 700">{{r.name}}</div><div class="small">{{r.kind}}</div></td>
+              <td class="r num">{{r.margin}}</td>
+              <td class="r num">{{r.base}}</td>
+              <td class="r num" style="font-weight: 700"><span class="{{r.pm}}"></span>{{r.over}}</td>
+              <td><span class="{{r.chipCls}}">{{r.status}}</span></td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+    <p class="src" style="margin-top: 10px"><b>Source</b>Official state and county results pages. As of Apr 20, 2027, 9:00 AM ET. Uncertified results are marked.</p>
+  </section>
+
+  <section style="margin-top: 48px">
+    <details class="disc">
+      <summary>How the index is calculated</summary>
+      <div class="stack" style="gap: 14px">
+        <p class="formula">overperformance = special margin − 2024 presidential margin in the same district</p>
+        <ul class="rule-list" style="font-size: 15px; max-width: 72ch">
+          <li><strong>The index</strong> is the unweighted mean of overperformance across all contested specials since Jan 1, 2027. A state house seat counts the same as a U.S. House seat.</li>
+          <li><strong>Uncontested specials</strong> have no two-sided margin. They are listed and left out of the index.</li>
+          <li><strong>No baseline.</strong> Where 2024 presidential results by district are not available, the special is listed with "No baseline" and left out. It is not dropped silently.</li>
+          <li><strong>Runoffs and first rounds.</strong> An all-party first round is scored by the combined vote of each party's candidates. A runoff is a separate contest.</li>
+          <li><strong>Both directions</strong> are written the same way: points toward Democrats, or points toward Republicans.</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"onNav":{"editor":null,"tsType":"(id: string) => void"},"$preview":{"width":1360,"height":2100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const standalone = !this.props.onNav;
+    const sort = st.sort || { key: 'date', dir: -1 };
+    // [order, date, name, kind, special margin, 2024 margin, state]
+    const raw = [
+      [1, 'Jan 12', 'Virginia Senate, District 15', 'State senate', 18.2, 12.1, 'ok'],
+      [2, 'Jan 26', 'Minnesota House, District 40B', 'State house', 29.0, 24.4, 'ok'],
+      [3, 'Feb 2', 'Iowa Senate, District 35', 'State senate', -3.9, -11.2, 'ok'],
+      [4, 'Feb 16', 'Pennsylvania House, District 35', 'State house', 41.0, 38.8, 'ok'],
+      [5, 'Feb 23', 'Oklahoma House, District 97', 'State house', null, 44.0, 'unc'],
+      [6, 'Mar 2', 'FL-19', 'U.S. House', -16.4, -27.0, 'ok'],
+      [7, 'Mar 9', 'Connecticut House, District 40', 'State house', 9.5, null, 'nobase'],
+      [8, 'Mar 16', 'Kentucky Senate, District 37', 'State senate', -22.8, -20.1, 'ok'],
+      [9, 'Mar 30', 'New York Assembly, District 115', 'State house', -8.0, -9.9, 'ok'],
+      [10, 'Apr 6', 'Wisconsin Senate, District 18', 'State senate', 2.4, -0.9, 'prov'],
+      [11, 'Apr 13', 'Alabama House, District 11', 'State house', null, -52.3, 'unc'],
+      [12, 'Apr 13', 'Georgia Senate, District 21', 'State senate', -19.5, -25.1, 'prov'],
+      [13, 'May 4', 'Texas Senate, District 9', 'State senate · all-party first round', null, -14.6, 'up'],
+      [14, 'May 18', 'Ohio House, District 52', 'State house', null, -6.2, 'up']
+    ];
+    const mfmt = (m) => (m == null ? '' : Math.abs(m) < 0.05 ? 'Even' : (m > 0 ? 'D+' : 'R+') + Math.abs(m).toFixed(1));
+    const sfmt = (s) => '+' + Math.abs(s).toFixed(1) + (s >= 0 ? ' D' : ' R');
+    const items = raw.map((r) => {
+      const scored = (r[6] === 'ok' || r[6] === 'prov') && r[4] != null && r[5] != null;
+      return { ord: r[0], date: r[1], name: r[2], kind: r[3], m: r[4], b: r[5], state: r[6], scored, over: scored ? r[4] - r[5] : null };
+    });
+    const scored = items.filter((i) => i.scored);
+    const mean = scored.reduce((a, i) => a + i.over, 0) / scored.length;
+    const y = (v) => +(150 - (v / 12) * 130).toFixed(1);
+    const x = (k) => (6 + (k / (scored.length - 1)) * 88).toFixed(2) + '%';
+    let sum = 0;
+    const run = scored.map((i, k) => { sum += i.over; return sum / (k + 1); });
+    const runLines = [];
+    for (let k = 0; k < run.length - 1; k++) {
+      runLines.push({ x1: x(k), x2: x(k + 1), y1: y(run[k]), y2: y(run[k]) });
+      runLines.push({ x1: x(k + 1), x2: x(k + 1), y1: y(run[k]), y2: y(run[k + 1]) });
+    }
+    const pts = scored.map((i, k) => ({ x: x(k), y: y(i.over) }));
+    const val = (i) => (sort.key === 'date' ? i.ord : i.over);
+    const rows = items.slice().sort((a, b) => {
+      const p = val(a), q = val(b);
+      if (p == null && q == null) return a.ord - b.ord;
+      if (p == null) return 1;
+      if (q == null) return -1;
+      return (p - q) * sort.dir;
+    }).map((i) => ({
+      date: i.date + ', 2027', name: i.name, kind: i.kind,
+      margin: i.state === 'unc' ? '' : i.state === 'up' ? '' : mfmt(i.m),
+      base: i.b == null ? '' : mfmt(i.b),
+      over: i.scored ? sfmt(i.over) : '',
+      pm: i.scored ? 'pm ' + (i.over >= 0 ? 'd' : 'r') : '',
+      status: i.state === 'ok' ? 'Certified' : i.state === 'prov' ? 'Uncertified' : i.state === 'unc' ? 'Uncontested: left out' : i.state === 'nobase' ? 'No baseline' : 'Upcoming',
+      chipCls: i.state === 'ok' ? 'chip solid' : i.state === 'prov' ? 'chip dot' : i.state === 'unc' ? 'chip hatch' : i.state === 'nobase' ? 'chip dash' : 'chip plain'
+    }));
+    const setSort = (k) => () => this.setState({ sort: { key: k, dir: sort.key === k ? -sort.dir : -1 } });
+    const ar = (k) => (sort.key === k ? (sort.dir === 1 ? '↑' : '↓') : '');
+    const held = items.filter((i) => i.state !== 'up');
+    return {
+      pad: standalone ? '0 40px 60px' : '0',
+      indexNum: sfmt(mean),
+      indexPm: 'pm ' + (mean >= 0 ? 'd' : 'r'),
+      indexText: Math.abs(mean).toFixed(1) + ' points toward ' + (mean >= 0 ? 'Democrats' : 'Republicans') + ', on average',
+      nScored: scored.length, nHeld: held.length,
+      nUnc: items.filter((i) => i.state === 'unc').length,
+      nNoBase: items.filter((i) => i.state === 'nobase').length,
+      chartAria: 'Overperformance of ' + scored.length + ' contested special elections in date order, with the running index ending at ' + sfmt(mean),
+      runLines, pts, rows,
+      sDate: setSort('date'), sOver: setSort('over'), aDate: ar('date'), aOver: ar('over')
+    };
+  }
+}
+</script>
+</body>
+</html>
