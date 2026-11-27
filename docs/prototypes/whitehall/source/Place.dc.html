@@ -33,6 +33,10 @@ body{margin:0}
     </div>
   </div>
 
+  <div style="margin-top: 16px">
+    <dc-import name="WhMap" view-key="{{mapKey}}" start-geo="{{mapGeo}}" start-layer="past" start-sel="{{mapSel}}" fit="PA" on-open="{{mapOpen}}" height="{{ 380 }}" hint-size="100%,660px"></dc-import>
+  </div>
+
   <!-- compare two elections here -->
   <section class="sec" style="margin-top: 16px">
     <div class="sec-h">
@@ -347,6 +351,8 @@ class Component extends DCLogic {
 
     return {
       pad: standalone ? '0 40px 60px' : '0',
+      mapKey: isD ? 'district' : 'county', mapGeo: isD ? 'districts' : 'counties', mapSel: isD ? 'PA-01' : '42017',
+      mapOpen: (place) => nav(place && place.kind === 'c' ? 'place' : 'race'),
       isDistrict: isD,
       countyP: pressed(!isD), districtP: pressed(isD),
       toCounty: () => this.setState({ mode: 'county' }), toDistrict: () => this.setState({ mode: 'district' }),

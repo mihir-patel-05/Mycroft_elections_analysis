@@ -118,29 +118,8 @@ body{margin:0}
 
   <div class="split" style="margin-top: 16px">
     <div class="main stack" style="gap: 14px">
-      <h2 class="h3">{{mapTitle}}</h2>
-      <div style="display: grid; grid-template-columns: repeat({{gridCols}}, minmax(0, 1fr)); gap: 3px; max-width: {{gridMax}}">
-        <sc-for list="{{tiles}}" as="t" hint-placeholder-count="60">
-          <button type="button" class="{{t.cls}}" style="grid-row: {{t.row}}; grid-column: {{t.col}}; background-color: {{t.bg}}; opacity: {{t.op}}" onClick="{{t.pick}}" aria-label="{{t.aria}}" title="{{t.aria}}"></button>
-        </sc-for>
-      </div>
-      <!-- symmetric scale -->
-      <div style="max-width: 560px">
-        <div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px">
-          <span style="height: 14px; background: var(--d3)"></span><span style="height: 14px; background: var(--d2)"></span><span style="height: 14px; background: var(--d1)"></span><span style="height: 14px; background: var(--zero)"></span><span style="height: 14px; background: var(--r1)"></span><span style="height: 14px; background: var(--r2)"></span><span style="height: 14px; background: var(--r3)"></span>
-        </div>
-        <div class="num" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 12px; color: var(--ink-2); text-align: center; margin-top: 3px">
-          <span>6+</span><span>3 to 6</span><span>1 to 3</span><span>under 1</span><span>1 to 3</span><span>3 to 6</span><span>6+</span>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 700; margin-top: 4px">
-          <span><span class="pm d"></span>Points toward Democrats</span><span>Points toward Republicans<span class="pm r" style="margin: 0 0 0 6px"></span></span>
-        </div>
-      </div>
-      <div class="legend">
-        <span><i class="hatch-bg" style="background-color: var(--zero)"></i>Excluded: unopposed race</span>
-        <span><i style="border: 1.5px dashed var(--ink-3)"></i>Not comparable</span>
-      </div>
-      <p class="small" style="margin: 0">Each square is one place, set roughly where it sits on a map. Squares are equal so small places are as easy to read as large ones. Select a square to see its numbers.</p>
+      <dc-import name="WhMap" extra="{{mapLayer}}" sel="{{mapSel}}" fit="{{mapFit}}" on-pick="{{mapPick}}" on-open="{{mapOpen}}" height="{{ 420 }}" hint-size="100%,700px"></dc-import>
+      <p class="small" style="margin: 0">The Swing layer shows the two elections picked above. Places outside the filters are faded. Select a place on the map or in the table to see its numbers.</p>
     </div>
 
     <aside class="side stack" style="gap: 12px">
@@ -382,14 +361,13 @@ class Component extends DCLogic {
     const sw = ok.map((p) => p.swing).sort((a, b) => a - b);
     const med = sw.length ? (sw.length % 2 ? sw[(sw.length - 1) / 2] : (sw[sw.length / 2 - 1] + sw[sw.length / 2]) / 2) : null;
 
-    const tiles = list.map((p) => ({
-      row: p.row, col: p.col,
-      cls: 'ctile' + (p.st === 'na' ? ' na' : p.st === 'ex' ? ' ex' : '') + (p.key === selKey ? ' sel' : ''),
-      bg: p.st === 'ok' ? color(p.swing) : p.st === 'ex' ? 'var(--zero)' : 'transparent',
-      op: pass(p) ? '1' : '.22',
-      aria: p.name + ': ' + (p.st === 'ok' ? 'swing ' + sfmt(p.swing) : p.st === 'ex' ? 'excluded, unopposed race' : 'not comparable'),
-      pick: pick(p.key)
-    }));
+    const mapValues = {}, mapDim = {}, mapLines = {};
+    list.forEach((p) => {
+      if (D.kind === 'region') return;
+      mapValues[p.key] = p.st === 'ok' ? p.swing : p.st;
+      if (!pass(p)) mapDim[p.key] = true;
+      if (p.st === 'ok') mapLines[p.key] = short(eF) + ' ' + mfmt(p.base) + ' → ' + short(eT) + ' ' + mfmt(p.now);
+    });
 
     const val = (p) => (sort.key === 'name' ? p.name : sort.key === 'pop' || sort.key === 'edu' ? (p[sort.key] == null ? null : p[sort.key]) : p.st !== 'ok' ? null : p[sort.key]);
     const rowsSrc = shown.slice().sort((a, b) => {
@@ -465,7 +443,20 @@ class Component extends DCLogic {
       allNa,
       allNaWhy: linesDiffer ? 'Pennsylvania drew new district lines for 2022. A ' + eF[1] + ' district and a ' + eT[1] + ' district with the same number cover different places, so no swing is shown.' : 'Connecticut replaced its counties with planning regions as reporting areas. Results from the two elections do not cover the same areas.',
       canUseCounties: linesDiffer, useCounties: () => this.setState({ setId: 'pa-county', sel: null }),
-      mapTitle: D.title, gridCols: D.cols, gridMax: D.max, tiles,
+      mapLayer: {
+        id: 'swing', label: 'Swing', geo: D.kind === 'district' ? 'districts' : 'counties', state: D.kind === 'region' ? 'CT' : 'PA', scale: 'swing',
+        rev: [setId, from, to, f.den, f.inc, f.edu].join('|'), values: mapValues, dim: mapDim, lines: mapLines,
+        fallback: D.kind === 'region' || linesDiffer ? 'na' : 'out',
+        heading: 'Swing, ' + lbl(eF) + ' to ' + lbl(eT), tag: D.title + (has2026 ? ' · 2026 counts uncertified' : ' · final counts'),
+        src: D.src, asof: 'Nov 25, 2026, 11:40 PM ET', what: 'Swing map, ' + short(eF) + ' to ' + short(eT),
+        note: 'Swing is the later margin minus the earlier margin, in points of all votes cast',
+        naText: linesDiffer ? 'District lines changed between these two elections; not comparable' : 'Boundaries changed; not comparable',
+        outText: 'Outside this set of places',
+        chip: D.kind === 'region' ? 'Shapes are Connecticut’s 8 former counties; results are reported for 9 planning regions' : ''
+      },
+      mapSel: D.kind === 'region' ? '' : selKey, mapFit: D.kind === 'region' ? 'CT' : 'PA',
+      mapPick: (place) => { if (!place) return; const key = D.kind === 'district' ? place.id : place.name; if (D.list.some((p) => p.key === key)) this.setState({ sel: key }); },
+      mapOpen: () => nav('place'),
       selName: sel.name, selOk: sel.st === 'ok', selEx: sel.st === 'ex', selNa: sel.st === 'na',
       selNaWhy: linesDiffer ? 'This district had different lines in ' + (era(eF) === 0 ? eF[1] : eT[1]) + '. Its results in each election are listed below, but the two are not set against each other.' : "This area's code does not exist in both years. We do not estimate a swing across the change.",
       selPm: sel.st === 'ok' ? 'pm ' + (sel.swing > 0 ? 'd' : 'r') : 'pm n',

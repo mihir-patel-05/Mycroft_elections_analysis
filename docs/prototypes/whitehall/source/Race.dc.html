@@ -122,6 +122,9 @@ body{margin:0}
         </button>
       </div>
     </div>
+    <div style="margin-bottom: 12px">
+      <dc-import name="WhMap" extra="{{mapLayer}}" mark="NH-01" fit="NH-01" height="{{ 400 }}" hint-size="100%,680px"></dc-import>
+    </div>
     <div class="tbl-box">
       <table class="tbl" style="min-width: 760px">
         <thead><tr><th>County</th><th class="r">Swing, 2024 to 2026</th><th class="r">2024 president</th><th class="r">2026 House</th><th class="r">Votes, 2026</th><th>Note</th></tr></thead>
@@ -214,6 +217,16 @@ class Component extends DCLogic {
       showHist: hist, histOpen: hist ? 'true' : 'false',
       histLabel: hist ? 'Hide the history' : 'See the history of this figure',
       toggleHist: () => this.setState({ hist: !hist }),
+      mapLayer: {
+        id: 'swing', label: 'Swing', geo: 'counties', state: 'NH', scale: 'swing', rev: 'nh01',
+        values: { Carroll: 3.1, Rockingham: 2.5, Strafford: 1.8, Belknap: 1.5, Hillsborough: 1.4, Merrimack: -0.7 },
+        lines: { Carroll: '2024 President D+1.8 → 2026 House D+4.9', Rockingham: '2024 President R+2.9 → 2026 House R+0.4', Strafford: '2024 President D+11.3 → 2026 House D+13.1 · votes corrected Nov 21', Belknap: 'Part of the county · 2024 President R+12.4 → 2026 House R+10.9', Hillsborough: 'Part of the county · 2024 President D+0.6 → 2026 House D+2.0', Merrimack: 'Part of the county · 2024 President R+3.2 → 2026 House R+3.9' },
+        fallback: 'out', outText: 'Not in NH-01',
+        heading: 'Swing by county in NH-01, 2024 President to 2026 House', tag: 'NH-01 · 6 counties, 3 of them in part · certified',
+        src: 'New Hampshire Secretary of State (2026, certified); MIT Election Data and Science Lab (2024 president by county)', asof: 'Nov 21, 2026, 10:14 AM ET', what: 'NH-01 swing map',
+        note: 'Whole counties are drawn; three are only partly in the district and use town-level returns',
+        chip: 'Different offices: candidates differ, read with care'
+      },
       goReplay: () => nav('replay'), goSwing: () => nav('swing'), goPlace: () => nav('place'), goScore: () => nav('score')
     };
   }

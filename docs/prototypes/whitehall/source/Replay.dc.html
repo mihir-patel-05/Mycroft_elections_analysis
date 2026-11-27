@@ -19,7 +19,7 @@ body{margin:0}
   <div style="padding-top: 14px; display: flex; flex-direction: column; gap: 14px">
     <p class="eyebrow">Election night replay · Nov 3 to Nov 12, 2026</p>
     <h1 class="h1">Election-night replay</h1>
-    <p class="lede">Scrub from first poll closing to last call. Map, seat counts, call log and market prices all read the newest snapshot stored at or before the selected moment.</p>
+    <p class="lede">Scrub from first poll closing to last call. The map, seat counts, call log, market prices and the count's progress all read the newest snapshot stored at or before the selected moment.</p>
   </div>
 
   <!-- the control: time, play, scrubber -->
@@ -85,12 +85,6 @@ body{margin:0}
       <button type="button" class="btn" onClick="{{viewNight}}" aria-pressed="{{nightPressed}}">The whole night</button>
       <button type="button" class="btn" onClick="{{viewRace}}" aria-pressed="{{racePressed}}">One race: NH-01</button>
     </div>
-    <sc-if value="{{isNight}}" hint-placeholder-val="{{true}}">
-      <div class="seg" role="group" aria-label="Chamber on the map">
-        <button type="button" class="btn sm" onClick="{{chSenate}}" aria-pressed="{{senPressed}}">Senate map</button>
-        <button type="button" class="btn sm" onClick="{{chHouse}}" aria-pressed="{{housePressed}}">House map</button>
-      </div>
-    </sc-if>
   </div>
 
   <sc-if value="{{isNight}}" hint-placeholder-val="{{true}}">
@@ -131,39 +125,7 @@ body{margin:0}
             </div>
           </div>
 
-          <div class="stack" style="gap: 12px">
-            <sc-if value="{{isSenate}}" hint-placeholder-val="{{true}}">
-              <div class="tm" style="max-width: 680px" role="img" aria-label="{{mapAria}}">
-                <sc-for list="{{tiles}}" as="t" hint-placeholder-count="50">
-                  <div class="{{t.scls}}" style="grid-row: {{t.row}}; grid-column: {{t.col}}">{{t.ab}}</div>
-                </sc-for>
-              </div>
-            </sc-if>
-            <sc-if value="{{isHouse}}" hint-placeholder-val="{{false}}">
-              <div class="tm" style="max-width: 680px" role="img" aria-label="{{mapAria}}">
-                <sc-for list="{{tiles}}" as="t" hint-placeholder-count="50">
-                  <div class="{{t.hcls}}" style="grid-row: {{t.row}}; grid-column: {{t.col}}; background: {{t.hbg}}"><span>{{t.ab}}</span><span class="sub">{{t.hsub}}</span></div>
-                </sc-for>
-              </div>
-            </sc-if>
-            <sc-if value="{{isSenate}}" hint-placeholder-val="{{true}}">
-              <div class="legend">
-                <span><i style="background: var(--dem)"></i>Called, Democrat</span>
-                <span><i style="background: var(--rep); border-radius: 50%"></i>Called, Republican</span>
-                <span><i class="hatch-bg" style="background-color: var(--zero)"></i>Counting, no call</span>
-                <span><i style="border: 1.5px dashed var(--ink-3)"></i>Polls open</span>
-                <span><i style="border: 1px solid var(--hair)"></i>No Senate race</span>
-                <span><i style="box-shadow: 0 0 0 2px var(--mark), 0 0 0 3px var(--ink); margin-left: 3px"></i>Just called</span>
-              </div>
-            </sc-if>
-            <sc-if value="{{isHouse}}" hint-placeholder-val="{{false}}">
-              <div class="legend">
-                <span>Each square: seats called out of the state's seats. The strip along the bottom fills from the left for Democrats and from the right for Republicans.</span>
-                <span><i style="border: 1.5px dashed var(--ink-3)"></i>Polls open</span>
-              </div>
-            </sc-if>
-            <dc-import name="SourceLine" src="civicAPI result snapshots and race calls, from the locked Nov 3 record" asof="{{clockFull}}" what="Replay map and seat counts" note="Calls are civicAPI's decision desk's, not Whitehall's" hint-size="100%,22px"></dc-import>
-          </div>
+          <dc-import name="WhMap" step="{{step}}" asof="{{clockFull}}" on-open="{{mapOpen}}" hint-size="100%,720px"></dc-import>
         </div>
 
         <aside class="side stack" style="gap: 28px">
@@ -226,7 +188,7 @@ body{margin:0}
               <th>Status</th>
               <th>Leader</th>
               <th class="r"><button type="button" class="sort" onClick="{{sortMargin}}">Margin <span aria-hidden="true">{{arMargin}}</span></button></th>
-              <th class="r"><button type="button" class="sort" onClick="{{sortCounted}}">Counted (estimate) <span aria-hidden="true">{{arCounted}}</span></button></th>
+              <th class="r"><button type="button" class="sort" onClick="{{sortCounted}}">Reported, of final count <span aria-hidden="true">{{arCounted}}</span></button></th>
               <th>Snapshot as of</th>
             </tr></thead>
             <tbody>
@@ -244,8 +206,150 @@ body{margin:0}
           </table>
         </div>
         <div class="tbl-foot">
-          <p class="src"><b>Source</b>civicAPI snapshots. Alaska shows first-choice votes only. Counted share is an estimate, never a call.</p>
+          <p class="src"><b>Source</b>civicAPI snapshots. Alaska shows first-choice votes only. The reported share is votes in the snapshot divided by the final count, never the feed's "percent reporting".</p>
           <span class="small">The CSV matches this table and this moment exactly.</span>
+        </div>
+      </section>
+
+      <section class="sec" id="count">
+        <div class="sec-h">
+          <h2 class="h2">How the count came in · share of the final count reported at {{clock}}</h2>
+          <div class="row">
+            <div class="seg" role="group" aria-label="Places">
+              <button type="button" class="btn sm" onClick="{{fStates}}" aria-pressed="{{fStatesP}}">States</button>
+              <button type="button" class="btn sm" onClick="{{fNh}}" aria-pressed="{{fNhP}}">Counties · New Hampshire</button>
+              <button type="button" class="btn sm" onClick="{{fAz}}" aria-pressed="{{fAzP}}">Counties · Arizona</button>
+            </div>
+            <button type="button" class="btn sm" aria-label="Export this table as CSV">
+              <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8M4.5 7 8 10.5 11.5 7M2.5 13.5h11"></path></svg>
+              Export CSV
+            </button>
+          </div>
+        </div>
+
+        <div style="display: grid; gap: 12px 40px; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr))">
+          <div><div class="eyebrow">Reported nationally at this moment</div><div class="mid num">{{fNat}}</div><div class="small">of the final count, all 50 states</div></div>
+          <div><div class="eyebrow">States past 50%</div><div class="mid num">{{fN50}} <span class="small">of 50</span></div><div class="small">past 90%: <span class="num">{{fN90}}</span> · past 99%: <span class="num">{{fN99}}</span></div></div>
+          <div><div class="eyebrow">Median time to 90%</div><div class="mid num">{{fMed90}}</div><div class="small">after polls closed, {{fScopeNote}}</div></div>
+          <div><div class="eyebrow">What "reported" means</div><div class="small" style="color: var(--ink-2)">Votes in the newest snapshot at or before this moment, divided by the final count. The feed's own "percent reporting" is never used.</div></div>
+        </div>
+
+        <div class="split" style="margin-top: 14px">
+          <div class="main">
+            <div class="tbl-box" style="max-height: 520px; overflow-y: auto">
+              <table class="tbl" style="min-width: 820px">
+                <thead><tr>
+                  <th><button type="button" class="sort" onClick="{{fsName}}">Place <span aria-hidden="true">{{faName}}</span></button></th>
+                  <th style="min-width: 140px"><button type="button" class="sort" onClick="{{fsRep}}">Reported at {{clock}} <span aria-hidden="true">{{faRep}}</span></button></th>
+                  <th class="r"><button type="button" class="sort" onClick="{{fs50}}">To 50% <span aria-hidden="true">{{fa50}}</span></button></th>
+                  <th class="r"><button type="button" class="sort" onClick="{{fs90}}">To 90% <span aria-hidden="true">{{fa90}}</span></button></th>
+                  <th class="r"><button type="button" class="sort" onClick="{{fs99}}">To 99% <span aria-hidden="true">{{fa99}}</span></button></th>
+                  <th class="r">Margin now</th>
+                  <th class="r">Final margin</th>
+                  <th class="r"><button type="button" class="sort" onClick="{{fsShift}}">Shift, 10% to final <span aria-hidden="true">{{faShift}}</span></button></th>
+                </tr></thead>
+                <tbody>
+                  <sc-for list="{{fRows}}" as="r" hint-placeholder-count="10">
+                    <tr class="{{r.trCls}}">
+                      <td>
+                        <button type="button" class="lnk" onClick="{{r.pick}}">{{r.name}}</button>
+                        <div class="small" style="white-space: nowrap">{{r.race}} · <span class="{{r.basisCls}}">{{r.basis}}</span></div>
+                        <sc-if value="{{r.hasFlag}}" hint-placeholder-val="{{false}}"><div class="small" style="color: inherit">{{r.flag}}</div></sc-if>
+                      </td>
+                      <td>
+                        <sc-if value="{{r.open}}" hint-placeholder-val="{{false}}"><span class="chip dash">Polls open</span></sc-if>
+                        <sc-if value="{{r.counting}}" hint-placeholder-val="{{true}}">
+                          <div>
+                            <div style="display: flex; align-items: center; gap: 8px">
+                              <span class="hatch-bg" style="position: relative; flex: 1; height: 10px; background-color: var(--zero); border: 1px solid var(--ink-3)" role="img" aria-label="{{r.barAria}}"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: {{r.w}}; background: var(--ink)"></span></span>
+                              <strong class="num" style="min-width: 40px; text-align: right">{{r.pct}}</strong>
+                            </div>
+                            <sc-if value="{{r.stale}}" hint-placeholder-val="{{false}}"><span class="chip dot" style="margin-top: 3px">Stale · 1:00 AM snapshot</span></sc-if>
+                          </div>
+                        </sc-if>
+                      </td>
+                      <td class="r" style="white-space: nowrap"><div class="num" style="font-weight: 700"><span class="{{r.k50}}"></span>{{r.t50}}</div><div class="small">{{r.d50}}</div></td>
+                      <td class="r" style="white-space: nowrap"><div class="num" style="font-weight: 700"><span class="{{r.k90}}"></span>{{r.t90}}</div><div class="small">{{r.d90}}</div></td>
+                      <td class="r" style="white-space: nowrap"><div class="num" style="font-weight: 700"><span class="{{r.k99}}"></span>{{r.t99}}</div><div class="small">{{r.d99}}</div></td>
+                      <td class="r num" style="font-weight: 700">{{r.mNow}}</td>
+                      <td class="r num">{{r.mFin}}</td>
+                      <td class="r num" style="font-weight: 700"><span class="{{r.shiftPm}}"></span>{{r.shift}}</td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+            <div class="legend" style="margin-top: 8px">
+              <span>Times are when the place reached that share; under each, the time since its polls closed.</span>
+              <span><i class="ms on"></i>Milestone reached by {{clock}}</span>
+              <span><i class="ms"></i>Reached later in the record</span>
+              <span><i style="background: var(--ink)"></i>Reported</span>
+              <span><i class="hatch-bg" style="background-color: var(--zero); border: 1px solid var(--ink-3)"></i>Not yet reported at this moment</span>
+              <span><span class="chip dot" style="margin-right: 5px">Provisional</span>Final count not certified yet</span>
+            </div>
+          </div>
+
+          <aside class="side stack" style="gap: 10px">
+            <div style="border-top: 1px solid var(--ink-3); padding-top: 10px">
+              <p class="eyebrow">Selected place</p>
+              <h3 class="h2" style="font-size: 13px">{{fSelName}}</h3>
+              <p class="small" style="margin: 2px 0 0">{{fSelRace}}</p>
+            </div>
+            <div>
+              <div class="row" style="justify-content: space-between"><span class="eyebrow">Share of the final count reported</span><span class="num" style="font-weight: 700">{{fSelPct}}</span></div>
+              <svg class="ch" width="100%" height="124" style="height: 124px; margin-top: 4px" role="img" aria-label="{{fSelAria}}">
+                <sc-for list="{{fGrid}}" as="g" hint-placeholder-count="3">
+                  <line class="gr" x1="0" x2="100%" y1="{{g.y}}" y2="{{g.y}}"></line>
+                </sc-for>
+                <sc-for list="{{fGrid}}" as="g" hint-placeholder-count="3">
+                  <text x="100%" y="{{g.ty}}" text-anchor="end">{{g.label}}</text>
+                </sc-for>
+                <sc-if value="{{fSelCounty}}" hint-placeholder-val="{{false}}"><rect class="gap" x="50.88%" y="4" width="7.02%" height="114"></rect></sc-if>
+                <sc-for list="{{fAll}}" as="b" hint-placeholder-count="0">
+                  <line class="gr" style="stroke: var(--ink-3)" x1="{{b.x1}}" x2="{{b.x2}}" y1="{{b.y1}}" y2="{{b.y2}}"></line>
+                </sc-for>
+                <sc-for list="{{fSoFar}}" as="b" hint-placeholder-count="0">
+                  <line class="li" style="stroke-width: 2.2" x1="{{b.x1}}" x2="{{b.x2}}" y1="{{b.y1}}" y2="{{b.y2}}"></line>
+                </sc-for>
+                <line class="dash" x1="84.2%" x2="84.2%" y1="4" y2="118"></line>
+                <line class="play" x1="{{fPlayX}}" x2="{{fPlayX}}" y1="0" y2="122"></line>
+                <line class="ax" x1="0" x2="100%" y1="118" y2="118"></line>
+              </svg>
+            </div>
+            <div>
+              <div class="row" style="justify-content: space-between"><span class="eyebrow">Margin as the count came in</span><span class="num" style="font-weight: 700">{{fSelM}}</span></div>
+              <svg class="ch" width="100%" height="96" style="height: 96px; margin-top: 4px" role="img" aria-label="{{fSelMAria}}">
+                <line class="dash" x1="0" x2="100%" y1="48" y2="48"></line>
+                <text x="0" y="12">{{fMTop}}</text>
+                <text x="0" y="92">{{fMBot}}</text>
+                <sc-if value="{{fSelCounty}}" hint-placeholder-val="{{false}}"><rect class="gap" x="50.88%" y="4" width="7.02%" height="88"></rect></sc-if>
+                <sc-for list="{{fMAll}}" as="b" hint-placeholder-count="0">
+                  <line class="gr" style="stroke: var(--ink-3)" x1="{{b.x1}}" x2="{{b.x2}}" y1="{{b.y1}}" y2="{{b.y2}}"></line>
+                </sc-for>
+                <sc-for list="{{fMSoFar}}" as="b" hint-placeholder-count="0">
+                  <line class="li" style="stroke-width: 2.2" x1="{{b.x1}}" x2="{{b.x2}}" y1="{{b.y1}}" y2="{{b.y2}}"></line>
+                </sc-for>
+                <line class="dash" x1="84.2%" x2="84.2%" y1="4" y2="92"></line>
+                <line class="play" x1="{{fPlayX}}" x2="{{fPlayX}}" y1="0" y2="96"></line>
+              </svg>
+              <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--ink-3)" aria-hidden="true"><span>6 PM</span><span>12 AM</span><span>6 AM · then one step a day</span><span>Nov 12</span></div>
+            </div>
+            <dl class="kv">
+              <dt>Polls closed</dt><dd class="num">{{fSelClose}}</dd>
+              <dt>Margin at 10% in</dt><dd class="num">{{fSelM10}}</dd>
+              <dt>Final margin</dt><dd class="num">{{fSelFin}}</dd>
+              <dt>Shift, 10% to final</dt><dd class="num" style="font-weight: 700"><span class="{{fSelShiftPm}}"></span>{{fSelShift}}</dd>
+              <dt>Final count</dt><dd>{{fSelBasis}}</dd>
+            </dl>
+            <p class="small" style="margin: 0">The darker line is the record up to {{clock}}; the lighter line is the rest of the stored record. A shift says which way the margin moved as later votes were added. It claims no cause.</p>
+            <sc-if value="{{fSelCounty}}" hint-placeholder-val="{{false}}">
+              <p class="nodata" style="margin: 0"><strong>Gap, 1:15 to 2:00 AM.</strong> County detail was not stored. The line stops and restarts, and a milestone crossed inside the gap is given as a range, not a time.</p>
+            </sc-if>
+          </aside>
+        </div>
+
+        <div style="margin-top: 10px">
+          <dc-import name="SourceLine" src="civicAPI result snapshots stored on the night; final counts from state election offices" asof="{{clockFull}}" what="How the count came in" note="Shares are of the final count: certified where the state has certified, otherwise the locked count, marked provisional. The CSV matches this table and this moment" hint-size="100%,22px"></dc-import>
         </div>
       </section>
     </div>
@@ -280,18 +384,25 @@ class Component extends DCLogic {
     });
     const calls = [];
     states.forEach((st) => {
+      // the same pinned outcomes as the map (WhMap), so the map, the call log and the overview agree
+      const pin = ({ AK: { 1: 'u' }, AZ: { 6: 'u' }, CA: { 22: 'u', 13: 'd', 45: 'd' }, NY: { 17: 'r' }, WA: { 3: 'd' }, NH: { 1: 'd' }, PA: { 1: 'r' } })[st.ab] || {};
+      const pinStep = { 'CA-13': 55, 'CA-45': 57, 'NY-17': 50, 'WA-03': 52, 'NH-01': 31 };
       const order = [];
       for (let i = 1; i <= st.n; i++) order.push({ i, h: hash(st.ab + i) });
       order.sort((a, b) => a.h - b.h);
-      order.forEach((o, k) => {
-        const party = k < st.d ? 'd' : k < st.d + st.unc ? 'u' : 'r';
+      let nd = st.d, nu = st.unc, k = 0;
+      Object.keys(pin).forEach((key) => { if (pin[key] === 'd') nd--; if (pin[key] === 'u') nu--; });
+      order.forEach((o) => {
+        const party = pin[o.i] || (k < nd ? 'd' : k < nd + nu ? 'u' : 'r');
+        if (!pin[o.i]) k++;
         if (party === 'u') return;
         const h2 = hash('c' + st.ab + o.i), h3 = hash('l' + st.ab + o.i);
         const lateShare = st.ab === 'CA' ? 0.3 : 0.1;
         let step = st.close + 1 + Math.floor(h2 * (6 + st.n * 0.4));
         if (h3 < lateShare) step = 49 + Math.floor(hash('d' + st.ab + o.i) * 9);
         step = Math.min(57, step);
-        if (st.ab === 'NH' && o.i === 1) step = 31;
+        const code = st.ab + '-' + (o.i < 10 ? '0' + o.i : o.i);
+        if (pinStep[code]) step = pinStep[code];
         calls.push({ step, ab: st.ab, race: st.n === 1 ? st.ab + ' at large' : st.ab + '-' + (o.i < 10 ? '0' + o.i : o.i), party, gain: hash('g' + st.ab + o.i) < 0.07, ch: 'h' });
       });
       if (st.sen !== '-') {
@@ -300,7 +411,7 @@ class Component extends DCLogic {
       }
     });
     calls.sort((a, b) => b.step - a.step || (a.race < b.race ? -1 : 1));
-    this._sim = { states, calls };
+    this._sim = { states, calls, hash };
     return this._sim;
   }
 
@@ -311,9 +422,8 @@ class Component extends DCLogic {
     const T = st.step ?? this.props.startStep ?? 26;
     const playing = !!st.playing;
     const view = st.view || 'night';
-    const chamber = st.chamber || 'senate';
     const sort = st.sort || { key: 'margin', dir: 1 };
-    const { states, calls } = this.sim();
+    const { states, calls, hash } = this.sim();
 
     const tlabel = (s) => {
       if (s > 48) return 'Nov ' + (4 + (s - 49));
@@ -349,23 +459,17 @@ class Component extends DCLogic {
         p[c.party]++;
       } else if (c.party === 'd') sD++; else sR++;
     });
-    const tiles = states.map((s) => {
-      const open = T < s.close;
-      let scls = 'tile none';
-      if (s.sen !== '-') {
-        if (open) scls = 'tile open';
-        else if (T >= s.senStep) scls = 'tile ' + (s.sen === 'd' ? 'cd' : 'cr') + (T - s.senStep <= 1 ? ' just' : '');
-        else scls = 'tile count';
-      }
-      const p = per[s.ab] || { d: 0, r: 0 };
-      const a = (p.d / s.n) * 100, b = 100 - (p.r / s.n) * 100;
-      return {
-        ab: s.ab, row: s.row, col: s.col, scls,
-        hcls: open ? 'tile open' : 'tile',
-        hsub: open ? '' : (p.d + p.r) + '/' + s.n,
-        hbg: open ? 'transparent' : 'linear-gradient(90deg, var(--dem) 0 ' + a.toFixed(1) + '%, transparent ' + a.toFixed(1) + '% ' + b.toFixed(1) + '%, var(--rep) ' + b.toFixed(1) + '% 100%) bottom / 100% 22% no-repeat, var(--zero)'
-      };
-    });
+    // share of the final count reported: the one definition the table, the map and the count pane use
+    const SLOW = 'CA AZ NV WA OR AK UT NY CO'.split(' ');
+    const share = (key, ab, close, t) => {
+      if (t <= close) return 0;
+      const slow = SLOW.indexOf(ab) >= 0;
+      const speed = (slow ? 12 : 4.5) + hash('sp' + key) * (slow ? 10 : 7);
+      const tail = slow ? 0.78 + hash('tl' + key) * 0.12 : 0.955 + hash('tl' + key) * 0.035;
+      if (t <= 48) return (tail * (1 - Math.exp(-(t - close) / speed))) / (1 - Math.exp(-(48 - close) / speed));
+      const days = slow ? 3 + Math.floor(hash('dd' + key) * 6) : 1 + Math.floor(hash('dd' + key) * 3);
+      return Math.min(1, tail + (1 - tail) * Math.pow(Math.min(1, (t - 48) / days), 0.7));
+    };
     const closedN = states.filter((s) => T >= s.close).length;
 
     // markets
@@ -408,7 +512,7 @@ class Component extends DCLogic {
     let rows = sen.map((r) => {
       const s = byAb[r[0]];
       const open = T <= s.close;
-      const c = open ? null : (T <= 48 ? 0.97 * (1 - Math.exp(-(T - s.close) / 9)) : 0.975 + ((T - 48) / 9) * 0.02);
+      const c = open ? null : share(r[0], r[0], s.close, T);
       const m = open ? null : r[2] + r[3] * Math.pow(1 - c, 1.5);
       const called = T >= s.senStep;
       const gap = T >= 29 && T <= 32;
@@ -428,14 +532,136 @@ class Component extends DCLogic {
     const setSort = (key) => this.setState({ sort: { key, dir: sort.key === key ? -sort.dir : 1 } });
     const arrow = (key) => (sort.key === key ? (sort.dir === 1 ? '↑' : '↓') : '');
 
+
+    const clock = tlabel(T);
+    const clockFull = T > 48 ? clock + ', 2026, end of day' : clock + ' ET, ' + (T >= 24 ? 'Nov 4' : 'Nov 3') + ', 2026';
+
+    // ---- how the count came in (F-16)
+    const NAMES = {};
+    'AL:Alabama AK:Alaska AZ:Arizona AR:Arkansas CA:California CO:Colorado CT:Connecticut DE:Delaware FL:Florida GA:Georgia HI:Hawaii ID:Idaho IL:Illinois IN:Indiana IA:Iowa KS:Kansas KY:Kentucky LA:Louisiana ME:Maine MD:Maryland MA:Massachusetts MI:Michigan MN:Minnesota MS:Mississippi MO:Missouri MT:Montana NE:Nebraska NV:Nevada NH:New_Hampshire NJ:New_Jersey NM:New_Mexico NY:New_York NC:North_Carolina ND:North_Dakota OH:Ohio OK:Oklahoma OR:Oregon PA:Pennsylvania RI:Rhode_Island SC:South_Carolina SD:South_Dakota TN:Tennessee TX:Texas UT:Utah VT:Vermont VA:Virginia WA:Washington WV:West_Virginia WI:Wisconsin WY:Wyoming'.split(' ').forEach((x) => { const p = x.split(':'); NAMES[p[0]] = p[1].replace(/_/g, ' '); });
+    const CERT = 'DE VT SD WY OK SC KY ND NH RI WV ID NE IA FL GA VA MS TN'.split(' ');
+    const senFix = { NC: [0.9, -7], GA: [1.8, -6], ME: [1.3, -3], MI: [2.6, -5], NH: [4.1, -2], OH: [-3.4, 5], IA: [-4.8, 2], TX: [-5.2, 6], AK: [-3.9, -4] };
+    const scope = st.fScope || 'states';
+    const fSort = st.fSort || { key: 'rep', dir: -1 };
+    const counties = { nh: ['NH', 'Belknap Carroll Cheshire Coos Grafton Hillsborough Merrimack Rockingham Strafford Sullivan'], az: ['AZ', 'Apache Cochise Coconino Gila Graham Greenlee La_Paz Maricopa Mohave Navajo Pima Pinal Santa_Cruz Yavapai Yuma'] };
+    const stateUnit = (s) => {
+      const fx = senFix[s.ab];
+      const sen = s.sen !== '-';
+      return {
+        key: s.ab, ab: s.ab, name: NAMES[s.ab], close: s.close, county: false, cert: CERT.indexOf(s.ab) >= 0,
+        race: sen ? 'U.S. Senate' : 'U.S. House, statewide vote',
+        fin: sen ? (fx ? fx[0] : (s.sen === 'd' ? 1 : -1) * (6 + Math.round(hash('sm' + s.ab) * 220) / 10)) : Math.round(((s.d / s.n - 0.5) * 34 + (hash('hm' + s.ab) - 0.5) * 8) * 10) / 10,
+        drift: sen && fx ? fx[1] : Math.round((hash('sd' + s.ab) - 0.5) * 80) / 10,
+        flag: s.ab === 'AK' ? 'First-choice votes only. Reports by state house district' : ''
+      };
+    };
+    const units = scope === 'states' ? states.map(stateUnit) : counties[scope][1].split(' ').map((n) => {
+      const ab = counties[scope][0], nm = n.replace(/_/g, ' ');
+      return {
+        key: ab + nm, ab, name: nm + ' County', close: byAb[ab].close, county: true, cert: CERT.indexOf(ab) >= 0,
+        race: ab === 'NH' ? 'U.S. Senate, New Hampshire' : 'U.S. House, all Arizona districts',
+        fin: Math.round(((ab === 'NH' ? 4.1 : -1.5) + (hash('cm' + nm) - 0.5) * 30) * 10) / 10,
+        drift: Math.round((hash('cd' + nm) - 0.5) * 140) / 10,
+        flag: nm === 'Pinal' ? 'Count fell by 1,204 at 11:15 PM: a correction by the county. Shown, not hidden' : ''
+      };
+    });
+    const inGapStep = (t) => t >= 29 && t <= 32;
+    const stored = (u, t) => (u.county && inGapStep(t) ? 28 : t);
+    const shareAt = (u, t) => share(u.key, u.ab, u.close, stored(u, t));
+    const firstAt = (u, x) => { for (let t = 0; t <= 57; t++) if (share(u.key, u.ab, u.close, t) >= x) return t; return null; };
+    const mAt = (u, t) => { const sh = shareAt(u, t); return sh <= 0 ? null : u.fin + u.drift * Math.pow(1 - sh, 1.5); };
+    const mfmt = (m) => (m == null ? 'No votes yet' : Math.abs(m) < 0.05 ? 'Even' : (m > 0 ? 'D+' : 'R+') + Math.abs(m).toFixed(1));
+    const sfmt = (v) => (Math.abs(v) < 0.05 ? '0.0' : '+' + Math.abs(v).toFixed(1) + (v > 0 ? ' D' : ' R'));
+    const dur = (u, t) => {
+      if (t > 48) return 'day ' + (t - 47) + ' of the count';
+      const m = (t - u.close) * 15;
+      return (m >= 60 ? Math.floor(m / 60) + ' h ' : '') + (m % 60 ? (m % 60) + ' min' : m >= 60 ? '' : '0 min');
+    };
+    const mile = (u, x) => {
+      const t = firstAt(u, x);
+      const gap = u.county && inGapStep(t);
+      return { t, sortT: gap ? 30.5 : t, passed: T >= (gap ? 33 : t), text: gap ? '1:00 to 2:15 AM' : tlabel(t), sub: gap ? 'inside the feed gap' : dur(u, t) };
+    };
+    const fAll = units.map((u) => {
+      const sh = shareAt(u, T), open = T < u.close || (T === u.close);
+      const a = mile(u, 0.5), b = mile(u, 0.9), c = mile(u, 0.99);
+      const t10 = firstAt(u, 0.1);
+      const m10 = u.fin + u.drift * Math.pow(1 - share(u.key, u.ab, u.close, t10), 1.5);
+      return { u, sh, open, a, b, c, m10, shift: u.fin - m10, mNow: mAt(u, T) };
+    });
+    const fVal = (r) => (fSort.key === 'name' ? r.u.name : fSort.key === 'rep' ? r.sh : fSort.key === 't50' ? r.a.sortT : fSort.key === 't90' ? r.b.sortT : fSort.key === 't99' ? r.c.sortT : r.shift);
+    const fSorted = fAll.slice().sort((x, y) => { const p = fVal(x), q = fVal(y); return (p < q ? -1 : p > q ? 1 : x.u.name < y.u.name ? -1 : 1) * (p === q ? 1 : fSort.dir); });
+    const fSelKey = st.fSel && units.some((u) => u.key === st.fSel) ? st.fSel : (scope === 'states' ? 'AZ' : units[0].key);
+    const ms = (m) => (m.passed ? 'ms on' : 'ms');
+    const fRows = fSorted.map((r) => ({
+      name: r.u.name, race: r.u.race, trCls: r.u.key === fSelKey ? 'sel' : '', pick: () => this.setState({ fSel: r.u.key }),
+      basis: r.u.cert ? 'certified' : 'provisional', basisCls: r.u.cert ? '' : 'chip dot',
+      hasFlag: !!r.u.flag, flag: r.u.flag,
+      open: r.open, counting: !r.open, w: (r.sh * 100).toFixed(1) + '%', pct: Math.round(r.sh * 100) + '%',
+      barAria: Math.round(r.sh * 100) + ' percent of the final count reported',
+      stale: !r.open && r.u.county && inGapStep(T),
+      t50: r.a.text, d50: r.a.sub, k50: ms(r.a), t90: r.b.text, d90: r.b.sub, k90: ms(r.b), t99: r.c.text, d99: r.c.sub, k99: ms(r.c),
+      m10: mfmt(r.m10), mNow: r.open ? 'Polls open' : mfmt(r.mNow), mFin: mfmt(r.u.fin),
+      shift: sfmt(r.shift), shiftPm: 'pm ' + (Math.abs(r.shift) < 0.05 ? 'n' : r.shift > 0 ? 'd' : 'r')
+    }));
+    const stU = states.map(stateUnit);
+    const wAll = states.reduce((a, s) => a + s.n, 0);
+    const fNat = stU.reduce((a, u, i) => a + share(u.key, u.ab, u.close, T) * states[i].n, 0) / wAll;
+    const past = (x) => stU.filter((u) => share(u.key, u.ab, u.close, T) >= x).length;
+    const med90 = units.map((u) => { const t = firstAt(u, 0.9); return t > 48 ? 30 * 60 + (t - 48) * 1440 : (t - u.close) * 15; }).sort((a, b) => a - b)[Math.floor(units.length / 2)];
+    const fSel = fAll.filter((r) => r.u.key === fSelKey)[0];
+    const FX = (t) => ((t / 57) * 100).toFixed(2) + '%';
+    const stepLines = (val, Y, upto, from) => {
+      const out = [];
+      let prev = null;
+      for (let t = from; t <= upto; t++) {
+        if (fSel.u.county && inGapStep(t)) { prev = null; continue; }
+        const v = val(t);
+        if (v == null) { prev = null; continue; }
+        const y = +Y(v).toFixed(1);
+        if (prev != null && prev !== y) out.push({ x1: FX(t), x2: FX(t), y1: prev, y2: y });
+        if (t < 57) out.push({ x1: FX(t), x2: FX(Math.min(57, t + 1)), y1: y, y2: y });
+        prev = y;
+      }
+      return out;
+    };
+    const su = fSel.u;
+    const shV = (t) => (t < su.close ? null : share(su.key, su.ab, su.close, t));
+    const mV = (t) => { const sh = share(su.key, su.ab, su.close, t); return sh <= 0 ? null : su.fin + su.drift * Math.pow(1 - sh, 1.5); };
+    const YS = (v) => 118 - v * 114;
+    const mR = Math.max(4, Math.ceil((Math.abs(su.fin) + Math.abs(su.drift)) / 4) * 4);
+    const YM = (v) => 48 - (Math.max(-mR, Math.min(mR, v)) / mR) * 44;
+    const setF = (key) => () => this.setState({ fSort: { key, dir: fSort.key === key ? -fSort.dir : key === 'name' ? 1 : -1 } });
+    const fArrow = (key) => (fSort.key === key ? (fSort.dir === 1 ? '↑' : '↓') : '');
+    const f16 = {
+      fStates: () => this.setState({ fScope: 'states', fSel: null }), fNh: () => this.setState({ fScope: 'nh', fSel: null }), fAz: () => this.setState({ fScope: 'az', fSel: null }),
+      fStatesP: scope === 'states' ? 'true' : 'false', fNhP: scope === 'nh' ? 'true' : 'false', fAzP: scope === 'az' ? 'true' : 'false',
+      fNat: Math.round(fNat * 100) + '%', fN50: past(0.5), fN90: past(0.9), fN99: past(0.99),
+      fMed90: med90 >= 1440 ? Math.round(med90 / 1440) + ' days' : Math.floor(med90 / 60) + ' h ' + (med90 % 60) + ' min',
+      fScopeNote: scope === 'states' ? 'across the 50 states' : 'across these ' + units.length + ' counties',
+      fRows,
+      fsName: setF('name'), fsRep: setF('rep'), fs50: setF('t50'), fs90: setF('t90'), fs99: setF('t99'), fsShift: setF('shift'),
+      faName: fArrow('name'), faRep: fArrow('rep'), fa50: fArrow('t50'), fa90: fArrow('t90'), fa99: fArrow('t99'), faShift: fArrow('shift'),
+      fSelName: su.name, fSelRace: su.race + (su.flag ? '. ' + su.flag : ''), fSelCounty: su.county,
+      fSelPct: T < su.close ? 'Polls open' : Math.round(fSel.sh * 100) + '%' + (su.county && inGapStep(T) ? ' (stale)' : ''),
+      fSelAria: 'Share of the final count reported in ' + su.name + ' through the night, as a stepped line. ' + Math.round(fSel.sh * 100) + ' percent at ' + clockFull,
+      fGrid: [[0.5, '50%'], [0.9, '90%'], [0.99, '99%']].map((g) => ({ y: +YS(g[0]).toFixed(1), ty: +(YS(g[0]) + (g[0] === 0.99 ? -2 : 11)).toFixed(1), label: g[1] })),
+      fAll: stepLines(shV, YS, 57, 0), fSoFar: stepLines(shV, YS, T, 0), fPlayX: FX(T),
+      fSelM: T < su.close ? 'Polls open' : mfmt(fSel.mNow),
+      fSelMAria: 'Margin in ' + su.name + ' as the count came in. ' + mfmt(fSel.m10) + ' at 10 percent reported, ' + mfmt(su.fin) + ' final',
+      fMTop: 'D+' + mR, fMBot: 'R+' + mR,
+      fMAll: stepLines(mV, YM, 57, 0), fMSoFar: stepLines(mV, YM, T, 0),
+      fSelClose: tlabel(su.close) + ' ET, Nov 3', fSelM10: mfmt(fSel.m10), fSelFin: mfmt(su.fin),
+      fSelShift: sfmt(fSel.shift) + ' points', fSelShiftPm: 'pm ' + (Math.abs(fSel.shift) < 0.05 ? 'n' : fSel.shift > 0 ? 'd' : 'r'),
+      fSelBasis: su.cert ? 'Certified by the state' : 'Locked count, not certified yet (provisional)'
+    };
+
     const log = upto.slice(0, 9).map((c) => ({
       time: tlabel(c.step), race: c.race, pm: 'pm ' + c.party,
       text: (c.party === 'd' ? 'Democratic ' : 'Republican ') + (c.gain ? 'gain' : 'hold')
     }));
     const ticks = [[0, '6 PM'], [8, '8 PM'], [16, '10 PM'], [24, '12 AM'], [32, '2 AM'], [40, '4 AM'], [48, '6 AM'], [57, 'Nov 12']]
       .map((t) => ({ f: (t[0] / 57).toFixed(4), label: t[1], shift: t[0] === 0 ? '0' : t[0] === 57 ? '-100%' : '-50%' }));
-    const clock = tlabel(T);
-    const clockFull = T > 48 ? clock + ', 2026, end of day' : clock + ' ET, ' + (T >= 24 ? 'Nov 4' : 'Nov 3') + ', 2026';
 
     return {
       pad: standalone ? '0 40px 60px' : '0',
@@ -452,19 +678,16 @@ class Component extends DCLogic {
       isNight: view === 'night', isRace: view === 'race',
       nightPressed: view === 'night' ? 'true' : 'false', racePressed: view === 'race' ? 'true' : 'false',
       viewNight: () => this.setState({ view: 'night' }), viewRace: () => this.setState({ view: 'race' }),
-      isSenate: chamber === 'senate', isHouse: chamber === 'house',
-      senPressed: chamber === 'senate' ? 'true' : 'false', housePressed: chamber === 'house' ? 'true' : 'false',
-      chSenate: () => this.setState({ chamber: 'senate' }), chHouse: () => this.setState({ chamber: 'house' }),
       hD, hR, hU: 435 - hD - hR, hDw: ((hD / 435) * 100).toFixed(2) + '%', hRw: ((hR / 435) * 100).toFixed(2) + '%',
       hAria: 'House seats called: Democrats ' + hD + ', Republicans ' + hR + ', not called ' + (435 - hD - hR),
       sD: 34 + sD, sR: 31 + sR, sU: 35 - sD - sR, sDw: sD + '%', sRw: sR + '%',
       sAria: 'Senate seats: Democrats ' + (34 + sD) + ', Republicans ' + (31 + sR) + ', not called ' + (35 - sD - sR),
-      mapAria: 'Tile map of the states at ' + clockFull,
-      tiles, markets, rows, log, logN: log.length, noCalls: log.length === 0,
+      mapOpen: () => nav('race'),
+      markets, rows, log, logN: log.length, noCalls: log.length === 0,
       sortRace: () => setSort('race'), sortMargin: () => setSort('margin'), sortCounted: () => setSort('counted'),
       arRace: arrow('race'), arMargin: arrow('margin'), arCounted: arrow('counted'),
       goRace: () => nav('race')
-    };
+    , ...f16 };
   }
 }
 </script>

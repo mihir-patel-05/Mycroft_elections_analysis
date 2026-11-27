@@ -53,7 +53,7 @@
       "x": 3350,
       "y": 0,
       "w": 390,
-      "h": 5200,
+      "h": 5450,
       "title": "Phone \u00b7 Election night",
       "page": "proto",
       "is_interactive": true
@@ -71,7 +71,7 @@
       "x": 0,
       "y": 3700,
       "w": 1360,
-      "h": 2700,
+      "h": 3400,
       "title": "Design system",
       "page": "proto",
       "expand": "fill",
@@ -81,8 +81,8 @@
       "x": 0,
       "y": 0,
       "w": 1360,
-      "h": 2700,
-      "title": "1 \u00b7 The result (F-09)",
+      "h": 2900,
+      "title": "1 \u00b7 The result (F-09, F-17)",
       "page": "screens",
       "expand": "fill",
       "is_interactive": true
@@ -92,7 +92,7 @@
       "y": 0,
       "w": 1360,
       "h": 2900,
-      "title": "2 \u00b7 Election night replay (F-10)",
+      "title": "2 \u00b7 Election night replay (F-10, F-16)",
       "page": "screens",
       "expand": "fill",
       "is_interactive": true
@@ -131,8 +131,8 @@
       "x": 1440,
       "y": 3100,
       "w": 1360,
-      "h": 2500,
-      "title": "6 \u00b7 Data (F-03)",
+      "h": 4900,
+      "title": "6 \u00b7 Data (F-03, F-07)",
       "page": "screens",
       "expand": "fill",
       "is_interactive": true
@@ -182,6 +182,15 @@
       "title": "Phone \u00b7 Place profile",
       "page": "proto",
       "is_interactive": true
+    },
+    "WhMap.dc.html": {
+      "x": 4320,
+      "y": 4720,
+      "w": 900,
+      "h": 720,
+      "title": "Part \u00b7 map: seven layers, three geographies (F-17)",
+      "page": "screens",
+      "is_interactive": true
     }
   },
   "order": [
@@ -201,7 +210,8 @@
     "Timeline.dc.html",
     "SourceLine.dc.html",
     "Place.dc.html",
-    "PhonePlace.dc.html"
+    "PhonePlace.dc.html",
+    "WhMap.dc.html"
   ],
   "notes": {},
   "designSystems": []

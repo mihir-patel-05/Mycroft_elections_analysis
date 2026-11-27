@@ -17,14 +17,15 @@ body{margin:0}
 <div class="wh" style="padding: {{pad}}">
 
   <div style="padding-top: 14px; display: flex; flex-direction: column; gap: 14px">
-    <p class="eyebrow">Data · downloads and methods</p>
+    <p class="eyebrow">Data · downloads, versions and methods</p>
     <h1 class="h1">Datasets and exports</h1>
-    <p class="lede">Nine public datasets as CSV and Parquet, each with source, licence, credit line, coverage and export time. No account needed.</p>
+    <p class="lede">Nine public datasets as CSV and Parquet, each with source, licence, credit line, coverage and export time. Every release has a version number and a DOI to cite, and a changelog lists every number revised since the release before. No account needed.</p>
   </div>
 
   <div style="display: grid; gap: 0 40px; grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr)); margin-top: 14px; border-top: 1px solid var(--ink-3)">
     <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Newest export</div><div class="num" style="font-weight: 700; font-size: 13.5px">Nov 26, 2026, 2:10 AM ET</div><div class="small">Exports run every night at 2:00 AM ET</div></div>
     <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Tonight's state</div><div style="font-weight: 700; font-size: 13.5px">8 of 9 current</div><div class="small">1 dataset is offering its last good export</div></div>
+    <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Newest release</div><div class="num" style="font-weight: 700; font-size: 13.5px">Nov 26, 2026</div><div class="small"><span class="num">23</span> numbers revised since Nov 19. <a href="#changelog">Open the changelog</a></div></div>
     <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Missing values</div><div style="font-weight: 700; font-size: 13.5px">Blank, never 0</div><div class="small">A status column says why: unknown, stale, partial, unavailable</div></div>
   </div>
 
@@ -36,6 +37,7 @@ body{margin:0}
           <h2 class="h2" style="font-size: 12.5px">{{d.name}}</h2>
           <p class="prose" style="font-size: 12.5px">{{d.desc}}</p>
           <div class="row" style="gap: 6px">
+            <span class="chip plain num">{{d.ver}}</span>
             <span class="{{d.chipCls}}">{{d.chip}}</span>
             <sc-if value="{{d.stale}}" hint-placeholder-val="{{false}}"><span class="chip hatch">Last good export</span></sc-if>
           </div>
@@ -50,13 +52,45 @@ body{margin:0}
             <dt>Credit line to use</dt><dd style="font-family: var(--serif); font-style: italic">{{d.credit}}</dd>
             <dt>Coverage</dt><dd>{{d.coverage}}</dd>
             <dt>Export as of</dt><dd class="num">{{d.updated}}</dd>
+            <dt>Version</dt><dd><strong class="num">{{d.ver}}</strong> · released <span class="num">{{d.released}}</span> · <sc-if value="{{d.hasRev}}" hint-placeholder-val="{{true}}"><a href="#changelog">{{d.revText}}</a></sc-if><sc-if value="{{d.noRev}}" hint-placeholder-val="{{false}}"><span>{{d.revText}}</span></sc-if></dd>
+            <dt>DOI</dt><dd>
+              <sc-if value="{{d.hasDoi}}" hint-placeholder-val="{{true}}"><span class="num" style="white-space: normal; overflow-wrap: anywhere">{{d.doi}}</span></sc-if>
+              <sc-if value="{{d.doiPending}}" hint-placeholder-val="{{false}}"><span><span class="chip dash">DOI pending</span> <span class="small">The registrar did not answer on Nov 26. The release is published; its DOI will be added here.</span></span></sc-if>
+            </dd>
+            <dt>Cite this dataset</dt><dd>
+              <span style="overflow-wrap: anywhere">{{d.cite}}</span>
+              <button type="button" class="lnk" style="margin-left: 6px; font-size: 11.5px" onClick="{{d.copy}}">{{d.copyLabel}}</button>
+            </dd>
           </dl>
         </div>
         <div style="flex: 0 1 200px; display: flex; flex-direction: column; gap: 8px; align-items: stretch">
           <button type="button" class="btn solid" style="justify-content: space-between"><span>CSV</span><span class="num" style="font-weight: 500">{{d.csv}}</span></button>
           <button type="button" class="btn" style="justify-content: space-between"><span>Parquet</span><span class="num" style="font-weight: 500">{{d.pq}}</span></button>
-          <a href="#method" style="min-height: 32px; display: flex; align-items: center; font-size: 12.5px">How it is made</a>
+          <a href="#method" style="min-height: 24px; display: flex; align-items: center; font-size: 12.5px">How it is made</a>
+          <button type="button" class="lnk" style="min-height: 24px; font-size: 12.5px" onClick="{{d.toggleVers}}" aria-expanded="{{d.versOpen}}">{{d.versLabel}}</button>
         </div>
+        <sc-if value="{{d.showVers}}" hint-placeholder-val="{{false}}">
+          <div style="flex: 1 1 100%; min-width: 0">
+            <div class="tbl-box">
+              <table class="tbl" style="min-width: 640px">
+                <thead><tr><th>Version</th><th>Released</th><th>DOI</th><th class="r">Numbers revised</th><th>State</th><th>Files</th></tr></thead>
+                <tbody>
+                  <sc-for list="{{d.vers}}" as="v" hint-placeholder-count="3">
+                    <tr>
+                      <td class="num" style="font-weight: 700">{{v.ver}}</td>
+                      <td class="num">{{v.date}}</td>
+                      <td class="num" style="white-space: normal; overflow-wrap: anywhere">{{v.doi}}</td>
+                      <td class="r num">{{v.rev}}</td>
+                      <td><span class="{{v.cls}}">{{v.state}}</span><sc-if value="{{v.hasWhy}}" hint-placeholder-val="{{false}}"><div class="small" style="margin-top: 4px; max-width: 46ch">{{v.why}}</div></sc-if></td>
+                      <td><button type="button" class="lnk">CSV</button> · <button type="button" class="lnk">Parquet</button></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+            <p class="small" style="margin: 6px 0 0">Every version stays downloadable under its own DOI. A withdrawn version is marked, never deleted.</p>
+          </div>
+        </sc-if>
       </article>
     </sc-for>
 
@@ -72,12 +106,86 @@ body{margin:0}
           <dt>Source</dt><dd>S&amp;P Dow Jones Indices and Cboe, read through FRED (Federal Reserve Bank of St. Louis)</dd>
           <dt>Licence</dt><dd>The owners' terms do not allow us to redistribute these series</dd>
           <dt>Where to get it</dt><dd>Directly from FRED, free, under their terms</dd>
+          <dt>DOI</dt><dd><span class="chip dash">No DOI</span> <span class="small">Not deposited: the licence forbids redistribution, so there is nothing of ours to cite.</span></dd>
         </dl>
       </div>
       <div style="flex: 0 1 200px">
         <p class="nodata" style="margin: 0; font-size: 12.5px">We can't offer this file. The reason is the licence, not a fault.</p>
       </div>
     </article>
+  </section>
+
+
+  <section class="sec" id="changelog">
+    <div class="sec-h">
+      <h2 class="h2">Changelog · every number revised since the last release</h2>
+      <div class="row">
+        <div class="seg" role="group" aria-label="Reason">
+          <button type="button" class="btn sm" onClick="{{rAll}}" aria-pressed="{{rAllP}}">All</button>
+          <button type="button" class="btn sm" onClick="{{rCert}}" aria-pressed="{{rCertP}}">Certification</button>
+          <button type="button" class="btn sm" onClick="{{rCorr}}" aria-pressed="{{rCorrP}}">Correction</button>
+        </div>
+        <button type="button" class="btn sm" aria-label="Export the changelog as CSV">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8M4.5 7 8 10.5 11.5 7M2.5 13.5h11"></path></svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
+
+    <div style="display: grid; gap: 12px 40px; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr))">
+      <div><div class="eyebrow">This release</div><div class="mid num">Nov 26, 2026</div><div class="small">compared with the release of Nov 19, 2026</div></div>
+      <div><div class="eyebrow">Numbers revised</div><div class="mid num">23</div><div class="small">in 4 of the 9 datasets</div></div>
+      <div><div class="eyebrow">By certification</div><div class="mid num">19</div><div class="small">a state certified and its count replaced the unofficial one</div></div>
+      <div><div class="eyebrow">By correction</div><div class="mid num">4</div><div class="small">an error found by us or reported by a reader</div></div>
+    </div>
+
+    <div class="tbl-box" style="margin-top: 14px">
+      <table class="tbl" style="min-width: 980px">
+        <thead><tr><th>Date</th><th>Dataset · version</th><th>Row and field</th><th class="r">Old value</th><th class="r">New value</th><th class="r">Change</th><th>Reason</th><th>Detail</th></tr></thead>
+        <tbody>
+          <sc-for list="{{log}}" as="c" hint-placeholder-count="8">
+            <tr>
+              <td class="num">{{c.date}}</td>
+              <td>{{c.set}} <span class="num small">{{c.ver}}</span></td>
+              <td><strong>{{c.row}}</strong><div class="small">{{c.field}}</div></td>
+              <td class="r num"><span class="strike">{{c.old}}</span></td>
+              <td class="r num" style="font-weight: 700">{{c.now}}</td>
+              <td class="r num">{{c.delta}}</td>
+              <td><span class="{{c.cls}}">{{c.reason}}</span></td>
+              <td style="max-width: 36ch"><span class="small" style="color: var(--ink-2)">{{c.why}}</span></td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+    <p class="small" style="margin: 8px 0 0">Showing <span class="num">{{logN}}</span> of 23 revisions in the prototype's sample. The CSV lists all 23, with the dataset, row, field, old value, new value, date and reason.</p>
+
+    <div class="cols" style="margin-top: 14px">
+      <div>
+        <h3 class="eyebrow" style="margin-bottom: 6px">Datasets with no revised numbers in this release</h3>
+        <ul class="rule-list">
+          <li><strong>Race calls</strong> · <span class="num">v1.1</span> · no numbers revised. 0 calls withdrawn or changed.</li>
+          <li><strong>Past results, 2018 to 2024, by county</strong> · <span class="num">v1.0</span> · no numbers revised since its first release.</li>
+          <li><strong>Market prices, hourly</strong> · <span class="num">v1.2</span> · no numbers revised. New hours are added, stored prices are never edited.</li>
+          <li><strong>Election-night snapshots</strong> · <span class="num">v1.1</span> · no new release: last night's export failed, so the last good one stands.</li>
+          <li><strong>People and population</strong> · <span class="num">v1.0</span> · no numbers revised since its first release.</li>
+        </ul>
+        <p class="small" style="margin: 8px 0 0">A release with nothing revised says so here. The changelog is never left blank.</p>
+      </div>
+      <div>
+        <h3 class="eyebrow" style="margin-bottom: 6px">Earlier releases</h3>
+        <ul class="rule-list">
+          <li><strong class="num">Nov 19, 2026</strong> · <span class="num">31</span> numbers revised: 30 by certification, 1 by correction. <button type="button" class="lnk">Open its changelog</button></li>
+          <li><strong class="num">Nov 14, 2026</strong> · <span class="chip dash">Withdrawn</span> An export error doubled 212 county rows in the results dataset. Replaced the same day; the withdrawn files stay listed under their DOI.</li>
+          <li><strong class="num">Nov 12, 2026</strong> · <span class="num">58</span> numbers revised as late counts were added. <button type="button" class="lnk">Open its changelog</button></li>
+          <li><strong class="num">Nov 5, 2026</strong> · first release of the locked election-night record.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top: 12px">
+      <dc-import name="SourceLine" src="Whitehall’s corrections log and certification entries, compared release against release" asof="Nov 26, 2026, 2:10 AM ET" what="Dataset changelog" note="DOIs in this prototype use the 10.5555 example prefix. Where they are registered is not decided (proposed: Zenodo)" hint-size="100%,22px"></dc-import>
+    </div>
   </section>
 
   <section class="sec" id="method">
@@ -88,6 +196,7 @@ body{margin:0}
         <li><strong>A status column.</strong> Blank numbers come with a reason. A blank is never a 0.</li>
         <li><strong>Provisional rows.</strong> Results from states that have not certified are marked provisional, row by row.</li>
         <li><strong>The same numbers as the screen.</strong> A table's CSV export and its dataset here come from the same read.</li>
+        <li><strong>A version in every file.</strong> The header block carries the version and its DOI, so a file found later can still be cited and checked against the changelog.</li>
       </ul>
       <div class="stack" style="gap: 10px">
         <p class="eyebrow">The first rows of a file</p>
@@ -95,6 +204,8 @@ body{margin:0}
 # source: state election offices via civicAPI
 # licence: public record; civicAPI terms, credit required
 # credit: Mycroft Whitehall, from state election offices via civicAPI
+# version: 1.3
+# doi: 10.5555/whitehall.results-2026.v1.3
 # as_of: 2026-11-26T02:10:00-05:00
 # method: /data/methods/results
 state,county_fips,race,party,votes,status
@@ -106,11 +217,40 @@ NY,36087,NY-17,DEM,,partial</pre>
   </section>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"onNav":{"editor":null,"tsType":"(id: string) => void"},"$preview":{"width":1360,"height":2500}}'>
+<script type="text/x-dc" data-dc-script data-props='{"onNav":{"editor":null,"tsType":"(id: string) => void"},"$preview":{"width":1360,"height":4900}}'>
 class Component extends DCLogic {
   renderVals() {
     const standalone = !this.props.onNav;
+    const st = this.state || {};
     const now = 'Nov 26, 2026, 2:10 AM ET';
+    // version, release date, numbers revised since the release before, DOI slug, DOI state, earlier versions
+    const rel = [
+      ['v1.3', 'Nov 26, 2026', 14, 'results-2026', 'ok', [['v1.2', 'Nov 19, 2026', 22, 'ok'], ['v1.1', 'Nov 14, 2026', 0, 'withdrawn'], ['v1.0', 'Nov 5, 2026', null, 'ok']]],
+      ['v1.1', 'Nov 12, 2026', 0, 'race-calls', 'ok', [['v1.0', 'Nov 5, 2026', null, 'ok']]],
+      ['v1.4', 'Nov 26, 2026', 5, 'certification', 'ok', [['v1.3', 'Nov 24, 2026', 3, 'ok'], ['v1.2', 'Nov 19, 2026', 6, 'ok'], ['v1.1', 'Nov 12, 2026', 2, 'ok'], ['v1.0', 'Nov 5, 2026', null, 'ok']]],
+      ['v1.0', 'Nov 20, 2026', 0, 'past-results-2018-2024', 'ok', []],
+      ['v1.3', 'Nov 26, 2026', 3, 'comparison-tables', 'ok', [['v1.2', 'Nov 19, 2026', 8, 'ok'], ['v1.1', 'Nov 12, 2026', 11, 'ok'], ['v1.0', 'Nov 5, 2026', null, 'ok']]],
+      ['v1.2', 'Nov 26, 2026', 0, 'market-prices-hourly', 'ok', [['v1.1', 'Nov 19, 2026', 0, 'ok'], ['v1.0', 'Nov 5, 2026', null, 'ok']]],
+      ['v1.2', 'Nov 26, 2026', 1, 'signal-scorecard', 'pending', [['v1.1', 'Nov 19, 2026', 4, 'ok'], ['v1.0', 'Nov 12, 2026', null, 'ok']]],
+      ['v1.1', 'Nov 24, 2026', 0, 'election-night-snapshots', 'ok', [['v1.0', 'Nov 5, 2026', null, 'ok']]],
+      ['v1.0', 'Nov 20, 2026', 0, 'people-and-population', 'ok', []]
+    ];
+    const doiOf = (slug, ver) => '10.5555/whitehall.' + slug + '.' + ver;
+    const reason = st.reason || 'all';
+    const logRaw = [
+      ['Nov 26', '2026 results by county and race', 'v1.3', 'Fulton County, GA · U.S. Senate', 'Total votes cast', '412,118', '412,340', '+222', 'cert', 'Georgia certified on Nov 25. The certified county total replaces the unofficial one.'],
+      ['Nov 26', '2026 results by county and race', 'v1.3', 'Miami-Dade County, FL · FL-27', 'Republican incumbent, votes', '148,902', '148,877', '−25', 'cert', 'Florida certified on Nov 25.'],
+      ['Nov 26', 'Certification', 'v1.4', 'Tennessee', 'Change from last unofficial count, votes', '', '+1,318', 'new', 'cert', 'Tennessee certified on Nov 25. The field was blank until then, not 0.'],
+      ['Nov 26', 'Signal scorecard', 'v1.2', 'Kalshi · all covered races', 'Races called right', '361 of 388', '362 of 388', '+1', 'cert', 'IA-01 was certified for the market leader after a recount.'],
+      ['Nov 22', 'Comparison tables, 2018 to 2026', 'v1.3', 'Strafford County, NH · 2024 President to 2026 House', 'Swing, points', '+1.7 D', '+1.8 D', '+0.1 D', 'corr', 'Recomputed after the correction to the county’s 2026 votes, below.'],
+      ['Nov 21', '2026 results by county and race', 'v1.3', 'Strafford County, NH · NH-01', 'Total votes cast', '48,211', '48,112', '−99', 'corr', 'We swapped two digits when entering the certified total. A reader reported it on Nov 20.'],
+      ['Nov 20', '2026 results by county and race', 'v1.3', 'Rockingham County, NH · NH-01', 'Democratic incumbent, votes', '79,964', '79,998', '+34', 'cert', 'New Hampshire certified on Nov 19.'],
+      ['Nov 20', 'Comparison tables, 2018 to 2026', 'v1.3', 'Kent County, DE · 2022 House', 'Democratic share', '51.4%', '51.2%', '−0.2 pts', 'corr', 'A write-in line had been left out of the total. Found in our own check.']
+    ];
+    const log = logRaw.filter((r) => reason === 'all' || r[8] === reason).map((r) => ({
+      date: r[0], set: r[1], ver: r[2], row: r[3], field: r[4], old: r[5] || 'blank', now: r[6], delta: r[7],
+      reason: r[8] === 'cert' ? 'Certification' : 'Correction', cls: r[8] === 'cert' ? 'chip solid' : 'chip mk', why: r[9]
+    }));
     const raw = [
       ['2026 results by county and race', 'The locked record of the 2026 general election: every federal race, every county, every candidate.', 'Provisional', 'State and county election offices, via civicAPI', 'Public record; civicAPI terms, credit required', 'Mycroft Whitehall, from state election offices via civicAPI', '470 races · 3,143 counties and equivalents · 212 races certified', now, '18.4 MB', '4.1 MB'],
       ['Race calls', 'Who called each race and when. The calls are civicAPI’s decision desk’s, not ours.', 'Current', 'civicAPI decision desk', 'civicAPI terms, credit required', 'Race calls by civicAPI’s decision desk, as recorded by Mycroft Whitehall', '467 calls · Nov 3 to Nov 12, 2026 · 3 races not called', now, '62 KB', '21 KB'],
@@ -128,8 +268,25 @@ class Component extends DCLogic {
         n: i + 1, name: r[0], desc: r[1], chip: r[2],
         chipCls: r[2] === 'Provisional' ? 'chip dot' : r[2] === 'Final' ? 'chip solid' : 'chip',
         source: r[3], licence: r[4], credit: r[5], coverage: r[6], updated: r[7], csv: r[8], pq: r[9],
-        stale: i === 7
-      }))
+        stale: i === 7,
+        ver: rel[i][0], released: rel[i][1],
+        hasRev: rel[i][2] > 0, noRev: !(rel[i][2] > 0),
+        revText: rel[i][2] > 0 ? rel[i][2] + (rel[i][2] === 1 ? ' number' : ' numbers') + ' revised since the version before' : (rel[i][5].length ? 'no numbers revised since the version before' : 'first release, nothing revised'),
+        hasDoi: rel[i][4] === 'ok', doiPending: rel[i][4] === 'pending', doi: doiOf(rel[i][3], rel[i][0]),
+        cite: 'Mycroft Whitehall (2026). ' + r[0] + ' (Version ' + rel[i][0].slice(1) + ') [Data set]. ' + (rel[i][4] === 'ok' ? 'https://doi.org/' + doiOf(rel[i][3], rel[i][0]) : 'DOI pending; cite by version and date, ' + rel[i][1]),
+        copy: () => this.setState({ copied: i }), copyLabel: st.copied === i ? 'Copied' : 'Copy',
+        toggleVers: () => this.setState({ vers: st.vers === i ? null : i }), showVers: st.vers === i, versOpen: st.vers === i ? 'true' : 'false',
+        versLabel: st.vers === i ? 'Hide versions' : rel[i][5].length ? 'All ' + (rel[i][5].length + 1) + ' versions' : 'Versions (1)',
+        vers: [[rel[i][0], rel[i][1], rel[i][2], 'current']].concat(rel[i][5]).map((v, k) => ({
+          ver: v[0], date: v[1], doi: v[3] === 'current' && rel[i][4] === 'pending' ? 'Pending' : doiOf(rel[i][3], v[0]),
+          rev: v[2] == null ? 'First release' : v[3] === 'withdrawn' ? 'Not counted' : String(v[2]),
+          state: v[3] === 'withdrawn' ? 'Withdrawn' : k === 0 ? 'Current' : 'Superseded', cls: v[3] === 'withdrawn' ? 'chip dash' : k === 0 ? 'chip solid' : 'chip plain',
+          hasWhy: v[3] === 'withdrawn', why: 'An export error doubled 212 county rows. The files stay here, marked withdrawn. Use a later version.'
+        }))
+      })),
+      log, logN: log.length,
+      rAll: () => this.setState({ reason: 'all' }), rCert: () => this.setState({ reason: 'cert' }), rCorr: () => this.setState({ reason: 'corr' }),
+      rAllP: reason === 'all' ? 'true' : 'false', rCertP: reason === 'cert' ? 'true' : 'false', rCorrP: reason === 'corr' ? 'true' : 'false'
     };
   }
 }
