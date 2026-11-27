@@ -55,18 +55,46 @@ The feature IDs match the Spec Kit inputs (`06-features.md`). Each feature becom
 | 2 | F-50 | Daily signal archive (capture) | #175 (archive) | NOW | Week of Nov 30 |
 | 3 | F-04 | Monitoring, analytics, uptime and stale-data alerts | #193 | P1 | Dec 4 |
 | 4 | F-13 | Certification updates | #153 | P1 | Through December, as states certify |
-| 5 | F-10 | Election-night replay | #139, #137, #138 | P1 | December |
-| 6 | F-11 | Swing explorer | #140 | P1 | December |
-| 7 | F-12 | Signal scorecard | #141 | P1 | Late December |
-| 8 | F-15 | CSV export | #143 | P1 | Early January |
-| 9 | F-03 | `/data` page: downloads and methodology | #144 | P1 | Early January |
-| 10 | F-05 | Trust pages: privacy, terms, attribution, "report a data error" | #194, #195 | P1 | Early January |
-| 11 | F-09 | **Whitehall public release:** post-election mode, research rail, the Whitehall name, domain, production on Railway, security re-check, freeze and QA | #145, #142, #191, #192, #197, #146, #196 | P1 | **Jan 15, 2027** |
-| 12 | F-14 | Special elections tracker | #176 | P2 | Before the first 2027 special it covers |
-| 13 | F-60 | Monte Carlo seats and tipping points (the first Python model) | #150 | P2 | January to February 2027 |
-| 14 | — | Whitehall backlog: share links #198, "what's still out" #177, redistricting tracker #162, "as of" #179, the 2028 map #148 and #161, then #158, #172, #184, #147, #170, #169 and #171, #174 | — | P2–P3 | Spring 2027 on |
+| 5 | F-17 | Whitehall map: a real map to pan and zoom, with every layer and geography of the War Room map | No issue yet | P1 | December |
+| 6 | F-10 | Election-night replay | #139, #137, #138 | P1 | December |
+| 7 | F-16 | How the count came in (inside the replay) | No issue yet | P1 | December |
+| 8 | F-11 | Swing explorer | #140 | P1 | December |
+| 9 | F-12 | Signal scorecard | #141 | P1 | Late December |
+| 10 | F-15 | CSV export | #143 | P1 | Early January |
+| 11 | F-03 | `/data` page: downloads and methodology | #144 | P1 | Early January |
+| 12 | F-07 | Dataset versions, DOI and changelog | No issue yet | P1 | Early January |
+| 13 | F-05 | Trust pages: privacy, terms, attribution, "report a data error" | #194, #195 | P1 | Early January |
+| 14 | F-09 | **Whitehall public release:** post-election mode, research rail, the Whitehall name, domain, production on Railway, security re-check, freeze and QA | #145, #142, #191, #192, #197, #146, #196 | P1 | **Jan 15, 2027** |
+| 15 | F-14 | Special elections tracker | #176 | P2 | Before the first 2027 special it covers |
+| 16 | F-60 | Monte Carlo seats and tipping points (the first Python model) | #150 | P2 | January to February 2027 |
+| 17 | — | Whitehall backlog: share links #198, "what's still out" #177, redistricting tracker #162, "as of" #179, the 2028 map #148 and #161, then #158, #172, #184, #147, #170, #169 and #171, #174 | — | P2–P3 | Spring 2027 on |
 
-**Never cut from the release:** F-20 and F-50 (data we can't recover), the locked record, replay (F-10), and the map and table of swing (F-11). If the release runs late, the stretch goals go first (comparison mode #147 and the 2028 map #148), then, following #146, the scorecard's calibration chart and then the swing scatter.
+**Added Nov 26** (F-17, F-16 and F-07; their order, priority and dates above are proposed):
+
+- **F-17, Whitehall map.** Whitehall's maps are a real geographic map that users can pan and zoom, not the tile maps in the first Whitehall prototype.
+  - It keeps every control of the War Room map (`CODE/src/features/war-room/map/`, built on MapLibre):
+    - the layers: Results, Market leader, Seat holder, Flip watch, Past results, Census and Tariff exposure
+    - the geographies: States, Districts and Counties
+    - zoom buttons, a marker on the selected race, and hatching for a race that is leading but not called
+  - Today only Past results and Census colour counties, and Tariff exposure sits behind the cost-of-living flag (`theater.ts`).
+  - The same map is used on the result page, the replay, the swing explorer, and the place and race pages.
+  - It follows Whitehall's look in light and dark, and works on a phone.
+- **F-16, How the count came in.** A view inside the replay (F-10), built on the Nov 3 snapshots that only we hold.
+  - For each state and county it shows how much of the final count was in at each moment, and it follows the replay's scrubber.
+  - It shows the time taken to reach 50%, 90% and 99% of the final count.
+  - It shows how the margin shifted as votes arrived.
+  - Shares are of the final count (locked, then certified), because civicAPI's `percent_reporting` can't be trusted. Gaps in the feed stay gaps.
+  - It is the groundwork for the "what's still out" model (#177).
+- **F-07, Dataset versions, DOI and changelog.** An addition to `/data` (F-03).
+  - Each dataset release has a version number, a DOI and a "cite this dataset" line.
+  - A public changelog lists every number revised since the last release, from certification (F-13) and corrections (F-05).
+  - Where DOIs are registered isn't decided (proposed: Zenodo).
+
+**Considered Nov 26 and rejected:** the scorecard by time horizon (each signal's accuracy 90, 30, 7 and 1 days out). Don't build it.
+
+**Considered Nov 26, not decided** (not on the list above): the call clock (market price, call and share counted on one timeline per race), county benchmarks, recount watch, citable number permalinks, the analog finder and the ticket-splitting map.
+
+**Never cut from the release:** F-20 and F-50 (data we can't recover), the locked record, replay (F-10), and the map and table of swing (F-11). If the release runs late, the stretch goals go first (comparison mode #147 and the 2028 map #148), then (proposed) the DOI in F-07 and the margin-shift view in F-16, then, following #146, the scorecard's calibration chart and then the swing scatter.
 
 **Deferred** (kept in `06-features.md`, not built now): F-01 accounts, F-02 public API with keys, F-06 research assistant, Markets (F-21, F-22, F-23), legAI (F-30, F-31, F-32), Money (F-40, F-41, F-42), Referee (F-51, F-52), Simulator (F-61, F-62), and the voter guide app (F-70).
 
