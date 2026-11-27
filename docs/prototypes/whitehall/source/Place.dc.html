@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Place profile: county and district</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="whitehall.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="wh" style="padding: {{pad}}">
+
+  <div style="padding-top: 36px; display: flex; flex-direction: column; gap: 14px">
+    <div class="row" style="justify-content: space-between">
+      <p class="eyebrow">{{eyebrow}}</p>
+      <div class="seg" role="group" aria-label="Kind of place">
+        <button type="button" class="btn sm" onClick="{{toCounty}}" aria-pressed="{{countyP}}">County: Bucks</button>
+        <button type="button" class="btn sm" onClick="{{toDistrict}}" aria-pressed="{{districtP}}">District: PA-01</button>
+      </div>
+    </div>
+    <h1 class="h1">{{title}}</h1>
+    <p class="lede">{{lede}}</p>
+    <div style="display: grid; gap: 0 40px; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); border-top: 3px solid var(--ink); margin-top: 8px">
+      <sc-for list="{{facts}}" as="f" hint-placeholder-count="4">
+        <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">{{f.k}}</div><div class="num" style="font-weight: 700; font-size: 19px; font-stretch: 85%">{{f.v}}</div><div class="small">{{f.n}}</div></div>
+      </sc-for>
+    </div>
+  </div>
+
+  <!-- compare two elections here -->
+  <section class="sec" style="margin-top: 44px">
+    <div class="sec-h">
+      <h2 class="h2"><span class="sec-n">§1</span>Compare two elections here</h2>
+      <button type="button" class="lnk" onClick="{{goCompare}}">Compare every place at once</button>
+    </div>
+    <div style="display: grid; gap: 14px 20px; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); align-items: end; max-width: 620px">
+      <label class="field">From this election
+        <select class="sel" value="{{from}}" onChange="{{onFrom}}">
+          <option value="2018h">2018 · U.S. House</option>
+          <option value="2018s">2018 · U.S. Senate</option>
+          <option value="2020p">2020 · President</option>
+          <option value="2020h">2020 · U.S. House</option>
+          <option value="2022h">2022 · U.S. House</option>
+          <option value="2022s">2022 · U.S. Senate</option>
+          <option value="2024p">2024 · President</option>
+          <option value="2024h">2024 · U.S. House</option>
+          <option value="2024s">2024 · U.S. Senate</option>
+          <option value="2026h">2026 · U.S. House</option>
+        </select>
+      </label>
+      <label class="field">To this election
+        <select class="sel" value="{{to}}" onChange="{{onTo}}">
+          <option value="2018h">2018 · U.S. House</option>
+          <option value="2018s">2018 · U.S. Senate</option>
+          <option value="2020p">2020 · President</option>
+          <option value="2020h">2020 · U.S. House</option>
+          <option value="2022h">2022 · U.S. House</option>
+          <option value="2022s">2022 · U.S. Senate</option>
+          <option value="2024p">2024 · President</option>
+          <option value="2024h">2024 · U.S. House</option>
+          <option value="2024s">2024 · U.S. Senate</option>
+          <option value="2026h">2026 · U.S. House</option>
+        </select>
+      </label>
+    </div>
+    <sc-if value="{{cmpOk}}" hint-placeholder-val="{{true}}">
+      <div style="display: grid; gap: 20px 40px; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); margin-top: 22px">
+        <div><div class="eyebrow">Swing</div><div class="big num" style="font-size: clamp(48px, 6cqi, 76px)">{{cSwing}}</div><div style="font-weight: 700"><span class="{{cPm}}"></span>{{cSwingText}}</div></div>
+        <div><div class="eyebrow">Margin</div><div class="mid num">{{cFrom}} → {{cTo}}</div><div class="small">{{fromLabel}} to {{toLabel}}</div></div>
+        <div><div class="eyebrow">Votes cast</div><div class="mid num">{{cVotes}}</div><div class="small">{{cVotesNote}}</div></div>
+        <div><div class="eyebrow">Turnout</div><div class="mid num">{{cTurn}}</div><div class="small">Share of voting-age population, {{cTurnNote}}</div></div>
+      </div>
+    </sc-if>
+    <sc-if value="{{cmpNa}}" hint-placeholder-val="{{false}}">
+      <p class="nodata" style="margin: 22px 0 0; max-width: 72ch"><strong>District lines changed; not comparable.</strong> PA-01 had different lines before 2022. Its results under each set of lines are listed below, but they are not set against each other. To compare across the whole period, use Bucks County, whose lines did not move.</p>
+    </sc-if>
+    <div class="row" style="margin-top: 14px">
+      <sc-if value="{{diffOffice}}" hint-placeholder-val="{{false}}"><span class="chip dash">Different offices: candidates differ, read with care</span></sc-if>
+      <sc-if value="{{has2026}}" hint-placeholder-val="{{true}}"><span class="chip dot">2026 count uncertified</span></sc-if>
+    </div>
+  </section>
+
+  <!-- every election, 2018 to 2026 -->
+  <section class="sec">
+    <div class="sec-h">
+      <h2 class="h2"><span class="sec-n">§2</span>Every election here, 2018 to 2026</h2>
+      <span class="legend">
+        <span><i style="background: var(--ink)"></i>U.S. House</span>
+        <span><i style="border: 1.6px solid var(--ink); border-radius: 50%"></i>President</span>
+        <span><i style="background: var(--ink); transform: rotate(45deg) scale(.8)"></i>U.S. Senate</span>
+        <span><i style="background: var(--mark); border: 1.5px solid var(--ink)"></i>The two you picked</span>
+      </span>
+    </div>
+    <div style="font-size: 12.5px; font-weight: 700; margin-bottom: 4px"><span class="pm d"></span>↑ Democratic margin</div>
+    <div style="position: relative; height: 280px; border-left: 1.5px solid var(--ink)">
+      <sc-if value="{{isDistrict}}" hint-placeholder-val="{{false}}">
+        <div class="hatch-bg" style="position: absolute; top: 0; bottom: 0; left: 0; width: 39.5%; border-right: 1.5px dashed var(--ink)"><span class="chip" style="position: absolute; left: 8px; bottom: 8px; background: var(--paper)">Earlier lines, 2018 and 2020</span></div>
+      </sc-if>
+      <sc-for list="{{yGrid}}" as="g" hint-placeholder-count="5">
+        <div style="position: absolute; left: 0; right: 0; top: {{g.y}}; border-top: {{g.bd}}"><span class="num" style="position: absolute; right: 4px; top: -17px; font-size: 12px; color: var(--ink-3)">{{g.label}}</span></div>
+      </sc-for>
+      <svg class="ch" width="100%" height="100%" style="position: absolute; left: 0; top: 0; height: 100%" aria-hidden="true">
+        <sc-for list="{{segs}}" as="s" hint-placeholder-count="0">
+          <line class="{{s.cls}}" x1="{{s.x1}}" y1="{{s.y1}}" x2="{{s.x2}}" y2="{{s.y2}}"></line>
+        </sc-for>
+      </svg>
+      <sc-for list="{{marks}}" as="k" hint-placeholder-count="10">
+        <button type="button" onClick="{{k.pick}}" aria-label="{{k.aria}}" title="{{k.aria}}" style="position: absolute; left: calc({{k.x}} - 7px); top: calc({{k.y}} - 7px); width: 14px; height: 14px; padding: 0; cursor: pointer; border: 1.6px solid var(--ink); border-radius: {{k.radius}}; transform: {{k.tf}}; background: {{k.bg}}; z-index: 2"></button>
+      </sc-for>
+    </div>
+    <div style="position: relative; height: 22px; font-size: 12px; color: var(--ink-3); border-top: 1.5px solid var(--ink)" class="num" aria-hidden="true">
+      <sc-for list="{{years}}" as="y" hint-placeholder-count="5"><span style="position: absolute; top: 4px; left: {{y.x}}; transform: translateX(-50%)">{{y.label}}</span></sc-for>
+    </div>
+    <div style="font-size: 12.5px; font-weight: 700; margin-top: 2px"><span class="pm r"></span>↓ Republican margin</div>
+    <p class="small" style="margin: 8px 0 0">Lines join results for the same office. Select a mark to make it the "to" election.</p>
+
+    <div class="row" style="justify-content: space-between; margin: 28px 0 10px">
+      <h3 class="h3">The results</h3>
+      <button type="button" class="btn sm" aria-label="Export this table as CSV">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8M4.5 7 8 10.5 11.5 7M2.5 13.5h11"></path></svg>
+        Export CSV
+      </button>
+    </div>
+    <div class="tbl-box">
+      <table class="tbl" style="min-width: 960px">
+        <thead><tr>
+          <th><button type="button" class="sort" onClick="{{sYear}}">Election <span aria-hidden="true">{{aYear}}</span></button></th>
+          <th class="r">Democratic</th>
+          <th class="r">Republican</th>
+          <th class="r"><button type="button" class="sort" onClick="{{sMargin}}">Margin <span aria-hidden="true">{{aMargin}}</span></button></th>
+          <th class="r"><button type="button" class="sort" onClick="{{sVotes}}">Votes cast <span aria-hidden="true">{{aVotes}}</span></button></th>
+          <th class="r"><button type="button" class="sort" onClick="{{sTurn}}">Turnout <span aria-hidden="true">{{aTurn}}</span></button></th>
+          <th class="r">Against Pennsylvania</th>
+          <th>Status</th>
+        </tr></thead>
+        <tbody>
+          <sc-for list="{{rows}}" as="r" hint-placeholder-count="10">
+            <tr class="{{r.trCls}}">
+              <td><span style="font-weight: 700">{{r.label}}</span> <span class="{{r.tagCls}}">{{r.tag}}</span></td>
+              <td class="r num">{{r.dem}}</td>
+              <td class="r num">{{r.rep}}</td>
+              <td class="r num" style="font-weight: 700">{{r.margin}}</td>
+              <td class="r num">{{r.votes}}</td>
+              <td class="r num">{{r.turn}}</td>
+              <td class="r num">{{r.vsState}}</td>
+              <td><span class="{{r.chip}}">{{r.status}}</span></td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+    <div class="tbl-foot">
+      <dc-import name="SourceLine" src="{{resSrc}}" asof="Nov 25, 2026, 11:40 PM ET" what="{{resWhat}}" note="Turnout is votes cast as a share of the voting-age population" hint-size="100%,22px"></dc-import>
+    </div>
+  </section>
+
+  <!-- people and place -->
+  <section class="sec">
+    <div class="sec-h">
+      <h2 class="h2"><span class="sec-n">§3</span>The people who live here</h2>
+      <button type="button" class="btn sm" aria-label="Export these figures as CSV">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8M4.5 7 8 10.5 11.5 7M2.5 13.5h11"></path></svg>
+        Export CSV
+      </button>
+    </div>
+    <div style="display: grid; gap: 0 40px; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr))">
+      <sc-for list="{{stats}}" as="s" hint-placeholder-count="8">
+        <div style="padding: 14px 0; border-top: 1.5px solid var(--ink)">
+          <div class="eyebrow">{{s.k}}</div>
+          <div class="mid num" style="margin-top: 4px">{{s.v}}</div>
+          <div class="small" style="margin-top: 4px">Pennsylvania: <span class="num">{{s.pa}}</span></div>
+        </div>
+      </sc-for>
+    </div>
+
+    <div class="cols" style="margin-top: 32px">
+      <div class="stack" style="gap: 8px">
+        <h3 class="h3">Race and ethnicity</h3>
+        <sc-for list="{{race}}" as="g" hint-placeholder-count="5">
+          <div style="display: grid; grid-template-columns: minmax(120px, 34%) 1fr 54px; gap: 10px; align-items: center; font-size: 14.5px; min-height: 28px">
+            <span>{{g.k}}</span>
+            <span style="position: relative; height: 12px; background: var(--zero)" role="img" aria-label="{{g.aria}}"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: {{g.w}}; background: var(--ink-2)"></span><span style="position: absolute; top: -4px; bottom: -4px; left: {{g.paX}}; border-left: 2px solid var(--ink)"></span></span>
+            <span class="num" style="text-align: right; font-weight: 700">{{g.v}}</span>
+          </div>
+        </sc-for>
+        <p class="small" style="margin: 2px 0 0">The upright tick on each bar is the Pennsylvania figure. These bars are in ink, not party colour.</p>
+      </div>
+      <div class="stack" style="gap: 8px">
+        <h3 class="h3">Population by year</h3>
+        <div style="display: flex; align-items: flex-end; gap: 6px; height: 150px; border-bottom: 1.5px solid var(--ink)">
+          <sc-for list="{{popYears}}" as="p" hint-placeholder-count="9">
+            <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; gap: 3px">
+              <span class="num" style="font-size: 11.5px; color: var(--ink-2); white-space: nowrap">{{p.v}}</span>
+              <span class="{{p.cls}}" style="display: block; width: 100%; height: {{p.h}}; background-color: {{p.bg}}; border: {{p.bd}}"></span>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display: flex; gap: 6px" class="num" aria-hidden="true">
+          <sc-for list="{{popYears}}" as="p" hint-placeholder-count="9"><span style="flex: 1; text-align: center; font-size: 12px; color: var(--ink-3)">{{p.y}}</span></sc-for>
+        </div>
+        <div class="legend">
+          <span>In thousands</span>
+          <sc-if value="{{isDistrict}}" hint-placeholder-val="{{false}}"><span><i class="hatch-bg" style="background-color: var(--zero)"></i>Earlier district lines: not shown</span></sc-if>
+          <span><i style="border: 1.5px dashed var(--ink-3)"></i>Not yet published</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top: 14px">
+      <dc-import name="SourceLine" src="{{demoSrc}}" asof="Nov 20, 2026, 2:08 AM ET" what="{{demoWhat}}" note="Survey estimates carry a margin of error, given in the download" hint-size="100%,22px"></dc-import>
+    </div>
+  </section>
+
+  <!-- districts and counties -->
+  <section class="sec">
+    <div class="sec-h">
+      <h2 class="h2"><span class="sec-n">§4</span>{{geoTitle}}</h2>
+      <button type="button" class="lnk" onClick="{{swapMode}}">{{swapLabel}}</button>
+    </div>
+    <div class="tbl-box">
+      <table class="tbl" style="min-width: 720px">
+        <thead><tr><th>{{g1}}</th><th>{{g2}}</th><th class="r">{{g3}}</th><th class="r">{{g4}}</th><th class="r">2026 House margin</th></tr></thead>
+        <tbody>
+          <sc-for list="{{geoRows}}" as="r" hint-placeholder-count="2">
+            <tr><td style="font-weight: 700">{{r.a}}</td><td>{{r.b}}</td><td class="r num">{{r.c}}</td><td class="r num">{{r.d}}</td><td class="r num">{{r.e}}</td></tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+    <p class="prose" style="margin-top: 14px; font-size: 15.5px">{{geoNote}}</p>
+    <p class="src" style="margin-top: 8px"><b>Source</b>Census Bureau block-to-district relationship files for the 116th and 119th Congresses; Pennsylvania Department of State. As of Nov 20, 2026.</p>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"onNav":{"editor":null,"tsType":"(id: string) => void"},"startMode":{"editor":"enum","options":["county","district"],"default":"county"},"$preview":{"width":1360,"height":3500}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.state || {};
+    const nav = this.props.onNav || (() => {});
+    const standalone = !this.props.onNav;
+    const mode = st.mode || this.props.startMode || 'county';
+    const isD = mode === 'district';
+    const EL = [['2018h', 2018, 'House'], ['2018s', 2018, 'Senate'], ['2020p', 2020, 'President'], ['2020h', 2020, 'House'], ['2022h', 2022, 'House'], ['2022s', 2022, 'Senate'], ['2024p', 2024, 'President'], ['2024h', 2024, 'House'], ['2024s', 2024, 'Senate'], ['2026h', 2026, 'House']];
+    const state = { '2018h': 10.2, '2018s': 13.1, '2020p': 1.2, '2020h': -1.0, '2022h': -4.6, '2022s': 4.9, '2024p': -1.7, '2024h': -3.2, '2024s': -0.2, '2026h': 3.6 };
+    const other = { '2018h': 0.9, '2018s': 1.6, '2020p': 1.4, '2020h': 0.6, '2022h': 0.7, '2022s': 2.6, '2024p': 1.3, '2024h': 0.8, '2024s': 2.2, '2026h': 1.1 };
+    const P = isD ? {
+      m: { '2018h': -2.5, '2018s': 12.6, '2020p': 5.8, '2020h': -13.1, '2022h': -9.6, '2022s': 7.2, '2024p': -0.6, '2024h': -12.4, '2024s': 0.6, '2026h': -4.3 },
+      v: { '2018h': 351200, '2018s': 354100, '2020p': 467900, '2020h': 459800, '2022h': 379600, '2022s': 382900, '2024p': 481700, '2024h': 472800, '2024s': 477300, '2026h': 379100 },
+      vap: 612000
+    } : {
+      m: { '2018h': -2.6, '2018s': 13.2, '2020p': 4.4, '2020h': -13.1, '2022h': -9.8, '2022s': 7.9, '2024p': -0.3, '2024h': -12.6, '2024s': 0.9, '2026h': -4.1 },
+      v: { '2018h': 298300, '2018s': 300900, '2020p': 396200, '2020h': 389400, '2022h': 318900, '2022s': 321700, '2024p': 404800, '2024h': 397300, '2024s': 401100, '2026h': 318400 },
+      vap: 521300
+    };
+    const from = st.from || '2024h', to = st.to || '2026h';
+    const el = (id) => EL.filter((e) => e[0] === id)[0];
+    const eF = el(from), eT = el(to);
+    const lbl = (e) => e[1] + ' ' + (e[2] === 'House' ? 'U.S. House' : e[2] === 'Senate' ? 'U.S. Senate' : 'President');
+    const era = (e) => (e[1] < 2022 ? 0 : 1);
+    const mfmt = (m) => (Math.abs(m) < 0.05 ? 'Even' : (m > 0 ? 'D+' : 'R+') + Math.abs(m).toFixed(1));
+    const sfmt = (s) => (Math.abs(s) < 0.05 ? '0.0' : '+' + Math.abs(s).toFixed(1) + (s > 0 ? ' D' : ' R'));
+    const num = (n) => n.toLocaleString('en-US');
+    const cmpNa = isD && era(eF) !== era(eT);
+    const swing = P.m[to] - P.m[from];
+    const dv = P.v[to] - P.v[from];
+    const tF = (P.v[from] / P.vap) * 100, tT = (P.v[to] / P.vap) * 100;
+
+    // chart
+    const X = (e) => 8 + ((e[1] - 2018) / 8) * 84 + (e[2] === 'House' ? -1.3 : e[2] === 'Senate' ? 1.3 : 0);
+    const Y = (m) => ((20 - Math.max(-20, Math.min(20, m))) / 40) * 100;
+    const pc = (v) => v.toFixed(2) + '%';
+    const segs = [];
+    ['House', 'President', 'Senate'].forEach((office) => {
+      const pts = EL.filter((e) => e[2] === office);
+      for (let i = 0; i < pts.length - 1; i++) {
+        if (isD && era(pts[i]) !== era(pts[i + 1])) continue;
+        segs.push({ cls: office === 'House' ? 'li' : 'dash', x1: pc(X(pts[i])), y1: pc(Y(P.m[pts[i][0]])), x2: pc(X(pts[i + 1])), y2: pc(Y(P.m[pts[i + 1][0]])) });
+      }
+    });
+    const marks = EL.map((e) => {
+      const picked = e[0] === from || e[0] === to;
+      return {
+        x: pc(X(e)), y: pc(Y(P.m[e[0]])),
+        radius: e[2] === 'President' ? '50%' : '0',
+        tf: e[2] === 'Senate' ? 'rotate(45deg) scale(.85)' : 'none',
+        bg: picked ? 'var(--mark)' : e[2] === 'President' ? 'var(--paper)' : 'var(--ink)',
+        aria: lbl(e) + ': ' + mfmt(P.m[e[0]]) + (e[0] === from ? ' (from)' : e[0] === to ? ' (to)' : ''),
+        pick: () => this.setState(e[0] === from ? { from: to, to: e[0] } : { to: e[0] })
+      };
+    });
+
+    // table
+    const sort = st.sort || { key: 'year', dir: -1 };
+    const base = EL.map((e, i) => {
+      const m = P.m[e[0]], o = other[e[0]];
+      return { e, i, m, v: P.v[e[0]], turn: (P.v[e[0]] / P.vap) * 100, dem: (100 - o + m) / 2, rep: (100 - o - m) / 2 };
+    });
+    const val = (r) => (sort.key === 'year' ? r.i : sort.key === 'margin' ? r.m : sort.key === 'votes' ? r.v : r.turn);
+    const rows = base.slice().sort((a, b) => (val(a) - val(b)) * sort.dir).map((r) => {
+      const id = r.e[0];
+      const old = isD && era(r.e) === 0;
+      const rel = r.m - state[id];
+      return {
+        label: lbl(r.e), trCls: id === from || id === to ? 'sel' : '',
+        tag: id === from ? 'From' : id === to ? 'To' : '', tagCls: id === from || id === to ? 'chip solid' : '',
+        dem: r.dem.toFixed(1) + '%', rep: r.rep.toFixed(1) + '%', margin: mfmt(r.m),
+        votes: num(r.v), turn: r.turn.toFixed(1) + '%',
+        vsState: sfmt(rel) + ' · state ' + mfmt(state[id]),
+        chip: old ? 'chip hatch' : id === '2026h' ? 'chip dot' : 'chip solid',
+        status: old ? 'Earlier lines' : id === '2026h' ? 'Uncertified' : 'Final'
+      };
+    });
+    const setSort = (k) => () => this.setState({ sort: { key: k, dir: sort.key === k ? -sort.dir : -1 } });
+    const ar = (k) => (sort.key === k ? (sort.dir === 1 ? '↑' : '↓') : '');
+
+    // people
+    const stats = (isD ? [
+      ['Population, 2024', '772,400', '13,078,800'], ['Voting-age population', '612,000', '10,443,000'], ['People per square mile', '1,180', '292'], ['Median age', '43.9', '40.9'],
+      ['Median household income', '$108,900', '$76,100'], ['College degree, adults 25+', '43.0%', '34.5%'], ['Homes owned by occupant', '75.1%', '69.2%'], ['Born outside the U.S.', '10.1%', '7.4%']
+    ] : [
+      ['Population, 2024', '648,900', '13,078,800'], ['Voting-age population', '521,300', '10,443,000'], ['People per square mile', '1,070', '292'], ['Median age', '44.6', '40.9'],
+      ['Median household income', '$107,800', '$76,100'], ['College degree, adults 25+', '42.1%', '34.5%'], ['Homes owned by occupant', '76.4%', '69.2%'], ['Born outside the U.S.', '9.6%', '7.4%']
+    ]).map((s) => ({ k: s[0], v: s[1], pa: s[2] }));
+    const race = (isD ? [['White, not Hispanic', 79.1, 73.5], ['Hispanic or Latino', 6.9, 8.9], ['Asian', 6.2, 3.9], ['Black', 4.6, 10.5], ['Two or more, or another', 3.2, 3.2]]
+      : [['White, not Hispanic', 80.2, 73.5], ['Hispanic or Latino', 6.7, 8.9], ['Asian', 5.6, 3.9], ['Black', 4.3, 10.5], ['Two or more, or another', 3.2, 3.2]])
+      .map((g) => ({ k: g[0], v: g[1].toFixed(1) + '%', w: g[1] + '%', paX: g[2] + '%', aria: g[0] + ': ' + g[1] + ' percent here, ' + g[2] + ' percent in Pennsylvania' }));
+    const popRaw = isD ? [[2018, 'old'], [2019, 'old'], [2020, 'old'], [2021, 'old'], [2022, 766.1], [2023, 768.0], [2024, 772.4], [2025, null], [2026, null]]
+      : [[2018, 641.2], [2019, 643.6], [2020, 646.5], [2021, 646.9], [2022, 645.1], [2023, 645.9], [2024, 648.9], [2025, 650.2], [2026, null]];
+    const lo = isD ? 740 : 620, hi = isD ? 780 : 655;
+    const popYears = popRaw.map((p) => {
+      const isNum = typeof p[1] === 'number';
+      return {
+        y: "'" + String(p[0]).slice(2),
+        v: isNum ? p[1].toFixed(1) : '',
+        h: isNum ? (20 + ((p[1] - lo) / (hi - lo)) * 60).toFixed(0) + '%' : '55%',
+        cls: p[1] === 'old' ? 'hatch-bg' : '',
+        bg: isNum ? 'var(--ink-2)' : p[1] === 'old' ? 'var(--zero)' : 'transparent',
+        bd: p[1] === null ? '1.5px dashed var(--ink-3)' : '0'
+      };
+    });
+    const pressed = (b) => (b ? 'true' : 'false');
+
+    return {
+      pad: standalone ? '0 40px 60px' : '0',
+      isDistrict: isD,
+      countyP: pressed(!isD), districtP: pressed(isD),
+      toCounty: () => this.setState({ mode: 'county' }), toDistrict: () => this.setState({ mode: 'district' }),
+      swapMode: () => this.setState({ mode: isD ? 'county' : 'district' }),
+      swapLabel: isD ? 'Open Bucks County' : 'Open PA-01',
+      eyebrow: isD ? 'Place profile · congressional district · Pennsylvania' : 'Place profile · county · Pennsylvania',
+      title: isD ? "PA-01: Pennsylvania's 1st congressional district" : 'Bucks County, Pennsylvania',
+      lede: isD ? 'Every federal election in this district from 2018 to 2026, the people who live in it, and the counties it is made of. Results before 2022 were held on earlier lines and are kept apart.'
+        : 'Every federal election in this county from 2018 to 2026, the people who live in it, and the congressional district it sits in. Compare any two elections below.',
+      facts: isD ? [
+        { k: 'Lines', v: '119th Congress', n: 'In use for 2022, 2024 and 2026' },
+        { k: 'Made of', v: '1 county and part of 1', n: 'All of Bucks, part of Montgomery' },
+        { k: 'Population, 2024', v: '772,400', n: 'Census Bureau estimate' },
+        { k: 'Elections on file', v: '10, 2018 to 2026', n: '4 of them on earlier lines' }
+      ] : [
+        { k: 'FIPS code', v: '42017', n: 'Unchanged from 2018 to 2026' },
+        { k: 'Congressional district', v: 'PA-01', n: 'The whole county, since 2018' },
+        { k: 'Population, 2024', v: '648,900', n: 'Census Bureau estimate' },
+        { k: 'Elections on file', v: '10, 2018 to 2026', n: 'President, Senate and House' }
+      ],
+      opts: EL.map((e) => ({ id: e[0], label: e[1] + ' · ' + (e[2] === 'House' ? 'U.S. House' : e[2] === 'Senate' ? 'U.S. Senate' : 'President') })),
+      from, to, fromLabel: lbl(eF), toLabel: lbl(eT),
+      onFrom: (e) => { const v = e.target.value; this.setState(v === to ? { from: v, to: from } : { from: v }); },
+      onTo: (e) => { const v = e.target.value; this.setState(v === from ? { to: v, from: to } : { to: v }); },
+      cmpOk: !cmpNa, cmpNa,
+      diffOffice: eF[2] !== eT[2], has2026: from === '2026h' || to === '2026h',
+      cSwing: sfmt(swing), cPm: 'pm ' + (swing > 0 ? 'd' : 'r'),
+      cSwingText: Math.abs(swing).toFixed(1) + ' points toward ' + (swing > 0 ? 'Democrats' : 'Republicans'),
+      cFrom: mfmt(P.m[from]), cTo: mfmt(P.m[to]),
+      cVotes: (dv >= 0 ? '+' : '−') + num(Math.abs(dv)),
+      cVotesNote: num(P.v[from]) + ' to ' + num(P.v[to]) + ' (' + (dv >= 0 ? '+' : '−') + Math.abs((dv / P.v[from]) * 100).toFixed(1) + '%)',
+      cTurn: tF.toFixed(1) + '% → ' + tT.toFixed(1) + '%',
+      cTurnNote: (tT - tF >= 0 ? 'up ' : 'down ') + Math.abs(tT - tF).toFixed(1) + ' points',
+      yGrid: [20, 10, 0, -10, -20].map((v) => ({ y: pc(Y(v)), label: v === 0 ? 'Even' : (v > 0 ? 'D+' : 'R+') + Math.abs(v), bd: v === 0 ? '1.5px solid var(--ink)' : '1px solid var(--hair)' })),
+      segs, marks,
+      years: [2018, 2020, 2022, 2024, 2026].map((y) => ({ label: y, x: pc(8 + ((y - 2018) / 8) * 84) })),
+      rows,
+      sYear: setSort('year'), sMargin: setSort('margin'), sVotes: setSort('votes'), sTurn: setSort('turn'),
+      aYear: ar('year'), aMargin: ar('margin'), aVotes: ar('votes'), aTurn: ar('turn'),
+      resSrc: 'Pennsylvania Department of State (2026, unofficial); MIT Election Data and Science Lab (2018 to 2024)',
+      resWhat: isD ? 'Election results, PA-01' : 'Election results, Bucks County',
+      stats, race, popYears,
+      demoSrc: isD ? 'Census Bureau: American Community Survey 2020 to 2024 five-year estimates for the 119th Congress districts' : 'Census Bureau: American Community Survey 2020 to 2024 five-year estimates; 2020 census; annual population estimates',
+      demoWhat: isD ? 'Demographics, PA-01' : 'Demographics, Bucks County',
+      geoTitle: isD ? 'The counties in this district' : 'The congressional district this county is in',
+      g1: isD ? 'County' : 'District', g2: isD ? 'How much of it' : 'Lines',
+      g3: isD ? "Share of the district's people" : "Share of the county's people", g4: isD ? 'Votes cast, 2026' : "Share of the district's people",
+      geoRows: isD ? [
+        { a: 'Bucks County', b: 'All of the county', c: '84.0%', d: '318,400', e: 'R+4.1' },
+        { a: 'Montgomery County', b: 'Part: 14% of the county', c: '16.0%', d: '60,700', e: 'R+5.3' }
+      ] : [
+        { a: 'PA-01', b: '2022, 2024, 2026 (119th Congress lines)', c: '100%', d: '84.0%', e: 'R+4.1' },
+        { a: 'PA-01', b: '2018, 2020 (earlier lines)', c: '100%', d: '87.6%', e: '' }
+      ],
+      geoNote: isD ? 'Where a county is split between districts, its part is built up from precinct results and census blocks inside the district. County parts are marked "part" wherever they appear.'
+        : 'Bucks County has sat wholly inside PA-01 under both sets of lines, but the district itself changed: it took in a different part of Montgomery County in 2022. That is why the county, not the district, is the unit to compare across 2018 to 2026.',
+      goCompare: () => nav('swing')
+    };
+  }
+}
+</script>
+</body>
+</html>

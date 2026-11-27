@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Swing explorer</title>
+<title>Compare elections</title>
 <script src="./support.js"></script>
 <link rel="stylesheet" href="whitehall.css">
 </head>
@@ -17,14 +17,14 @@ body{margin:0}
 <div class="wh" style="padding: {{pad}}">
 
   <div style="padding-top: 36px; display: flex; flex-direction: column; gap: 14px">
-    <p class="eyebrow">Swing explorer · 2024 to 2026</p>
-    <h1 class="h1">Where places moved, and by how much.</h1>
-    <p class="lede">Swing is the 2026 margin minus the 2024 baseline margin, in points. A place can swing toward either party; both directions use the same words and the same scale.</p>
+    <p class="eyebrow">Compare elections · 2018 to 2026 · county and district</p>
+    <h1 class="h1">Compare any two elections, place by place.</h1>
+    <p class="lede">Pick two elections from 2018 to 2026. Swing is the second margin minus the first, in points, for every county or district. A place can swing toward either party; both directions use the same words and the same scale.</p>
   </div>
 
-  <!-- filters -->
+  <!-- the comparison and filters -->
   <section style="margin-top: 28px; border-top: 3px solid var(--ink); border-bottom: 1.5px solid var(--ink); padding: 14px 0 16px">
-    <div style="display: grid; gap: 14px 20px; grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); align-items: end">
+    <div style="display: grid; gap: 14px 20px; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); align-items: end">
       <label class="field">Places
         <select class="sel" value="{{setId}}" onChange="{{onSet}}">
           <option value="pa-county">Pennsylvania · counties</option>
@@ -32,12 +32,36 @@ body{margin:0}
           <option value="ct-region">Connecticut · planning regions</option>
         </select>
       </label>
-      <label class="field">Race
-        <select class="sel" defaultValue="house">
-          <option value="house">U.S. House, 2026</option>
-          <option value="senate" disabled>U.S. Senate (no 2026 race here)</option>
+      <label class="field">From this election
+        <select class="sel" value="{{from}}" onChange="{{onFrom}}">
+          <option value="2018h">2018 · U.S. House</option>
+          <option value="2018s">2018 · U.S. Senate</option>
+          <option value="2020p">2020 · President</option>
+          <option value="2020h">2020 · U.S. House</option>
+          <option value="2022h">2022 · U.S. House</option>
+          <option value="2022s">2022 · U.S. Senate</option>
+          <option value="2024p">2024 · President</option>
+          <option value="2024h">2024 · U.S. House</option>
+          <option value="2024s">2024 · U.S. Senate</option>
+          <option value="2026h">2026 · U.S. House</option>
         </select>
       </label>
+      <label class="field">To this election
+        <select class="sel" value="{{to}}" onChange="{{onTo}}">
+          <option value="2018h">2018 · U.S. House</option>
+          <option value="2018s">2018 · U.S. Senate</option>
+          <option value="2020p">2020 · President</option>
+          <option value="2020h">2020 · U.S. House</option>
+          <option value="2022h">2022 · U.S. House</option>
+          <option value="2022s">2022 · U.S. Senate</option>
+          <option value="2024p">2024 · President</option>
+          <option value="2024h">2024 · U.S. House</option>
+          <option value="2024s">2024 · U.S. Senate</option>
+          <option value="2026h">2026 · U.S. House</option>
+        </select>
+      </label>
+    </div>
+    <div style="display: grid; gap: 14px 20px; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); align-items: end; margin-top: 14px">
       <label class="field">Density (ACS)
         <select class="sel" value="{{fDen}}" onChange="{{onDen}}">
           <option value="all">All places</option>
@@ -63,16 +87,34 @@ body{margin:0}
         </select>
       </label>
     </div>
-    <p class="small" style="margin: 12px 0 0"><strong style="color: var(--ink)">Baseline:</strong> {{baseline}} · <strong style="color: var(--ink)">2026 counts:</strong> {{certNote}}</p>
+    <div class="row" style="margin-top: 14px; gap: 8px 12px">
+      <span style="font-weight: 700"><span class="hl">{{fromLabel}}</span> → <span class="hl">{{toLabel}}</span></span>
+      <sc-if value="{{diffOffice}}" hint-placeholder-val="{{false}}"><span class="chip dash">Different offices: candidates differ, read with care</span></sc-if>
+      <sc-if value="{{has2026}}" hint-placeholder-val="{{true}}"><span class="chip dot">2026 counts uncertified</span></sc-if>
+      <button type="button" class="lnk" style="min-height: 32px" onClick="{{swap}}">Swap the two</button>
+    </div>
+    <p class="small" style="margin: 8px 0 0">Coverage: President 2020 and 2024; U.S. Senate where a seat was up; U.S. House every two years. Pennsylvania had no Senate race in 2020 or 2026.</p>
   </section>
 
   <!-- summary -->
   <div style="display: grid; gap: 20px 40px; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); margin-top: 28px">
     <div><div class="eyebrow">Median swing</div><div class="mid num"><span class="{{medPm}}"></span>{{median}}</div><div class="small">{{medNote}}</div></div>
     <div><div class="eyebrow">Compared</div><div class="mid num">{{nShown}}</div><div class="small">of {{nAll}} places, after filters</div></div>
-    <div><div class="eyebrow">Excluded</div><div class="mid num">{{nEx}}</div><div class="small">Unopposed 2026 race. Counted here, left out of every figure</div></div>
-    <div><div class="eyebrow">Not comparable</div><div class="mid num">{{nNa}}</div><div class="small">Boundaries changed between 2024 and 2026</div></div>
+    <div><div class="eyebrow">Excluded</div><div class="mid num">{{nEx}}</div><div class="small">Unopposed race in one of the two elections</div></div>
+    <div><div class="eyebrow">Not comparable</div><div class="mid num">{{nNa}}</div><div class="small">Boundaries or district lines changed between the two</div></div>
   </div>
+
+  <sc-if value="{{allNa}}" hint-placeholder-val="{{false}}">
+    <div class="hatch-bg" style="margin-top: 24px; border: 1.5px solid var(--ink); padding: 3px">
+      <div style="background: var(--paper); padding: 14px 16px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start">
+        <span class="chip solid">Not comparable</span>
+        <span>{{allNaWhy}}</span>
+        <sc-if value="{{canUseCounties}}" hint-placeholder-val="{{false}}">
+          <button type="button" class="btn sm" onClick="{{useCounties}}">Compare these two elections by county instead</button>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
 
   <div class="split" style="margin-top: 36px">
     <div class="main stack" style="gap: 14px">
@@ -95,8 +137,8 @@ body{margin:0}
         </div>
       </div>
       <div class="legend">
-        <span><i class="hatch-bg" style="background-color: var(--zero)"></i>Excluded: unopposed 2026 race</span>
-        <span><i style="border: 1.5px dashed var(--ink-3)"></i>Boundaries changed; not comparable</span>
+        <span><i class="hatch-bg" style="background-color: var(--zero)"></i>Excluded: unopposed race</span>
+        <span><i style="border: 1.5px dashed var(--ink-3)"></i>Not comparable</span>
       </div>
       <p class="small" style="margin: 0">Each square is one place, set roughly where it sits on a map. Squares are equal so small places are as easy to read as large ones. Select a square to see its numbers.</p>
     </div>
@@ -109,19 +151,32 @@ body{margin:0}
       <sc-if value="{{selOk}}" hint-placeholder-val="{{true}}">
         <dl class="kv">
           <dt>Swing</dt><dd class="num" style="font-weight: 700"><span class="{{selPm}}"></span>{{selSwing}}</dd>
-          <dt>2024 baseline margin</dt><dd class="num">{{selBase}}</dd>
-          <dt>2026 margin</dt><dd class="num">{{selNow}} <span class="chip dot" style="margin-left: 6px">Uncertified</span></dd>
-          <dt>Votes cast, 2026</dt><dd class="num">{{selVotes}}</dd>
+          <dt>{{fromLabel}}</dt><dd class="num">{{selBase}}</dd>
+          <dt>{{toLabel}}</dt><dd class="num">{{selNow}}</dd>
+          <dt>Votes cast, {{toShort}}</dt><dd class="num">{{selVotes}}</dd>
+          <dt>Population</dt><dd class="num">{{selPop}}</dd>
           <dt>College degree</dt><dd class="num">{{selEdu}}</dd>
           <dt>Median household income</dt><dd class="num">{{selInc}}</dd>
-          <dt>People per square mile</dt><dd class="num">{{selDen}}</dd>
         </dl>
       </sc-if>
       <sc-if value="{{selEx}}" hint-placeholder-val="{{false}}">
         <p class="nodata" style="margin: 0"><strong>Excluded.</strong> The 2026 House race here was unopposed, so there is no two-sided margin to compare. This place is counted as excluded and left out of the median, the scatter and the scale.</p>
       </sc-if>
       <sc-if value="{{selNa}}" hint-placeholder-val="{{false}}">
-        <p class="nodata" style="margin: 0"><strong>Boundaries changed; not comparable.</strong> This area's code does not exist in both years: 2024 results were reported for the old counties, 2026 results for planning regions. We do not estimate a swing across the change.</p>
+        <p class="nodata" style="margin: 0"><strong>Not comparable.</strong> {{selNaWhy}}</p>
+      </sc-if>
+      <sc-if value="{{hasHist}}" hint-placeholder-val="{{true}}">
+        <div class="stack" style="gap: 4px">
+          <p class="eyebrow" style="margin-top: 6px">Every election here, 2018 to 2026</p>
+          <sc-for list="{{hist}}" as="h" hint-placeholder-count="10">
+            <div style="display: grid; grid-template-columns: 112px 1fr 58px; gap: 8px; align-items: center; font-size: 13.5px; min-height: 24px">
+              <span class="{{h.lblCls}}">{{h.label}}</span>
+              <span style="position: relative; height: 10px; background: var(--zero)" aria-hidden="true"><span style="position: absolute; top: 0; bottom: 0; left: {{h.left}}; width: {{h.w}}; background: {{h.bg}}"></span><span style="position: absolute; top: -3px; bottom: -3px; left: 50%; border-left: 1.5px solid var(--ink)"></span></span>
+              <span class="num" style="text-align: right; font-weight: 700">{{h.margin}}</span>
+            </div>
+          </sc-for>
+          <button type="button" class="lnk" style="min-height: 36px; margin-top: 4px" onClick="{{goPlace}}">Open the full profile: results, people, districts</button>
+        </div>
       </sc-if>
       <dc-import name="SourceLine" src="{{srcText}}" asof="Nov 25, 2026, 11:40 PM ET" what="{{selWhat}}" hint-size="100%,22px"></dc-import>
     </aside>
@@ -137,13 +192,14 @@ body{margin:0}
       </button>
     </div>
     <div class="tbl-box" style="max-height: 560px; overflow-y: auto">
-      <table class="tbl" style="min-width: 860px">
+      <table class="tbl" style="min-width: 960px">
         <thead><tr>
           <th><button type="button" class="sort" onClick="{{sName}}">Place <span aria-hidden="true">{{aName}}</span></button></th>
           <th class="r"><button type="button" class="sort" onClick="{{sSwing}}">Swing (points) <span aria-hidden="true">{{aSwing}}</span></button></th>
-          <th class="r"><button type="button" class="sort" onClick="{{sBase}}">2024 baseline <span aria-hidden="true">{{aBase}}</span></button></th>
-          <th class="r"><button type="button" class="sort" onClick="{{sNow}}">2026 margin <span aria-hidden="true">{{aNow}}</span></button></th>
-          <th class="r"><button type="button" class="sort" onClick="{{sVotes}}">Votes, 2026 <span aria-hidden="true">{{aVotes}}</span></button></th>
+          <th class="r"><button type="button" class="sort" onClick="{{sBase}}">{{fromShort}} <span aria-hidden="true">{{aBase}}</span></button></th>
+          <th class="r"><button type="button" class="sort" onClick="{{sNow}}">{{toShort}} <span aria-hidden="true">{{aNow}}</span></button></th>
+          <th class="r"><button type="button" class="sort" onClick="{{sVotes}}">Votes, {{toShort}} <span aria-hidden="true">{{aVotes}}</span></button></th>
+          <th class="r"><button type="button" class="sort" onClick="{{sPop}}">Population <span aria-hidden="true">{{aPop}}</span></button></th>
           <th class="r"><button type="button" class="sort" onClick="{{sEdu}}">College <span aria-hidden="true">{{aEdu}}</span></button></th>
           <th>Status</th>
         </tr></thead>
@@ -155,6 +211,7 @@ body{margin:0}
               <td class="r num">{{r.base}}</td>
               <td class="r num">{{r.now}}</td>
               <td class="r num">{{r.votes}}</td>
+              <td class="r num">{{r.pop}}</td>
               <td class="r num">{{r.edu}}</td>
               <td><span class="{{r.chip}}">{{r.status}}</span></td>
             </tr>
@@ -182,7 +239,7 @@ body{margin:0}
       <div>
         <div style="display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 700; margin-bottom: 4px"><span><span class="pm d"></span>↑ Toward Democrats</span><span class="small">{{nShown}} places plotted · each dot is one place</span></div>
         <div style="position: relative; height: 320px; border-left: 1.5px solid var(--ink); border-bottom: 1.5px solid var(--ink)">
-          <sc-for list="{{yGrid}}" as="g" hint-placeholder-count="5">
+          <sc-for list="{{yGrid}}" as="g" hint-placeholder-count="4">
             <div style="position: absolute; left: 0; right: 0; top: {{g.y}}; border-top: {{g.bd}}"><span class="num" style="position: absolute; left: 6px; top: -17px; font-size: 12px; color: var(--ink-3)">{{g.label}}</span></div>
           </sc-for>
           <sc-for list="{{dots}}" as="d" hint-placeholder-count="0">
@@ -190,7 +247,7 @@ body{margin:0}
           </sc-for>
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-top: 4px"><span style="font-weight: 700"><span class="pm r"></span>↓ Toward Republicans</span><span class="num" style="color: var(--ink-3)">{{xMin}} ← {{xLabel}} → {{xMax}}</span></div>
-        <p class="prose" style="font-size: 15px; margin-top: 12px">The chart describes what happened in 2026. It is not a prediction of how any place will vote.</p>
+        <p class="prose" style="font-size: 15px; margin-top: 12px">The chart describes the change between the two elections you picked. It is not a prediction of how any place will vote.</p>
       </div>
     </sc-if>
     <sc-if value="{{noDots}}" hint-placeholder-val="{{false}}">
@@ -202,26 +259,40 @@ body{margin:0}
     <details class="disc">
       <summary>How this is calculated</summary>
       <div class="stack" style="gap: 14px">
-        <p class="formula">swing = 2026 margin − 2024 baseline margin</p>
+        <p class="formula">swing = margin in the "to" election − margin in the "from" election</p>
         <ul class="rule-list" style="font-size: 15px; max-width: 72ch">
           <li><strong>Margin</strong> is the Democratic share minus the Republican share, using shares of <em>all</em> votes cast, not the two-party vote. A positive swing is toward Democrats; a negative swing is toward Republicans. We show both the same way.</li>
-          <li><strong>Baseline.</strong> Counties use the 2024 presidential result. Districts use the 2024 House result, and only where the 2024 and 2026 lines are the same. In redistricted states, only counties are compared.</li>
+          <li><strong>Elections held.</strong> 2018, 2020, 2022, 2024 and 2026. President in 2020 and 2024, U.S. Senate where a seat was up, U.S. House every two years. Every election is stored down to the county.</li>
+          <li><strong>Different offices.</strong> You can compare a presidential result with a House or Senate result, and the page says when you do. The candidates differ, so some of the swing is about them, not the place.</li>
+          <li><strong>Counties are the steady unit.</strong> County lines did not move between 2018 and 2026, except in Connecticut. Use counties to compare across the whole period.</li>
+          <li><strong>District lines changed.</strong> Districts are compared only when both elections used the same lines. Pennsylvania drew new lines for 2022, so 2018 and 2020 districts cannot be compared with 2022, 2024 or 2026 districts.</li>
           <li><strong>Unopposed races</strong> have no two-sided margin. Their places are excluded and the count of exclusions is shown.</li>
           <li><strong>Boundaries changed; not comparable.</strong> A place whose FIPS code does not exist in both years is listed but not scored. Connecticut's planning regions are the main case.</li>
           <li><strong>Alaska</strong> reports by state house district, not county, and is shown that way.</li>
-          <li><strong>Uncertified counts</strong> are labelled until the state certifies. The swing may change by a tenth of a point when it does.</li>
+          <li><strong>Uncertified counts</strong> are labelled until the state certifies.</li>
         </ul>
-        <p class="small">Method version 1.0 · Characteristics: Census Bureau, American Community Survey 2020 to 2024 five-year estimates.</p>
+        <p class="small">Method version 1.1 · Characteristics: Census Bureau, American Community Survey 2020 to 2024 five-year estimates.</p>
       </div>
     </details>
   </section>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"onNav":{"editor":null,"tsType":"(id: string) => void"},"$preview":{"width":1360,"height":2900}}'>
+<script type="text/x-dc" data-dc-script data-props='{"onNav":{"editor":null,"tsType":"(id: string) => void"},"$preview":{"width":1360,"height":3100}}'>
 class Component extends DCLogic {
+  elections() {
+    return [['2018h', 2018, 'House'], ['2018s', 2018, 'Senate'], ['2020p', 2020, 'President'], ['2020h', 2020, 'House'], ['2022h', 2022, 'House'], ['2022s', 2022, 'Senate'], ['2024p', 2024, 'President'], ['2024h', 2024, 'House'], ['2024s', 2024, 'Senate'], ['2026h', 2026, 'House']];
+  }
+
   data() {
     if (this._d) return this._d;
     const hash = (str) => { let x = 2166136261; for (let i = 0; i < str.length; i++) { x ^= str.charCodeAt(i); x = Math.imul(x, 16777619); } return ((x >>> 0) % 10007) / 10007; };
+    const EL = this.elections();
+    const env = { '2018h': 7.5, '2018s': 11, '2020p': 3, '2020h': 1.5, '2022h': -1, '2022s': 6.5, '2024p': 0, '2024h': -0.5, '2024s': 1.5 };
+    const vf = { '2018h': 0.92, '2018s': 0.93, '2020p': 1.28, '2020h': 1.24, '2022h': 0.97, '2022s': 0.99, '2024p': 1.3, '2024h': 1.26, '2024s': 1.28, '2026h': 1 };
+    const fixed = {
+      Bucks: { m: { '2018h': -2.6, '2018s': 13.2, '2020p': 4.4, '2020h': -13.1, '2022h': -9.8, '2022s': 7.9, '2024p': -0.3, '2024h': -12.6, '2024s': 0.9, '2026h': -4.1 }, v: { '2018h': 298300, '2018s': 300900, '2020p': 396200, '2020h': 389400, '2022h': 318900, '2022s': 321700, '2024p': 404800, '2024h': 397300, '2024s': 401100, '2026h': 318400 }, pop: 648900, edu: 42.1, inc: 107.8, den: 1070 },
+      'PA-01': { m: { '2018h': -2.5, '2018s': 12.6, '2020p': 5.8, '2020h': -13.1, '2022h': -9.6, '2022s': 7.2, '2024p': -0.6, '2024h': -12.4, '2024s': 0.6, '2026h': -4.3 }, v: { '2018h': 351200, '2018s': 354100, '2020p': 467900, '2020h': 459800, '2022h': 379600, '2022s': 382900, '2024p': 481700, '2024h': 472800, '2024s': 477300, '2026h': 379100 }, pop: 772400, edu: 43.0, inc: 108.9, den: 1180 }
+    };
     const paRows = [
       ['Erie', 'Crawford', 'Warren', 'McKean', 'Potter', 'Tioga', 'Bradford', 'Susquehanna', 'Wayne'],
       ['Mercer', 'Venango', 'Forest', 'Elk', 'Cameron', 'Clinton', 'Lycoming', 'Sullivan', 'Wyoming', 'Lackawanna', 'Pike'],
@@ -232,30 +303,34 @@ class Component extends DCLogic {
       ['Greene', 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Delaware', 'Philadelphia']
     ];
     const dense = 'Philadelphia Delaware Montgomery Bucks Chester Allegheny Lehigh Northampton Lancaster Dauphin Berks York Erie Lackawanna Luzerne Cumberland Centre Monroe Westmoreland Lebanon Beaver Washington'.split(' ');
-    const unopp = 'Clearfield Jefferson Elk Cameron Clarion Forest'.split(' ');
+    const unopp = 'Clearfield Jefferson Elk Cameron Clarion Forest PA-13 PA-15'.split(' ');
     const make = (name, row, col, kind) => {
       const h = (k) => hash(k + name);
-      const isDense = dense.indexOf(name) >= 0 || kind === 'district' && h('dd') > 0.45;
-      const den = name === 'Philadelphia' ? 11900 : isDense ? Math.round(300 + h('den') * 2600) : Math.round(18 + h('den') * 210);
-      const edu = isDense ? 28 + h('edu') * 24 : 13 + h('edu') * 13;
-      const inc = isDense ? 66 + h('inc') * 34 : 47 + h('inc') * 22;
+      const fx = fixed[name];
+      const isDense = dense.indexOf(name) >= 0 || (kind === 'district' && h('dd') > 0.45);
+      const den = fx ? fx.den : name === 'Philadelphia' ? 11900 : isDense ? Math.round(300 + h('den') * 2600) : Math.round(18 + h('den') * 210);
+      const edu = fx ? fx.edu : isDense ? 28 + h('edu') * 24 : 13 + h('edu') * 13;
+      const inc = fx ? fx.inc : isDense ? 66 + h('inc') * 34 : 47 + h('inc') * 22;
       const base = name === 'Philadelphia' ? 57.8 : isDense ? -12 + h('b') * 36 : -56 + h('b') * 40;
-      const swing = 1.6 + (edu - 26) * 0.16 + (h('n') - 0.5) * 6.4;
-      const votes = name === 'Philadelphia' ? 512300 : isDense ? Math.round(52000 + h('v') * 330000) : Math.round(2600 + h('v') * 41000);
-      return { name: kind === 'county' ? name + ' County' : name, key: name, row, col, den, edu, inc, base, swing, now: base + swing, votes, st: unopp.indexOf(name) >= 0 ? 'ex' : 'ok' };
+      const v26 = name === 'Philadelphia' ? 512300 : kind === 'district' ? Math.round(300000 + h('v') * 90000) : isDense ? Math.round(52000 + h('v') * 330000) : Math.round(2600 + h('v') * 41000);
+      const m = {}, v = {};
+      EL.forEach((e) => {
+        if (fx) { m[e[0]] = fx.m[e[0]]; v[e[0]] = fx.v[e[0]]; return; }
+        v[e[0]] = Math.round(v26 * vf[e[0]] * (0.97 + h('t' + e[0]) * 0.06));
+        if (e[0] === '2024p') m[e[0]] = base;
+        else if (e[0] === '2026h') m[e[0]] = base + 1.6 + (edu - 26) * 0.16 + (h('n') - 0.5) * 6.4;
+        else m[e[0]] = base + env[e[0]] - (edu - 26) * 0.12 * (2024 - e[1]) + (h('n' + e[0]) - 0.5) * 5;
+      });
+      return { name: kind === 'county' ? name + ' County' : name, key: name, row, col, den, edu, inc, m, v, pop: fx ? fx.pop : Math.round(v26 * (2.25 + h('p') * 0.5)), unopp: unopp.indexOf(name) >= 0, st0: 'ok' };
     };
     const pa = [];
     paRows.forEach((r, ri) => r.forEach((n, ci) => { if (n) pa.push(make(n, ri + 1, ci + 1, 'county')); }));
     const dist = [];
-    for (let i = 1; i <= 17; i++) {
-      const p = make('PA-' + (i < 10 ? '0' + i : i), Math.floor((i - 1) / 6) + 1, ((i - 1) % 6) + 1, 'district');
-      if (i === 13 || i === 15) p.st = 'ex';
-      dist.push(p);
-    }
+    for (let i = 1; i <= 17; i++) dist.push(make('PA-' + (i < 10 ? '0' + i : i), Math.floor((i - 1) / 6) + 1, ((i - 1) % 6) + 1, 'district'));
     const ct = ['Capitol', 'Greater Bridgeport', 'Lower Connecticut River Valley', 'Naugatuck Valley', 'Northeastern Connecticut', 'Northwest Hills', 'South Central Connecticut', 'Southeastern Connecticut', 'Western Connecticut']
-      .map((n, i) => ({ name: n + ' Planning Region', key: n, row: Math.floor(i / 3) + 1, col: (i % 3) + 1, st: 'na' }));
+      .map((n, i) => ({ name: n + ' Planning Region', key: n, row: Math.floor(i / 3) + 1, col: (i % 3) + 1, st0: 'na' }));
     const terc = (list, f) => {
-      const ok = list.filter((p) => p.st !== 'na').map(f).sort((a, b) => a - b);
+      const ok = list.map(f).sort((a, b) => a - b);
       const a = ok[Math.floor(ok.length / 3)], b = ok[Math.floor((ok.length * 2) / 3)];
       return (v) => (v < a ? 0 : v < b ? 1 : 2);
     };
@@ -264,43 +339,59 @@ class Component extends DCLogic {
       list.forEach((p) => { p.tDen = td(p.den); p.tInc = ti(p.inc); p.tEdu = te(p.edu); });
     });
     this._d = {
-      'pa-county': { list: pa, cols: 12, max: '640px', title: "Pennsylvania's 67 counties", baseline: '2024 presidential result, by county', src: 'Pennsylvania Department of State (2026, unofficial); MIT Election Data and Science Lab (2024 president by county); Census Bureau ACS', sel: 'Bucks' },
-      'pa-district': { list: dist, cols: 6, max: '330px', title: "Pennsylvania's 17 House districts", baseline: '2024 House result. District lines are the same in 2024 and 2026', src: 'Pennsylvania Department of State (2026, unofficial; 2024 House); Census Bureau ACS', sel: 'PA-07' },
-      'ct-region': { list: ct, cols: 3, max: '170px', title: "Connecticut's 9 planning regions", baseline: 'None available. 2024 results were reported for the old counties', src: 'Connecticut Secretary of the State; Census Bureau', sel: 'Capitol' }
+      'pa-county': { kind: 'county', list: pa, cols: 12, max: '640px', title: "Pennsylvania's 67 counties", src: 'Pennsylvania Department of State (2026, unofficial); MIT Election Data and Science Lab (2018 to 2024, by county); Census Bureau ACS and population estimates', sel: 'Bucks' },
+      'pa-district': { kind: 'district', list: dist, cols: 6, max: '330px', title: "Pennsylvania's 17 House districts", src: 'Pennsylvania Department of State (2026, unofficial; earlier House results); MIT Election Data and Science Lab; Census Bureau ACS', sel: 'PA-01' },
+      'ct-region': { kind: 'region', list: ct, cols: 3, max: '170px', title: "Connecticut's 9 planning regions", src: 'Connecticut Secretary of the State; Census Bureau', sel: 'Capitol' }
     };
     return this._d;
   }
 
   renderVals() {
     const st = this.state || {};
+    const nav = this.props.onNav || (() => {});
     const standalone = !this.props.onNav;
     const setId = st.setId || 'pa-county';
     const D = this.data()[setId];
+    const EL = this.elections();
+    const from = st.from || '2024p', to = st.to || '2026h';
+    const el = (id) => EL.filter((e) => e[0] === id)[0];
+    const eF = el(from), eT = el(to);
+    const lbl = (e) => e[1] + ' ' + (e[2] === 'House' ? 'U.S. House' : e[2] === 'Senate' ? 'U.S. Senate' : 'President');
+    const short = (e) => e[1] + ' ' + e[2];
+    const era = (e) => (e[1] < 2022 ? 0 : 1);
+    const linesDiffer = D.kind === 'district' && era(eF) !== era(eT);
+    const has2026 = from === '2026h' || to === '2026h';
     const f = { den: st.fDen || 'all', inc: st.fInc || 'all', edu: st.fEdu || 'all' };
     const sort = st.sort || { key: 'swing', dir: -1 };
     const xKey = st.xKey || 'edu';
     const selKey = st.sel && D.list.some((p) => p.key === st.sel) ? st.sel : D.sel;
-    const pass = (p) => p.st === 'na' || ((f.den === 'all' || p.tDen === +f.den) && (f.inc === 'all' || p.tInc === +f.inc) && (f.edu === 'all' || p.tEdu === +f.edu));
     const mfmt = (m) => (Math.abs(m) < 0.05 ? 'Even' : (m > 0 ? 'D+' : 'R+') + Math.abs(m).toFixed(1));
     const sfmt = (s) => (Math.abs(s) < 0.05 ? '0.0' : '+' + Math.abs(s).toFixed(1) + (s > 0 ? ' D' : ' R'));
     const color = (s) => { const a = Math.abs(s); if (a < 1) return 'var(--zero)'; const k = a < 3 ? 1 : a < 6 ? 2 : 3; return 'var(--' + (s > 0 ? 'd' : 'r') + k + ')'; };
     const pick = (key) => () => this.setState({ sel: key });
 
-    const shown = D.list.filter(pass);
+    const list = D.list.map((p) => {
+      const stt = p.st0 === 'na' || linesDiffer ? 'na' : has2026 && p.unopp ? 'ex' : 'ok';
+      const q = Object.assign({}, p, { st: stt });
+      if (p.m) { q.base = p.m[from]; q.now = p.m[to]; q.swing = q.now - q.base; q.votes = p.v[to]; }
+      return q;
+    });
+    const pass = (p) => p.st0 === 'na' || ((f.den === 'all' || p.tDen === +f.den) && (f.inc === 'all' || p.tInc === +f.inc) && (f.edu === 'all' || p.tEdu === +f.edu));
+    const shown = list.filter(pass);
     const ok = shown.filter((p) => p.st === 'ok');
     const sw = ok.map((p) => p.swing).sort((a, b) => a - b);
     const med = sw.length ? (sw.length % 2 ? sw[(sw.length - 1) / 2] : (sw[sw.length / 2 - 1] + sw[sw.length / 2]) / 2) : null;
 
-    const tiles = D.list.map((p) => ({
+    const tiles = list.map((p) => ({
       row: p.row, col: p.col,
       cls: 'ctile' + (p.st === 'na' ? ' na' : p.st === 'ex' ? ' ex' : '') + (p.key === selKey ? ' sel' : ''),
       bg: p.st === 'ok' ? color(p.swing) : p.st === 'ex' ? 'var(--zero)' : 'transparent',
       op: pass(p) ? '1' : '.22',
-      aria: p.name + ': ' + (p.st === 'ok' ? 'swing ' + sfmt(p.swing) : p.st === 'ex' ? 'excluded, unopposed race' : 'boundaries changed; not comparable'),
+      aria: p.name + ': ' + (p.st === 'ok' ? 'swing ' + sfmt(p.swing) : p.st === 'ex' ? 'excluded, unopposed race' : 'not comparable'),
       pick: pick(p.key)
     }));
 
-    const val = (p) => (sort.key === 'name' ? p.name : p.st !== 'ok' ? null : p[sort.key]);
+    const val = (p) => (sort.key === 'name' ? p.name : sort.key === 'pop' || sort.key === 'edu' ? (p[sort.key] == null ? null : p[sort.key]) : p.st !== 'ok' ? null : p[sort.key]);
     const rowsSrc = shown.slice().sort((a, b) => {
       const x = val(a), y = val(b);
       if (x == null && y == null) return a.name < b.name ? -1 : 1;
@@ -308,24 +399,27 @@ class Component extends DCLogic {
       if (y == null) return -1;
       return (x < y ? -1 : x > y ? 1 : 0) * sort.dir;
     });
+    const naText = linesDiffer ? 'District lines changed' : 'Boundaries changed; not comparable';
     const rows = rowsSrc.map((p) => ({
       name: p.name, pick: pick(p.key), trCls: p.key === selKey ? 'sel' : '',
       pm: p.st === 'ok' ? 'pm ' + (Math.abs(p.swing) < 0.05 ? 'n' : p.swing > 0 ? 'd' : 'r') : '',
       swing: p.st === 'ok' ? sfmt(p.swing) : '',
-      base: p.st === 'ok' ? mfmt(p.base) : '',
-      now: p.st === 'ok' ? mfmt(p.now) : '',
+      base: p.m && p.st !== 'ex' ? mfmt(p.base) : '',
+      now: p.m && p.st !== 'ex' ? mfmt(p.now) : '',
       votes: p.votes ? p.votes.toLocaleString('en-US') : '',
+      pop: p.pop ? p.pop.toLocaleString('en-US') : '',
       edu: p.edu ? p.edu.toFixed(0) + '%' : '',
-      chip: p.st === 'ok' ? 'chip dot' : p.st === 'ex' ? 'chip hatch' : 'chip dash',
-      status: p.st === 'ok' ? 'Uncertified' : p.st === 'ex' ? 'Excluded: unopposed' : 'Boundaries changed; not comparable'
+      chip: p.st === 'ok' ? (has2026 ? 'chip dot' : 'chip solid') : p.st === 'ex' ? 'chip hatch' : 'chip dash',
+      status: p.st === 'ok' ? (has2026 ? 'Uncertified' : 'Final') : p.st === 'ex' ? 'Excluded: unopposed' : naText
     }));
     const setSort = (key) => () => this.setState({ sort: { key, dir: sort.key === key ? -sort.dir : key === 'name' ? 1 : -1 } });
     const ar = (key) => (sort.key === key ? (sort.dir === 1 ? '↑' : '↓') : '');
 
     const xs = ok.map((p) => (xKey === 'den' ? Math.log10(p[xKey]) : p[xKey]));
     const x0 = Math.min.apply(null, xs), x1 = Math.max.apply(null, xs);
-    const yTop = 12, yBot = -8;
-    const yPct = (s) => (((yTop - Math.max(yBot, Math.min(yTop, s))) / (yTop - yBot)) * 100).toFixed(2) + '%';
+    const maxAbs = sw.length ? Math.max(Math.abs(sw[0]), Math.abs(sw[sw.length - 1])) : 8;
+    const R = Math.max(8, Math.ceil(maxAbs / 4) * 4);
+    const yPct = (s) => (((R - Math.max(-R, Math.min(R, s))) / (2 * R)) * 100).toFixed(2) + '%';
     const dots = ok.map((p) => {
       const xv = xKey === 'den' ? Math.log10(p[xKey]) : p[xKey];
       return {
@@ -336,44 +430,62 @@ class Component extends DCLogic {
     });
     const xfmt = (p, k) => (k === 'edu' ? p.edu.toFixed(0) + '%' : k === 'inc' ? '$' + Math.round(p.inc) + 'k' : p.den.toLocaleString('en-US') + ' per sq mi');
     const byX = ok.slice().sort((a, b) => a[xKey] - b[xKey]);
-    const sel = D.list.find((p) => p.key === selKey);
+    const sel = list.filter((p) => p.key === selKey)[0];
     const pressed = (b) => (b ? 'true' : 'false');
+    const hist = sel.m ? EL.map((e) => {
+      const m = sel.m[e[0]];
+      const w = Math.min(50, (Math.abs(m) / 60) * 50);
+      return {
+        label: short(e), lblCls: e[0] === from || e[0] === to ? 'hl' : '',
+        margin: mfmt(m), w: w.toFixed(1) + '%', left: m > 0 ? (50 - w).toFixed(1) + '%' : '50%',
+        bg: m > 0 ? 'var(--dem)' : 'var(--rep)'
+      };
+    }) : [];
+    const allNa = list.length > 0 && list.every((p) => p.st === 'na');
 
     return {
       pad: standalone ? '0 40px 60px' : '0',
-      setId, fDen: f.den, fInc: f.inc, fEdu: f.edu,
+      setId, from, to, fDen: f.den, fInc: f.inc, fEdu: f.edu,
       onSet: (e) => this.setState({ setId: e.target.value, sel: null }),
+      onFrom: (e) => { const v = e.target.value; this.setState(v === to ? { from: v, to: from } : { from: v }); },
+      onTo: (e) => { const v = e.target.value; this.setState(v === from ? { to: v, from: to } : { to: v }); },
+      swap: () => this.setState({ from: to, to: from }),
       onDen: (e) => this.setState({ fDen: e.target.value }),
       onInc: (e) => this.setState({ fInc: e.target.value }),
       onEdu: (e) => this.setState({ fEdu: e.target.value }),
-      baseline: D.baseline,
-      certNote: setId === 'ct-region' ? 'certified Nov 25, 2026' : 'uncertified. Pennsylvania certifies by Nov 30, 2026',
+      fromLabel: lbl(eF), toLabel: lbl(eT), fromShort: short(eF), toShort: short(eT),
+      diffOffice: eF[2] !== eT[2], has2026,
       median: med == null ? 'None' : sfmt(med),
       medPm: med == null ? 'pm n' : 'pm ' + (med > 0 ? 'd' : 'r'),
       medNote: med == null ? 'No comparable places' : 'points, across ' + ok.length + ' compared places',
-      nShown: ok.length, nAll: D.list.length,
+      nShown: ok.length, nAll: list.length,
       nEx: shown.filter((p) => p.st === 'ex').length,
       nNa: shown.filter((p) => p.st === 'na').length,
       nRows: rows.length,
+      allNa,
+      allNaWhy: linesDiffer ? 'Pennsylvania drew new district lines for 2022. A ' + eF[1] + ' district and a ' + eT[1] + ' district with the same number cover different places, so no swing is shown.' : 'Connecticut replaced its counties with planning regions as reporting areas. Results from the two elections do not cover the same areas.',
+      canUseCounties: linesDiffer, useCounties: () => this.setState({ setId: 'pa-county', sel: null }),
       mapTitle: D.title, gridCols: D.cols, gridMax: D.max, tiles,
       selName: sel.name, selOk: sel.st === 'ok', selEx: sel.st === 'ex', selNa: sel.st === 'na',
+      selNaWhy: linesDiffer ? 'This district had different lines in ' + (era(eF) === 0 ? eF[1] : eT[1]) + '. Its results in each election are listed below, but the two are not set against each other.' : "This area's code does not exist in both years. We do not estimate a swing across the change.",
       selPm: sel.st === 'ok' ? 'pm ' + (sel.swing > 0 ? 'd' : 'r') : 'pm n',
       selSwing: sel.st === 'ok' ? sfmt(sel.swing) + ' points' : '',
       selBase: sel.st === 'ok' ? mfmt(sel.base) : '', selNow: sel.st === 'ok' ? mfmt(sel.now) : '',
       selVotes: sel.votes ? sel.votes.toLocaleString('en-US') : '',
+      selPop: sel.pop ? sel.pop.toLocaleString('en-US') + ' (2024 estimate)' : '',
       selEdu: sel.edu ? sel.edu.toFixed(1) + '% of adults 25 and over' : '',
       selInc: sel.inc ? '$' + Math.round(sel.inc * 1000).toLocaleString('en-US') : '',
-      selDen: sel.den ? sel.den.toLocaleString('en-US') : '',
+      hasHist: hist.length > 0, hist, goPlace: () => nav('place'),
       selWhat: 'Swing for ' + sel.name, srcText: D.src,
       rows,
-      sName: setSort('name'), sSwing: setSort('swing'), sBase: setSort('base'), sNow: setSort('now'), sVotes: setSort('votes'), sEdu: setSort('edu'),
-      aName: ar('name'), aSwing: ar('swing'), aBase: ar('base'), aNow: ar('now'), aVotes: ar('votes'), aEdu: ar('edu'),
+      sName: setSort('name'), sSwing: setSort('swing'), sBase: setSort('base'), sNow: setSort('now'), sVotes: setSort('votes'), sPop: setSort('pop'), sEdu: setSort('edu'),
+      aName: ar('name'), aSwing: ar('swing'), aBase: ar('base'), aNow: ar('now'), aVotes: ar('votes'), aPop: ar('pop'), aEdu: ar('edu'),
       xEdu: () => this.setState({ xKey: 'edu' }), xInc: () => this.setState({ xKey: 'inc' }), xDen: () => this.setState({ xKey: 'den' }),
       xEduP: pressed(xKey === 'edu'), xIncP: pressed(xKey === 'inc'), xDenP: pressed(xKey === 'den'),
       hasDots: dots.length > 0, noDots: dots.length === 0,
-      noDotsWhy: setId === 'ct-region' ? 'Every place in this set changed boundaries between 2024 and 2026.' : 'Loosen the filters to see more places.',
+      noDotsWhy: allNa ? 'No place in this set can be compared across these two elections.' : 'Loosen the filters to see more places.',
       dots,
-      yGrid: [12, 6, 0, -6].map((v) => ({ y: yPct(v), label: v === 0 ? 'No swing' : '+' + Math.abs(v) + (v > 0 ? ' D' : ' R'), bd: v === 0 ? '1.5px solid var(--ink)' : '1px solid var(--hair)' })),
+      yGrid: [R, R / 2, 0, -R / 2].map((v) => ({ y: yPct(v), label: v === 0 ? 'No swing' : '+' + Math.abs(v) + (v > 0 ? ' D' : ' R'), bd: v === 0 ? '1.5px solid var(--ink)' : '1px solid var(--hair)' })),
       xLabel: xKey === 'edu' ? 'adults with a college degree' : xKey === 'inc' ? 'median household income' : 'people per square mile (log scale)',
       xMin: byX.length ? xfmt(byX[0], xKey) : '', xMax: byX.length ? xfmt(byX[byX.length - 1], xKey) : ''
     };

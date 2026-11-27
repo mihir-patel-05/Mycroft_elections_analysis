@@ -1,30 +1,208 @@
 {
   "v": 3,
-  "createdOnFiles": {"v": 1, "at": "2026-11-26T15:00:00Z"},
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-26T15:00:00Z"
+  },
   "title": "Mycroft Whitehall Prototype",
-  "launch": {"view": "canvas", "page": "proto"},
+  "launch": {
+    "view": "canvas",
+    "page": "proto"
+  },
   "pages": [
-    {"id": "proto", "name": "Prototype"},
-    {"id": "screens", "name": "Screens and parts"}
+    {
+      "id": "proto",
+      "name": "Prototype"
+    },
+    {
+      "id": "screens",
+      "name": "Screens and parts"
+    }
   ],
   "boards": {
-    "Main.dc.html": {"x": 0, "y": 0, "w": 1360, "h": 3300, "title": "Whitehall · playable prototype (light)", "page": "proto", "expand": "fill", "is_interactive": true},
-    "DarkReplay.dc.html": {"x": 1440, "y": 0, "w": 1360, "h": 3300, "title": "Election night · dark", "page": "proto", "expand": "fill", "is_interactive": true},
-    "PhoneHome.dc.html": {"x": 2880, "y": 0, "w": 390, "h": 5200, "title": "Phone · The result", "page": "proto", "is_interactive": true},
-    "PhoneReplay.dc.html": {"x": 3350, "y": 0, "w": 390, "h": 5200, "title": "Phone · Election night", "page": "proto", "is_interactive": true},
-    "PhoneRace.dc.html": {"x": 3820, "y": 0, "w": 390, "h": 6200, "title": "Phone · Race page (dark)", "page": "proto", "is_interactive": true},
-    "System.dc.html": {"x": 0, "y": 3700, "w": 1360, "h": 2700, "title": "Design system", "page": "proto", "expand": "fill", "is_interactive": true},
-    "Home.dc.html": {"x": 0, "y": 0, "w": 1360, "h": 2700, "title": "1 · The result (F-09)", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Replay.dc.html": {"x": 1440, "y": 0, "w": 1360, "h": 2900, "title": "2 · Election night replay (F-10)", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Swing.dc.html": {"x": 2880, "y": 0, "w": 1360, "h": 2900, "title": "3 · Swing explorer (F-11)", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Scorecard.dc.html": {"x": 4320, "y": 0, "w": 1360, "h": 2700, "title": "4 · Signal scorecard (F-12)", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Race.dc.html": {"x": 0, "y": 3100, "w": 1360, "h": 3300, "title": "5 · Race page (F-13, F-05)", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Data.dc.html": {"x": 1440, "y": 3100, "w": 1360, "h": 2500, "title": "6 · Data (F-03)", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Specials.dc.html": {"x": 2880, "y": 3100, "w": 1360, "h": 2100, "title": "8 · Special elections (F-14)", "page": "screens", "expand": "fill", "is_interactive": true},
-    "Timeline.dc.html": {"x": 4320, "y": 3100, "w": 900, "h": 760, "title": "Part · single-race night timeline", "page": "screens"},
-    "SourceLine.dc.html": {"x": 4320, "y": 3980, "w": 900, "h": 620, "title": "Part · source line with report form (F-05)", "page": "screens", "is_interactive": true}
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1360,
+      "h": 3300,
+      "title": "Whitehall \u00b7 playable prototype (light)",
+      "page": "proto",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "DarkReplay.dc.html": {
+      "x": 1440,
+      "y": 0,
+      "w": 1360,
+      "h": 3300,
+      "title": "Election night \u00b7 dark",
+      "page": "proto",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "PhoneHome.dc.html": {
+      "x": 2880,
+      "y": 0,
+      "w": 390,
+      "h": 5200,
+      "title": "Phone \u00b7 The result",
+      "page": "proto",
+      "is_interactive": true
+    },
+    "PhoneReplay.dc.html": {
+      "x": 3350,
+      "y": 0,
+      "w": 390,
+      "h": 5200,
+      "title": "Phone \u00b7 Election night",
+      "page": "proto",
+      "is_interactive": true
+    },
+    "PhoneRace.dc.html": {
+      "x": 3820,
+      "y": 0,
+      "w": 390,
+      "h": 6200,
+      "title": "Phone \u00b7 Race page (dark)",
+      "page": "proto",
+      "is_interactive": true
+    },
+    "System.dc.html": {
+      "x": 0,
+      "y": 3700,
+      "w": 1360,
+      "h": 2700,
+      "title": "Design system",
+      "page": "proto",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Home.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1360,
+      "h": 2700,
+      "title": "1 \u00b7 The result (F-09)",
+      "page": "screens",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Replay.dc.html": {
+      "x": 1440,
+      "y": 0,
+      "w": 1360,
+      "h": 2900,
+      "title": "2 \u00b7 Election night replay (F-10)",
+      "page": "screens",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Swing.dc.html": {
+      "x": 2880,
+      "y": 0,
+      "w": 1360,
+      "h": 2980,
+      "title": "3 \u00b7 Compare elections, 2018 to 2026 (F-11, #147)",
+      "page": "screens",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Scorecard.dc.html": {
+      "x": 4320,
+      "y": 0,
+      "w": 1360,
+      "h": 2700,
+      "title": "4 \u00b7 Signal scorecard (F-12)",
+      "page": "screens",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Race.dc.html": {
+      "x": 0,
+      "y": 3100,
+      "w": 1360,
+      "h": 3300,
+      "title": "5 \u00b7 Race page (F-13, F-05)",
+      "page": "screens",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Data.dc.html": {
+      "x": 1440,
+      "y": 3100,
+      "w": 1360,
+      "h": 2500,
+      "title": "6 \u00b7 Data (F-03)",
+      "page": "screens",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Specials.dc.html": {
+      "x": 2880,
+      "y": 3100,
+      "w": 1360,
+      "h": 2100,
+      "title": "8 \u00b7 Special elections (F-14)",
+      "page": "screens",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "Timeline.dc.html": {
+      "x": 4320,
+      "y": 3100,
+      "w": 900,
+      "h": 760,
+      "title": "Part \u00b7 single-race night timeline",
+      "page": "screens"
+    },
+    "SourceLine.dc.html": {
+      "x": 4320,
+      "y": 3980,
+      "w": 900,
+      "h": 620,
+      "title": "Part \u00b7 source line with report form (F-05)",
+      "page": "screens",
+      "is_interactive": true
+    },
+    "Place.dc.html": {
+      "x": 5760,
+      "y": 0,
+      "w": 1360,
+      "h": 3500,
+      "title": "3b \u00b7 Place profile: county and district",
+      "page": "screens",
+      "expand": "fill",
+      "is_interactive": true
+    },
+    "PhonePlace.dc.html": {
+      "x": 4290,
+      "y": 0,
+      "w": 390,
+      "h": 6800,
+      "title": "Phone \u00b7 Place profile",
+      "page": "proto",
+      "is_interactive": true
+    }
   },
-  "order": ["Main.dc.html", "DarkReplay.dc.html", "PhoneHome.dc.html", "PhoneReplay.dc.html", "PhoneRace.dc.html", "System.dc.html", "Home.dc.html", "Replay.dc.html", "Swing.dc.html", "Scorecard.dc.html", "Race.dc.html", "Data.dc.html", "Specials.dc.html", "Timeline.dc.html", "SourceLine.dc.html"],
+  "order": [
+    "Main.dc.html",
+    "DarkReplay.dc.html",
+    "PhoneHome.dc.html",
+    "PhoneReplay.dc.html",
+    "PhoneRace.dc.html",
+    "System.dc.html",
+    "Home.dc.html",
+    "Replay.dc.html",
+    "Swing.dc.html",
+    "Scorecard.dc.html",
+    "Race.dc.html",
+    "Data.dc.html",
+    "Specials.dc.html",
+    "Timeline.dc.html",
+    "SourceLine.dc.html",
+    "Place.dc.html",
+    "PhonePlace.dc.html"
+  ],
   "notes": {},
   "designSystems": []
 }

@@ -158,10 +158,16 @@ body{margin:0}
         <span class="go">Open the replay →</span>
       </button>
       <button type="button" class="door" onClick="{{goSwing}}">
-        <span class="eyebrow">Swing</span>
-        <span class="h3">Where places moved since 2024</span>
-        <span class="prose" style="font-size: 15px">The median contested House seat moved 2.9 points toward Democrats against its 2024 presidential margin. See it by county and district.</span>
-        <span class="go">Open the swing explorer →</span>
+        <span class="eyebrow">Compare</span>
+        <span class="h3">Set 2026 beside any election since 2018</span>
+        <span class="prose" style="font-size: 15px">Pick two elections from 2018 to 2026 and see the swing in every county and district. The median contested House seat moved 2.9 points toward Democrats against its 2024 presidential margin.</span>
+        <span class="go">Compare elections →</span>
+      </button>
+      <button type="button" class="door" onClick="{{goPlace}}">
+        <span class="eyebrow">Places</span>
+        <span class="h3">Every county and district, in full</span>
+        <span class="prose" style="font-size: 15px">One page per county and per congressional district: every federal result from 2018 to 2026, its population and its people.</span>
+        <span class="go">Open a place →</span>
       </button>
       <button type="button" class="door" onClick="{{goScore}}">
         <span class="eyebrow">Scorecard</span>
@@ -172,7 +178,7 @@ body{margin:0}
       <button type="button" class="door" onClick="{{goData}}">
         <span class="eyebrow">Data</span>
         <span class="h3">Download it, with sources</span>
-        <span class="prose" style="font-size: 15px">Eight datasets as CSV and Parquet, each with its source, licence, attribution text and update time.</span>
+        <span class="prose" style="font-size: 15px">Nine datasets as CSV and Parquet, each with its source, licence, attribution text and update time.</span>
         <span class="go">Open the data page →</span>
       </button>
     </div>
@@ -219,6 +225,7 @@ class Component extends DCLogic {
       goRace: () => nav('race'),
       goReplay: () => nav('replay'),
       goSwing: () => nav('swing'),
+      goPlace: () => nav('place'),
       goScore: () => nav('score'),
       goData: () => nav('data')
     };

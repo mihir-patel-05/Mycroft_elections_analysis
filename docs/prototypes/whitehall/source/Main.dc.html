@@ -28,7 +28,7 @@ body{margin:0}
       <span class="eyebrow">Mycroft</span>
       <span style="font-weight: 800; font-stretch: 66%; font-size: 54px; line-height: .9; letter-spacing: -.01em">Whitehall</span>
     </button>
-    <p style="flex: 1 1 260px; margin: 0; font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink-2); max-width: 44ch">The record of the 2026 U.S. federal elections: how each race was counted, how it moved, and how the forecasts did.</p>
+    <p style="flex: 1 1 260px; margin: 0; font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink-2); max-width: 44ch">The record of the 2026 U.S. federal elections: how each race was counted, how it moved, how it compares with every election since 2018, and how the forecasts did.</p>
     <div style="display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center">
       <div style="font-size: 13px; line-height: 1.3">
         <div class="eyebrow">Record as of</div>
@@ -43,7 +43,7 @@ body{margin:0}
 
   <div class="wrap">
     <nav class="nav" aria-label="Sections">
-      <sc-for list="{{navItems}}" as="item" hint-placeholder-count="7">
+      <sc-for list="{{navItems}}" as="item" hint-placeholder-count="8">
         <button type="button" onClick="{{item.go}}" aria-current="{{item.cur}}">{{item.label}}</button>
       </sc-for>
     </nav>
@@ -58,6 +58,9 @@ body{margin:0}
     </sc-if>
     <sc-if value="{{isSwing}}" hint-placeholder-val="{{false}}">
       <dc-import name="Swing" on-nav="{{nav}}" hint-size="100%,1800px"></dc-import>
+    </sc-if>
+    <sc-if value="{{isPlace}}" hint-placeholder-val="{{false}}">
+      <dc-import name="Place" on-nav="{{nav}}" hint-size="100%,1800px"></dc-import>
     </sc-if>
     <sc-if value="{{isScore}}" hint-placeholder-val="{{false}}">
       <dc-import name="Scorecard" on-nav="{{nav}}" hint-size="100%,1800px"></dc-import>
@@ -97,7 +100,7 @@ body{margin:0}
   </footer>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props='{"start":{"editor":"enum","options":["home","replay","swing","score","race","specials","data"],"default":"home"},"startTheme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1360,"height":3300}}'>
+<script type="text/x-dc" data-dc-script data-props='{"start":{"editor":"enum","options":["home","replay","swing","place","score","race","specials","data"],"default":"home"},"startTheme":{"editor":"enum","options":["light","dark"],"default":"light"},"$preview":{"width":1360,"height":3300}}'>
 class Component extends DCLogic {
   renderVals() {
     const st = this.state || {};
@@ -107,7 +110,8 @@ class Component extends DCLogic {
     const items = [
       ['home', 'The result'],
       ['replay', 'Election night'],
-      ['swing', 'Swing'],
+      ['swing', 'Compare'],
+      ['place', 'Places'],
       ['score', 'Scorecard'],
       ['race', 'Races'],
       ['specials', 'Special elections'],
@@ -126,6 +130,7 @@ class Component extends DCLogic {
       isHome: screen === 'home',
       isReplay: screen === 'replay',
       isSwing: screen === 'swing',
+      isPlace: screen === 'place',
       isScore: screen === 'score',
       isRace: screen === 'race',
       isSpecials: screen === 'specials',

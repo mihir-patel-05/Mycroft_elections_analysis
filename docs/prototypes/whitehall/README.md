@@ -6,7 +6,7 @@ A new UI prototype for Whitehall's first public release (Jan 15, 2027, post-elec
 
 The canvas has two pages:
 
-- **Prototype:** the playable app (light), the replay in dark, three phone frames (the result, election night, the race page in dark) and the design-system board.
+- **Prototype:** the playable app (light), the replay in dark, four phone frames (the result, election night, the race page in dark, a place profile) and the design-system board.
 - **Screens and parts:** each screen on its own, plus the two shared parts (the single-race night timeline and the source line with its report form).
 
 Press Play on the first artboard to use it. The section bar moves between screens and the theme button switches light and dark for all of them.
@@ -27,18 +27,29 @@ It shares no tokens, typefaces, shell or screen layouts with `../analyst-workben
 
 | # | Screen | Canvas file | Features | What it shows |
 |---|---|---|---|---|
-| 1 | The result (home) | `Home.dc.html` | F-09, F-13 | House and Senate result, the status of all 470 races (certified, unchanged, still counting), the 7 races still counting, certification by state with deadlines, and doors to the replay, swing, scorecard and data. No countdown |
+| 1 | The result (home) | `Home.dc.html` | F-09, F-13 | House and Senate result, the status of all 470 races (certified, unchanged, still counting), the 7 races still counting, certification by state with deadlines, and doors to the replay, compare, places, scorecard and data. No countdown |
 | 2 | Election night replay | `Replay.dc.html`, `Timeline.dc.html` | F-10, F-15 | Play, step and scrub from 6:00 PM ET on Nov 3 to the last call on Nov 12. Drives the Senate or House tile map, seat counts, the call log and Kalshi prices together. A feed gap is shown as a gap. "One race" shows votes, share counted and market price on one timeline with the call marked |
-| 3 | Swing explorer | `Swing.dc.html` | F-11, F-15 | County or district tile map, sortable table, filters (places, density, income, education), scatter against a characteristic, "How this is calculated", excluded unopposed races, and "Boundaries changed; not comparable" (the Connecticut set) |
+| 3 | Compare elections | `Swing.dc.html` | F-11, #147, F-15 | Pick any two elections from 2018 to 2026 (President, Senate, House) and see the swing for every county or district: tile map, sortable table with population, filters (density, income, education), scatter, and every election for the selected place. Flags comparisons across different offices, district lines that changed (2022), excluded unopposed races and "Boundaries changed; not comparable" |
+| 3b | Place profile | `Place.dc.html` | F-11, #147, F-15 | One page per county (Bucks) and per congressional district (PA-01): a two-election comparison (swing, margin, votes, turnout), all ten elections from 2018 to 2026 as a chart and table, demographics and population by year against the state, and which district a county is in (or which counties make up a district). Earlier district lines are kept apart |
 | 4 | Signal scorecard | `Scorecard.dc.html` | F-12, F-15 | Brier score ("lower is better"), races called right, average error, coverage of 470 beside each score, the 6:00 PM ET cut-off, a same-races comparison, biggest misses, calibration, provisional and certified labels, and a "not scored" row for ratings |
 | 5 | Race page | `Race.dc.html` | F-13, F-05, F-10, F-11 | Certified result with the state's source and date, what changed from the last unofficial count, the night timeline with its own scrubber, county swing, signals at the cut-off ("No public polling"), and sources |
-| 6 | Data | `Data.dc.html` | F-03 | Eight datasets with source, licence, credit line, coverage, export time, CSV and Parquet; one dataset on its last good export; one listed but not offered, with the reason; the header rows every file carries |
+| 6 | Data | `Data.dc.html` | F-03 | Nine datasets (now including results for 2018 to 2024 by county and people and population by county and district) with source, licence, credit line, coverage, export time, CSV and Parquet; one dataset on its last good export; one listed but not offered, with the reason; the header rows every file carries |
 | 7 | Trust flow | `SourceLine.dc.html`, inside `Race.dc.html` | F-05 | "Report an error" opens from any source line with no account. A published correction shows "Corrected Nov 21" beside the number, the old value struck through, the note and the figure's history |
 | 8 | Special elections | `Specials.dc.html` | F-14 | Each special against its 2024 presidential baseline, the running overperformance index with its formula and coverage, "No baseline" and uncontested rows. Shown as it would look in April 2027 |
 | — | Design system | `System.dc.html` | — | Colour tokens for both themes, type scale, source line, status chips, party marks, margin format, scrubber, seat bar, table |
-| — | Phone and dark frames | `PhoneHome`, `PhoneReplay`, `PhoneRace`, `DarkReplay` | F-09 | The same app at 390px and in the dark theme |
+| — | Phone and dark frames | `PhoneHome`, `PhoneReplay`, `PhoneRace`, `PhonePlace`, `DarkReplay` | F-09 | The same app at 390px and in the dark theme |
 
 Not designed: privacy, terms and attributions pages (plain text pages), the admin side of corrections and certification, F-60, and everything deferred (accounts, notebooks, saved workspaces, AI chat).
+
+## Comparing elections (added Nov 26)
+
+The product now compares any two elections from 2018 to 2026 down to the county, with demographics and population for every county and congressional district. Three rules shape the design:
+
+- **Counties are the steady unit.** County lines did not move in the period (except Connecticut), so counties carry comparisons across all five elections.
+- **Districts are compared only on the same lines.** Where lines changed between two elections, the district view says "District lines changed; not comparable" and offers the county view. A district's earlier-lines results are listed but kept apart.
+- **Different offices are allowed and labelled.** Comparing a presidential result with a House result shows a "Different offices" chip, because part of the swing is the candidates.
+
+This goes beyond the current spec inputs: F-11 fixes the baseline at 2024, comparison mode (#147) is P3, and #137 loads only what the swing explorer needs. Those need updating before `/speckit-specify`.
 
 ## Tokens
 

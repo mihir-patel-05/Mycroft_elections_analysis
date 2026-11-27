@@ -114,7 +114,8 @@ body{margin:0}
     <div class="sec-h">
       <h2 class="h2"><span class="sec-n">§3</span>Swing by county</h2>
       <div class="row">
-        <button type="button" class="lnk" onClick="{{goSwing}}">Open the swing explorer</button>
+        <button type="button" class="lnk" onClick="{{goPlace}}">Open a county profile</button>
+        <button type="button" class="lnk" onClick="{{goSwing}}">Compare with other elections</button>
         <button type="button" class="btn sm" aria-label="Export this table as CSV">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8M4.5 7 8 10.5 11.5 7M2.5 13.5h11"></path></svg>
           Export CSV
@@ -123,7 +124,7 @@ body{margin:0}
     </div>
     <div class="tbl-box">
       <table class="tbl" style="min-width: 760px">
-        <thead><tr><th>County</th><th class="r">Swing (points)</th><th class="r">2024 president</th><th class="r">2026 House</th><th class="r">Votes, 2026</th><th>Note</th></tr></thead>
+        <thead><tr><th>County</th><th class="r">Swing, 2024 to 2026</th><th class="r">2024 president</th><th class="r">2026 House</th><th class="r">Votes, 2026</th><th>Note</th></tr></thead>
         <tbody>
           <tr><td style="font-weight: 700">Carroll</td><td class="r num" style="font-weight: 700"><span class="pm d"></span>+3.1 D</td><td class="r num">D+1.8</td><td class="r num">D+4.9</td><td class="r num">33,870</td><td></td></tr>
           <tr><td style="font-weight: 700">Rockingham</td><td class="r num" style="font-weight: 700"><span class="pm d"></span>+2.5 D</td><td class="r num">R+2.9</td><td class="r num">R+0.4</td><td class="r num">160,620</td><td></td></tr>
@@ -213,7 +214,7 @@ class Component extends DCLogic {
       showHist: hist, histOpen: hist ? 'true' : 'false',
       histLabel: hist ? 'Hide the history' : 'See the history of this figure',
       toggleHist: () => this.setState({ hist: !hist }),
-      goReplay: () => nav('replay'), goSwing: () => nav('swing'), goScore: () => nav('score')
+      goReplay: () => nav('replay'), goSwing: () => nav('swing'), goPlace: () => nav('place'), goScore: () => nav('score')
     };
   }
 }
