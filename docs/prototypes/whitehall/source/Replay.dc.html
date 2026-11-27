@@ -9,27 +9,27 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&amp;family=JetBrains+Mono:wght@400..700&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0}
 </style>
 </helmet>
 <div class="wh" style="padding: {{pad}}">
 
-  <div style="padding-top: 36px; display: flex; flex-direction: column; gap: 14px">
+  <div style="padding-top: 14px; display: flex; flex-direction: column; gap: 14px">
     <p class="eyebrow">Election night replay · Nov 3 to Nov 12, 2026</p>
-    <h1 class="h1">The night, as it was recorded.</h1>
-    <p class="lede">Move through the night from the first polls closing to the last call. The map, the seat counts, the call log and the market prices all show the newest snapshot stored at or before the moment you pick.</p>
+    <h1 class="h1">Election-night replay</h1>
+    <p class="lede">Scrub from first poll closing to last call. Map, seat counts, call log and market prices all read the newest snapshot stored at or before the selected moment.</p>
   </div>
 
   <!-- the control: time, play, scrubber -->
-  <section style="margin-top: 32px; border-top: 3px solid var(--ink); border-bottom: 1.5px solid var(--ink); padding: 16px 0 12px; background: var(--paper)">
+  <section style="margin-top: 12px; border: 1px solid var(--hair); padding: 10px 12px; background: var(--paper)">
     <div style="display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: center; justify-content: space-between">
       <div aria-live="polite">
         <div class="eyebrow">The moment shown</div>
         <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px">
-          <span class="hl" style="font-weight: 800; font-stretch: 70%; font-size: clamp(40px, 6cqi, 60px); line-height: 1.05">{{clock}}</span>
-          <span style="font-weight: 700; font-stretch: 85%; font-size: 17px">{{clockDay}}</span>
+          <span class="hl" style="font-family: var(--mono); font-weight: 600; font-size: 24px; line-height: 1.25">{{clock}}</span>
+          <span style="font-weight: 700; font-stretch: 85%; font-size: 13px">{{clockDay}}</span>
         </div>
       </div>
       <div class="row" style="gap: 8px">
@@ -168,7 +168,7 @@ body{margin:0}
 
         <aside class="side stack" style="gap: 28px">
           <div class="stack" style="gap: 10px">
-            <div style="border-top: 3px solid var(--ink); padding-top: 12px">
+            <div style="border-top: 1px solid var(--ink-3); padding-top: 12px">
               <h3 class="h3">Market prices at this moment</h3>
               <p class="small" style="margin: 2px 0 0">Market price (Kalshi, hourly). Last traded price. Prices are not forecasts.</p>
             </div>
@@ -191,14 +191,14 @@ body{margin:0}
           </div>
 
           <div class="stack" style="gap: 6px">
-            <div style="border-top: 3px solid var(--ink); padding-top: 12px">
+            <div style="border-top: 1px solid var(--ink-3); padding-top: 12px">
               <h3 class="h3">Call log</h3>
               <p class="small" style="margin: 2px 0 0">Calls by civicAPI's decision desk. Whitehall does not call races.</p>
             </div>
             <sc-if value="{{noCalls}}" hint-placeholder-val="{{false}}">
               <p class="nodata" style="margin: 6px 0 0">No race has been called yet at this moment.</p>
             </sc-if>
-            <ul class="rule-list" style="font-size: 14.5px">
+            <ul class="rule-list" style="font-size: 12.5px">
               <sc-for list="{{log}}" as="c" hint-placeholder-count="8">
                 <li style="display: grid; grid-template-columns: 76px 1fr; gap: 10px; padding: 9px 0">
                   <span class="num" style="color: var(--ink-3)">{{c.time}}</span>
@@ -213,7 +213,7 @@ body{margin:0}
 
       <section class="sec">
         <div class="sec-h">
-          <h2 class="h2"><span class="sec-n">§1</span>The closest Senate races at {{clock}}</h2>
+          <h2 class="h2"><span class="sec-n">§1</span>Closest Senate races at {{clock}}</h2>
           <button type="button" class="btn sm" aria-label="Export this moment as CSV">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8M4.5 7 8 10.5 11.5 7M2.5 13.5h11"></path></svg>
             Export this moment as CSV
@@ -253,7 +253,7 @@ body{margin:0}
 
   <sc-if value="{{isRace}}" hint-placeholder-val="{{false}}">
     <section style="margin-top: 24px">
-      <div class="sec-h" style="border-top: 3px solid var(--ink); padding-top: 14px">
+      <div class="sec-h" style="border-top: 1px solid var(--ink-3); padding-top: 14px">
         <h2 class="h2">NH-01 · U.S. House, New Hampshire's 1st district</h2>
         <button type="button" class="lnk" onClick="{{goRace}}">Open the full race page</button>
       </div>

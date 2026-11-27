@@ -9,21 +9,21 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&amp;family=JetBrains+Mono:wght@400..700&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0}
 </style>
 </helmet>
 <div class="wh" style="padding: {{pad}}">
 
-  <div style="padding-top: 36px; display: flex; flex-direction: column; gap: 14px">
+  <div style="padding-top: 14px; display: flex; flex-direction: column; gap: 14px">
     <p class="eyebrow">Compare elections · 2018 to 2026 · county and district</p>
-    <h1 class="h1">Compare any two elections, place by place.</h1>
-    <p class="lede">Pick two elections from 2018 to 2026. Swing is the second margin minus the first, in points, for every county or district. A place can swing toward either party; both directions use the same words and the same scale.</p>
+    <h1 class="h1">Compare elections by county and district</h1>
+    <p class="lede">Swing = margin in the "to" election minus margin in the "from" election, in points, for every county or district, 2018 to 2026. Both directions use the same wording and scale.</p>
   </div>
 
   <!-- the comparison and filters -->
-  <section style="margin-top: 28px; border-top: 3px solid var(--ink); border-bottom: 1.5px solid var(--ink); padding: 14px 0 16px">
+  <section style="margin-top: 12px; border: 1px solid var(--hair); padding: 10px 12px; background: var(--paper-2)">
     <div style="display: grid; gap: 14px 20px; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); align-items: end">
       <label class="field">Places
         <select class="sel" value="{{setId}}" onChange="{{onSet}}">
@@ -97,7 +97,7 @@ body{margin:0}
   </section>
 
   <!-- summary -->
-  <div style="display: grid; gap: 20px 40px; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); margin-top: 28px">
+  <div style="display: grid; gap: 20px 40px; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); margin-top: 14px">
     <div><div class="eyebrow">Median swing</div><div class="mid num"><span class="{{medPm}}"></span>{{median}}</div><div class="small">{{medNote}}</div></div>
     <div><div class="eyebrow">Compared</div><div class="mid num">{{nShown}}</div><div class="small">of {{nAll}} places, after filters</div></div>
     <div><div class="eyebrow">Excluded</div><div class="mid num">{{nEx}}</div><div class="small">Unopposed race in one of the two elections</div></div>
@@ -116,7 +116,7 @@ body{margin:0}
     </div>
   </sc-if>
 
-  <div class="split" style="margin-top: 36px">
+  <div class="split" style="margin-top: 16px">
     <div class="main stack" style="gap: 14px">
       <h2 class="h3">{{mapTitle}}</h2>
       <div style="display: grid; grid-template-columns: repeat({{gridCols}}, minmax(0, 1fr)); gap: 3px; max-width: {{gridMax}}">
@@ -144,9 +144,9 @@ body{margin:0}
     </div>
 
     <aside class="side stack" style="gap: 12px">
-      <div style="border-top: 3px solid var(--ink); padding-top: 12px">
+      <div style="border-top: 1px solid var(--ink-3); padding-top: 12px">
         <p class="eyebrow">Selected place</p>
-        <h3 class="h2" style="font-size: 30px">{{selName}}</h3>
+        <h3 class="h2" style="font-size: 13px">{{selName}}</h3>
       </div>
       <sc-if value="{{selOk}}" hint-placeholder-val="{{true}}">
         <dl class="kv">
@@ -185,7 +185,7 @@ body{margin:0}
   <!-- table -->
   <section class="sec">
     <div class="sec-h">
-      <h2 class="h2"><span class="sec-n">§1</span>The table</h2>
+      <h2 class="h2"><span class="sec-n">§1</span>Places · table</h2>
       <button type="button" class="btn sm" aria-label="Export this table as CSV">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8M4.5 7 8 10.5 11.5 7M2.5 13.5h11"></path></svg>
         Export CSV ({{nRows}} rows, these filters)
@@ -247,7 +247,7 @@ body{margin:0}
           </sc-for>
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-top: 4px"><span style="font-weight: 700"><span class="pm r"></span>↓ Toward Republicans</span><span class="num" style="color: var(--ink-3)">{{xMin}} ← {{xLabel}} → {{xMax}}</span></div>
-        <p class="prose" style="font-size: 15px; margin-top: 12px">The chart describes the change between the two elections you picked. It is not a prediction of how any place will vote.</p>
+        <p class="prose" style="font-size: 12.5px; margin-top: 12px">The chart describes the change between the two elections you picked. It is not a prediction of how any place will vote.</p>
       </div>
     </sc-if>
     <sc-if value="{{noDots}}" hint-placeholder-val="{{false}}">
@@ -255,12 +255,12 @@ body{margin:0}
     </sc-if>
   </section>
 
-  <section style="margin-top: 48px">
+  <section style="margin-top: 16px">
     <details class="disc">
       <summary>How this is calculated</summary>
       <div class="stack" style="gap: 14px">
         <p class="formula">swing = margin in the "to" election − margin in the "from" election</p>
-        <ul class="rule-list" style="font-size: 15px; max-width: 72ch">
+        <ul class="rule-list" style="font-size: 12.5px; max-width: 72ch">
           <li><strong>Margin</strong> is the Democratic share minus the Republican share, using shares of <em>all</em> votes cast, not the two-party vote. A positive swing is toward Democrats; a negative swing is toward Republicans. We show both the same way.</li>
           <li><strong>Elections held.</strong> 2018, 2020, 2022, 2024 and 2026. President in 2020 and 2024, U.S. Senate where a seat was up, U.S. House every two years. Every election is stored down to the county.</li>
           <li><strong>Different offices.</strong> You can compare a presidential result with a House or Senate result, and the page says when you do. The candidates differ, so some of the swing is about them, not the place.</li>

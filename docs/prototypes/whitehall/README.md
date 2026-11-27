@@ -1,4 +1,4 @@
-# Mycroft Whitehall prototype: "the register"
+# Mycroft Whitehall prototype: analyst workspace
 
 A new UI prototype for Whitehall's first public release (Jan 15, 2027, post-election mode). It replaces nothing in `CODE/`. Every figure is invented and the prototype says so on every screen; candidates are shown by party and role, never by name.
 
@@ -9,19 +9,22 @@ The canvas has two pages:
 - **Prototype:** the playable app (light), the replay in dark, four phone frames (the result, election night, the race page in dark, a place profile) and the design-system board.
 - **Screens and parts:** each screen on its own, plus the two shared parts (the single-race night timeline and the source line with its report form).
 
-Press Play on the first artboard to use it. The section bar moves between screens and the theme button switches light and dark for all of them.
+Press Play on the first artboard to use it. The tab strip moves between tools, the find box jumps to a sample race, place or tool, and the theme button switches light and dark for all of them.
 
 ## Design direction
 
-Whitehall is drawn as a public register, not a dashboard: ink on cool paper, heavy black rules, numbered sections, and a footnote-style source line under every figure.
+Whitehall is drawn as professional analyst software: a dense tool surface built for working with the numbers, not for reading an article. (The first version of this prototype was an editorial "register" look; it was replaced on Nov 26 because it read like a news site.)
 
-- **One accent, one meaning.** A highlighter yellow marks the thing you are looking at: the moment on the scrubber, the selected row, the current section. Nothing else in the interface is coloured.
-- **Party colour is data only.** Blue and orange-red appear in party marks, bars and the swing scale. The marks also differ in shape (square, circle) and in lightness. Margins and swings are set in ink, so they pass contrast in both themes.
+- **Shell.** A compact app bar (product name, a find box for races, counties, districts and tools, the election cycle, the record's "as of" time, certification status, theme), a tab strip of tools, and a status bar along the bottom showing each feed's freshness.
+- **Panes, not pages.** Every section is a ruled pane with a title bar and its own actions (sort, export, switch view). Corners are near-square; there are no shadows, cards or hero headlines. Titles are functional ("Election-night replay", "Count status · 470 races").
+- **Density.** 13.5px interface text, 12.5px tables with 28px sticky headers and row hover, 30px controls. At phone width, controls grow back to touch size.
+- **Monospaced figures.** Every number, margin, price and time is set in JetBrains Mono so columns align; the interface is Inter.
+- **One accent, one meaning.** A highlighter yellow marks selection only: the scrubber position, the selected row or place, the active tab, a pressed toggle.
+- **Party colour is data only.** Blue and orange-red appear in party marks, bars and the swing scale. The marks also differ in shape (square, circle) and in lightness. Margins and swings are set in ink.
 - **States are patterns, not traffic lights.** Solid means certified or called. An outline means unchanged. Hatching means not counted, not called or not stored. A dashed outline means unknown or "No public polling". A dotted outline means provisional or stale.
-- **Navigation** is a publication masthead with a section bar, not a sidebar. On a phone the bar scrolls sideways.
-- **Charts** are stepped lines that hold until the next stored snapshot, with gaps left as gaps. Market prices are unjoined hourly marks, never a line. Maps are tile maps (one equal square per state or county), so small places read as easily as large ones.
+- **Charts** are stepped lines that hold until the next stored snapshot, with gaps left as gaps. Market prices are unjoined hourly marks, never a line. Maps are tile maps (one equal square per state or county).
 
-It shares no tokens, typefaces, shell or screen layouts with `../analyst-workbench/` or `../dashboard-mockups/`.
+It shares no tokens, typefaces, shell or screen layouts with `../analyst-workbench/` (IBM Plex, indigo accent, left sidebar, white cards on grey) or `../dashboard-mockups/`.
 
 ## Screens
 
@@ -37,6 +40,7 @@ It shares no tokens, typefaces, shell or screen layouts with `../analyst-workben
 | 7 | Trust flow | `SourceLine.dc.html`, inside `Race.dc.html` | F-05 | "Report an error" opens from any source line with no account. A published correction shows "Corrected Nov 21" beside the number, the old value struck through, the note and the figure's history |
 | 8 | Special elections | `Specials.dc.html` | F-14 | Each special against its 2024 presidential baseline, the running overperformance index with its formula and coverage, "No baseline" and uncontested rows. Shown as it would look in April 2027 |
 | — | Design system | `System.dc.html` | — | Colour tokens for both themes, type scale, source line, status chips, party marks, margin format, scrubber, seat bar, table |
+| — | App shell | `Main.dc.html` | F-09 | App bar with find box and context, tab strip, feed status bar |
 | — | Phone and dark frames | `PhoneHome`, `PhoneReplay`, `PhoneRace`, `PhonePlace`, `DarkReplay` | F-09 | The same app at 390px and in the dark theme |
 
 Not designed: privacy, terms and attributions pages (plain text pages), the admin side of corrections and certification, F-60, and everything deferred (accounts, notebooks, saved workspaces, AI chat).
@@ -57,8 +61,8 @@ All tokens and component styles are in [`source/whitehall.css`](source/whitehall
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--paper` | `#F5F6F3` | `#0F1213` | Page |
-| `--paper-2` | `#EAECE7` | `#191D1E` | Sunk bands, code |
+| `--paper` | `#F7F8F7` | `#0F1213` | Page |
+| `--paper-2` | `#ECEEEC` | `#191D1E` | Sunk bands, code |
 | `--ink` | `#121517` | `#ECEEE8` | Text, rules, solid chips |
 | `--ink-2` | `#3A4043` | `#C4C9C3` | Secondary text |
 | `--ink-3` | `#596063` | `#9BA29C` | Captions, source lines |
@@ -69,9 +73,9 @@ All tokens and component styles are in [`source/whitehall.css`](source/whitehall
 | `--oth` | `#7B8087` | `#8D9399` | Other parties (diamond) |
 | `--d1` to `--d3`, `--zero`, `--r1` to `--r3` | see file | see file | The swing scale, the same steps on both sides |
 
-Measured contrast: body text 16.9:1 (light) and 16.1:1 (dark); the lightest caption colour 5.4:1 or better on the page and band backgrounds; text inside party-coloured tiles 4.8:1 or better.
+Measured contrast: body text about 17:1 (light) and 16.1:1 (dark); the lightest caption colour 5.4:1 or better on the page and band backgrounds; text inside party-coloured tiles 4.8:1 or better.
 
-**Type:** Archivo (variable width; condensed and heavy for figures, headlines and labels, normal width for the interface, tabular figures throughout) and Source Serif 4 (ledes, body text and source lines). No monospace except the sample file on the data page. Corners are square everywhere.
+**Type:** Inter for the interface and JetBrains Mono for every figure, code and time. Corners are 2 to 3px.
 
 ## Files
 

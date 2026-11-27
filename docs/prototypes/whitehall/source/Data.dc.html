@@ -9,38 +9,38 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&amp;family=JetBrains+Mono:wght@400..700&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0}
 </style>
 </helmet>
 <div class="wh" style="padding: {{pad}}">
 
-  <div style="padding-top: 36px; display: flex; flex-direction: column; gap: 14px">
+  <div style="padding-top: 14px; display: flex; flex-direction: column; gap: 14px">
     <p class="eyebrow">Data · downloads and methods</p>
-    <h1 class="h1">Take the record with you.</h1>
-    <p class="lede">Every public Whitehall dataset, as CSV and Parquet, with its source, licence and the credit line to use. Free, no account.</p>
+    <h1 class="h1">Datasets and exports</h1>
+    <p class="lede">Nine public datasets as CSV and Parquet, each with source, licence, credit line, coverage and export time. No account needed.</p>
   </div>
 
-  <div style="display: grid; gap: 0 40px; grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr)); margin-top: 28px; border-top: 3px solid var(--ink)">
-    <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Newest export</div><div class="num" style="font-weight: 700; font-size: 19px; font-stretch: 85%">Nov 26, 2026, 2:10 AM ET</div><div class="small">Exports run every night at 2:00 AM ET</div></div>
-    <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Tonight's state</div><div style="font-weight: 700; font-size: 19px; font-stretch: 85%">8 of 9 current</div><div class="small">1 dataset is offering its last good export</div></div>
-    <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Missing values</div><div style="font-weight: 700; font-size: 19px; font-stretch: 85%">Blank, never 0</div><div class="small">A status column says why: unknown, stale, partial, unavailable</div></div>
+  <div style="display: grid; gap: 0 40px; grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr)); margin-top: 14px; border-top: 1px solid var(--ink-3)">
+    <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Newest export</div><div class="num" style="font-weight: 700; font-size: 13.5px">Nov 26, 2026, 2:10 AM ET</div><div class="small">Exports run every night at 2:00 AM ET</div></div>
+    <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Tonight's state</div><div style="font-weight: 700; font-size: 13.5px">8 of 9 current</div><div class="small">1 dataset is offering its last good export</div></div>
+    <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">Missing values</div><div style="font-weight: 700; font-size: 13.5px">Blank, never 0</div><div class="small">A status column says why: unknown, stale, partial, unavailable</div></div>
   </div>
 
-  <section style="margin-top: 44px">
+  <section style="margin-top: 16px">
     <sc-for list="{{sets}}" as="d" hint-placeholder-count="9">
-      <article style="border-top: 3px solid var(--ink); padding: 16px 0 28px; display: flex; flex-wrap: wrap; gap: 18px 40px">
+      <article style="border: 1px solid var(--hair); padding: 12px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 18px 40px">
         <div style="flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
           <div class="eyebrow num">Dataset {{d.n}} of 9</div>
-          <h2 class="h2" style="font-size: 28px">{{d.name}}</h2>
-          <p class="prose" style="font-size: 15.5px">{{d.desc}}</p>
+          <h2 class="h2" style="font-size: 12.5px">{{d.name}}</h2>
+          <p class="prose" style="font-size: 12.5px">{{d.desc}}</p>
           <div class="row" style="gap: 6px">
             <span class="{{d.chipCls}}">{{d.chip}}</span>
             <sc-if value="{{d.stale}}" hint-placeholder-val="{{false}}"><span class="chip hatch">Last good export</span></sc-if>
           </div>
           <sc-if value="{{d.stale}}" hint-placeholder-val="{{false}}">
-            <p class="nodata" style="margin: 0; font-size: 14.5px"><strong>Last night's export of this dataset failed.</strong> The files offered are the last good export, from Nov 24, 2026, 2:09 AM ET. Two days of corrections are not in them yet.</p>
+            <p class="nodata" style="margin: 0; font-size: 12.5px"><strong>Last night's export of this dataset failed.</strong> The files offered are the last good export, from Nov 24, 2026, 2:09 AM ET. Two days of corrections are not in them yet.</p>
           </sc-if>
         </div>
         <div style="flex: 2 1 380px; min-width: 0">
@@ -55,16 +55,16 @@ body{margin:0}
         <div style="flex: 0 1 200px; display: flex; flex-direction: column; gap: 8px; align-items: stretch">
           <button type="button" class="btn solid" style="justify-content: space-between"><span>CSV</span><span class="num" style="font-weight: 500">{{d.csv}}</span></button>
           <button type="button" class="btn" style="justify-content: space-between"><span>Parquet</span><span class="num" style="font-weight: 500">{{d.pq}}</span></button>
-          <a href="#method" style="min-height: 32px; display: flex; align-items: center; font-size: 14.5px">How it is made</a>
+          <a href="#method" style="min-height: 32px; display: flex; align-items: center; font-size: 12.5px">How it is made</a>
         </div>
       </article>
     </sc-for>
 
-    <article style="border-top: 3px solid var(--ink); padding: 16px 0 28px; display: flex; flex-wrap: wrap; gap: 18px 40px">
+    <article style="border: 1px solid var(--hair); padding: 12px; margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 18px 40px">
       <div style="flex: 1 1 280px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
         <div class="eyebrow">Listed, not offered</div>
-        <h2 class="h2" style="font-size: 28px">S&amp;P 500 and VIX, daily</h2>
-        <p class="prose" style="font-size: 15.5px">Shown on Whitehall beside market prices for context.</p>
+        <h2 class="h2" style="font-size: 12.5px">S&amp;P 500 and VIX, daily</h2>
+        <p class="prose" style="font-size: 12.5px">Shown on Whitehall beside market prices for context.</p>
         <div class="row"><span class="chip dash">No download</span></div>
       </div>
       <div style="flex: 2 1 380px; min-width: 0">
@@ -75,15 +75,15 @@ body{margin:0}
         </dl>
       </div>
       <div style="flex: 0 1 200px">
-        <p class="nodata" style="margin: 0; font-size: 14.5px">We can't offer this file. The reason is the licence, not a fault.</p>
+        <p class="nodata" style="margin: 0; font-size: 12.5px">We can't offer this file. The reason is the licence, not a fault.</p>
       </div>
     </article>
   </section>
 
   <section class="sec" id="method">
-    <div class="sec-h"><h2 class="h2"><span class="sec-n">§</span>What every file carries</h2></div>
+    <div class="sec-h"><h2 class="h2"><span class="sec-n">§</span>File format</h2></div>
     <div class="cols">
-      <ul class="rule-list" style="font-size: 15.5px">
+      <ul class="rule-list" style="font-size: 12.5px">
         <li><strong>A header block.</strong> The first rows of each CSV (and the Parquet metadata) give the source, licence, credit line, "as of" time and the method page's address.</li>
         <li><strong>A status column.</strong> Blank numbers come with a reason. A blank is never a 0.</li>
         <li><strong>Provisional rows.</strong> Results from states that have not certified are marked provisional, row by row.</li>

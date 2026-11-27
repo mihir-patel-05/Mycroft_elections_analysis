@@ -9,14 +9,14 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&amp;family=JetBrains+Mono:wght@400..700&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0}
 </style>
 </helmet>
 <div class="wh" style="padding: {{pad}}">
 
-  <div style="padding-top: 36px; display: flex; flex-direction: column; gap: 14px">
+  <div style="padding-top: 14px; display: flex; flex-direction: column; gap: 14px">
     <div class="row" style="justify-content: space-between">
       <p class="eyebrow">{{eyebrow}}</p>
       <div class="seg" role="group" aria-label="Kind of place">
@@ -26,17 +26,17 @@ body{margin:0}
     </div>
     <h1 class="h1">{{title}}</h1>
     <p class="lede">{{lede}}</p>
-    <div style="display: grid; gap: 0 40px; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); border-top: 3px solid var(--ink); margin-top: 8px">
+    <div style="display: grid; gap: 0 40px; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); border-top: 1px solid var(--ink-3); margin-top: 8px">
       <sc-for list="{{facts}}" as="f" hint-placeholder-count="4">
-        <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">{{f.k}}</div><div class="num" style="font-weight: 700; font-size: 19px; font-stretch: 85%">{{f.v}}</div><div class="small">{{f.n}}</div></div>
+        <div style="padding: 12px 0; border-bottom: 1px solid var(--hair)"><div class="eyebrow">{{f.k}}</div><div class="num" style="font-weight: 700; font-size: 13.5px">{{f.v}}</div><div class="small">{{f.n}}</div></div>
       </sc-for>
     </div>
   </div>
 
   <!-- compare two elections here -->
-  <section class="sec" style="margin-top: 44px">
+  <section class="sec" style="margin-top: 16px">
     <div class="sec-h">
-      <h2 class="h2"><span class="sec-n">§1</span>Compare two elections here</h2>
+      <h2 class="h2"><span class="sec-n">§1</span>Two-election comparison</h2>
       <button type="button" class="lnk" onClick="{{goCompare}}">Compare every place at once</button>
     </div>
     <div style="display: grid; gap: 14px 20px; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); align-items: end; max-width: 620px">
@@ -71,7 +71,7 @@ body{margin:0}
     </div>
     <sc-if value="{{cmpOk}}" hint-placeholder-val="{{true}}">
       <div style="display: grid; gap: 20px 40px; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr)); margin-top: 22px">
-        <div><div class="eyebrow">Swing</div><div class="big num" style="font-size: clamp(48px, 6cqi, 76px)">{{cSwing}}</div><div style="font-weight: 700"><span class="{{cPm}}"></span>{{cSwingText}}</div></div>
+        <div><div class="eyebrow">Swing</div><div class="big num" style="font-size: 12.5px">{{cSwing}}</div><div style="font-weight: 700"><span class="{{cPm}}"></span>{{cSwingText}}</div></div>
         <div><div class="eyebrow">Margin</div><div class="mid num">{{cFrom}} → {{cTo}}</div><div class="small">{{fromLabel}} to {{toLabel}}</div></div>
         <div><div class="eyebrow">Votes cast</div><div class="mid num">{{cVotes}}</div><div class="small">{{cVotesNote}}</div></div>
         <div><div class="eyebrow">Turnout</div><div class="mid num">{{cTurn}}</div><div class="small">Share of voting-age population, {{cTurnNote}}</div></div>
@@ -89,7 +89,7 @@ body{margin:0}
   <!-- every election, 2018 to 2026 -->
   <section class="sec">
     <div class="sec-h">
-      <h2 class="h2"><span class="sec-n">§2</span>Every election here, 2018 to 2026</h2>
+      <h2 class="h2"><span class="sec-n">§2</span>Election history, 2018 to 2026</h2>
       <span class="legend">
         <span><i style="background: var(--ink)"></i>U.S. House</span>
         <span><i style="border: 1.6px solid var(--ink); border-radius: 50%"></i>President</span>
@@ -120,7 +120,7 @@ body{margin:0}
     <div style="font-size: 12.5px; font-weight: 700; margin-top: 2px"><span class="pm r"></span>↓ Republican margin</div>
     <p class="small" style="margin: 8px 0 0">Lines join results for the same office. Select a mark to make it the "to" election.</p>
 
-    <div class="row" style="justify-content: space-between; margin: 28px 0 10px">
+    <div class="row" style="justify-content: space-between; margin: 16px 0 8px">
       <h3 class="h3">The results</h3>
       <button type="button" class="btn sm" aria-label="Export this table as CSV">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8M4.5 7 8 10.5 11.5 7M2.5 13.5h11"></path></svg>
@@ -163,7 +163,7 @@ body{margin:0}
   <!-- people and place -->
   <section class="sec">
     <div class="sec-h">
-      <h2 class="h2"><span class="sec-n">§3</span>The people who live here</h2>
+      <h2 class="h2"><span class="sec-n">§3</span>Demographics and population</h2>
       <button type="button" class="btn sm" aria-label="Export these figures as CSV">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8M4.5 7 8 10.5 11.5 7M2.5 13.5h11"></path></svg>
         Export CSV
@@ -179,11 +179,11 @@ body{margin:0}
       </sc-for>
     </div>
 
-    <div class="cols" style="margin-top: 32px">
+    <div class="cols" style="margin-top: 16px">
       <div class="stack" style="gap: 8px">
         <h3 class="h3">Race and ethnicity</h3>
         <sc-for list="{{race}}" as="g" hint-placeholder-count="5">
-          <div style="display: grid; grid-template-columns: minmax(120px, 34%) 1fr 54px; gap: 10px; align-items: center; font-size: 14.5px; min-height: 28px">
+          <div style="display: grid; grid-template-columns: minmax(120px, 34%) 1fr 54px; gap: 10px; align-items: center; font-size: 12.5px; min-height: 28px">
             <span>{{g.k}}</span>
             <span style="position: relative; height: 12px; background: var(--zero)" role="img" aria-label="{{g.aria}}"><span style="position: absolute; left: 0; top: 0; bottom: 0; width: {{g.w}}; background: var(--ink-2)"></span><span style="position: absolute; top: -4px; bottom: -4px; left: {{g.paX}}; border-left: 2px solid var(--ink)"></span></span>
             <span class="num" style="text-align: right; font-weight: 700">{{g.v}}</span>
@@ -232,7 +232,7 @@ body{margin:0}
         </tbody>
       </table>
     </div>
-    <p class="prose" style="margin-top: 14px; font-size: 15.5px">{{geoNote}}</p>
+    <p class="prose" style="margin-top: 14px; font-size: 12.5px">{{geoNote}}</p>
     <p class="src" style="margin-top: 8px"><b>Source</b>Census Bureau block-to-district relationship files for the 116th and 119th Congresses; Pennsylvania Department of State. As of Nov 20, 2026.</p>
   </section>
 </div>

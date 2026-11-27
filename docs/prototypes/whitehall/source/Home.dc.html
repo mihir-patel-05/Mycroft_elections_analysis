@@ -9,21 +9,21 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&amp;family=JetBrains+Mono:wght@400..700&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0}
 </style>
 </helmet>
 <div class="wh" style="padding: {{pad}}">
 
-  <div style="padding-top: 36px; display: flex; flex-direction: column; gap: 18px">
-    <p class="eyebrow">The 2026 general election · 23 days after Election Day</p>
-    <h1 class="h1">Democrats won the House.<br>Republicans kept the Senate.</h1>
-    <p class="lede">Of 470 federal races, <strong>212 are certified</strong>, 251 have not changed since their last count, and <strong>7 are still counting</strong>. A result stays labelled uncertified until its state certifies it.</p>
+  <div style="padding-top: 14px; display: flex; flex-direction: column; gap: 18px">
+    <p class="eyebrow">Overview · 2026 general · day 23 after Election Day</p>
+    <h1 class="h1">2026 general election: chamber results and count status</h1>
+    <p class="lede">Democrats 221, Republicans 211 in the House with 3 seats uncalled; Republicans 51, Democrats 49 in the Senate. 212 of 470 races certified, 251 unchanged since their last count, 7 still counting. Results stay labelled uncertified until the state certifies.</p>
   </div>
 
-  <div class="cols" style="margin-top: 44px">
-    <section class="stack" style="gap: 16px; border-top: 3px solid var(--ink); padding-top: 14px">
+  <div class="cols" style="margin-top: 16px">
+    <section class="stack" style="gap: 16px; border: 1px solid var(--hair); padding: 12px">
       <div class="row" style="justify-content: space-between">
         <h2 class="h3">House · 435 seats</h2>
         <span class="chip plain">218 for a majority</span>
@@ -39,11 +39,11 @@ body{margin:0}
         <span style="flex: 1; background: var(--rep)"></span>
         <span class="maj" style="left: 50.1%"></span>
       </div>
-      <p class="prose" style="font-size: 15.5px">Democrats gained 6 seats on 2024. The 3 seats without a call cannot change control.</p>
+      <p class="prose" style="font-size: 12.5px">Democrats gained 6 seats on 2024. The 3 seats without a call cannot change control.</p>
       <dc-import name="SourceLine" src="Race calls: civicAPI decision desk. Counts: state election offices" asof="Nov 26, 2026, 9:00 AM ET" what="House seat count" note="212 of 435 House races certified" hint-size="100%,22px"></dc-import>
     </section>
 
-    <section class="stack" style="gap: 16px; border-top: 3px solid var(--ink); padding-top: 14px">
+    <section class="stack" style="gap: 16px; border: 1px solid var(--hair); padding: 12px">
       <div class="row" style="justify-content: space-between">
         <h2 class="h3">Senate · 100 seats, 35 up</h2>
         <span class="chip plain">51 for a majority</span>
@@ -60,17 +60,17 @@ body{margin:0}
         <span style="flex: 1; background: var(--r2)"></span>
         <span class="maj" style="left: 50.5%"></span>
       </div>
-      <p class="prose" style="font-size: 15.5px">Of the 35 seats up, Democrats won 15 and Republicans won 20. The paler ends of the bar are the 65 seats not up this year. The Democratic total includes 2 independents who caucus with the party.</p>
+      <p class="prose" style="font-size: 12.5px">Of the 35 seats up, Democrats won 15 and Republicans won 20. The paler ends of the bar are the 65 seats not up this year. The Democratic total includes 2 independents who caucus with the party.</p>
       <dc-import name="SourceLine" src="Race calls: civicAPI decision desk. Counts: state election offices" asof="Nov 26, 2026, 9:00 AM ET" what="Senate seat count" note="17 of 35 Senate races certified" hint-size="100%,22px"></dc-import>
     </section>
   </div>
 
   <section class="sec">
     <div class="sec-h">
-      <h2 class="h2"><span class="sec-n">§1</span>Where every race stands</h2>
+      <h2 class="h2"><span class="sec-n">§1</span>Count status · 470 races</h2>
       <button type="button" class="lnk" onClick="{{goRace}}">Open a race page</button>
     </div>
-    <div role="img" aria-label="Of 470 races: 212 certified, 251 unchanged since their last count, 7 still counting" style="display: flex; height: 34px; width: 100%; gap: 3px">
+    <div role="img" aria-label="Of 470 races: 212 certified, 251 unchanged since their last count, 7 still counting" style="display: flex; height: 16px; width: 100%; gap: 2px">
       <span style="width: 45.1%; background: var(--ink)"></span>
       <span style="flex: 1; border: 1.5px solid var(--ink)"></span>
       <span class="hatch-bg" style="width: 1.5%; min-width: 14px; background-color: var(--zero)"></span>
@@ -81,7 +81,7 @@ body{margin:0}
       <div><div class="mid num">7</div><span class="chip hatch">Still counting</span><p class="small" style="margin: 8px 0 0">Ballots, a recount or a ranked-choice tabulation are outstanding.</p></div>
     </div>
 
-    <div class="row" style="justify-content: space-between; margin: 36px 0 10px">
+    <div class="row" style="justify-content: space-between; margin: 16px 0 8px">
       <h3 class="h3">The 7 races still counting</h3>
       <button type="button" class="btn sm" aria-label="Export this table as CSV">
         <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M8 2v8M4.5 7 8 10.5 11.5 7M2.5 13.5h11"></path></svg>
@@ -114,7 +114,7 @@ body{margin:0}
 
   <section class="sec">
     <div class="sec-h">
-      <h2 class="h2"><span class="sec-n">§2</span>Certification, state by state</h2>
+      <h2 class="h2"><span class="sec-n">§2</span>Certification by state</h2>
       <span class="small">Entered by our editors from each state's official page</span>
     </div>
     <div class="split">
@@ -132,7 +132,7 @@ body{margin:0}
         <p class="small" style="margin: 0">Each square is one state, placed roughly where it sits on a map.</p>
       </div>
       <div class="side stack" style="gap: 14px">
-        <div><span class="big num">19</span><span style="font-weight: 700; font-size: 20px; font-stretch: 80%"> of 50 states certified</span></div>
+        <div><span class="big num">19</span><span style="font-weight: 700; font-size: 13.5px"> of 50 states certified</span></div>
         <h3 class="eyebrow">Next deadlines</h3>
         <ul class="rule-list">
           <li><strong class="num">Nov 30</strong> · Arizona, Colorado, Michigan, New Mexico, Pennsylvania</li>
@@ -140,7 +140,7 @@ body{margin:0}
           <li><strong class="num">Dec 11</strong> · California</li>
           <li><strong class="num">Dec 15</strong> · New York</li>
         </ul>
-        <p class="prose" style="font-size: 15px">A state that passes its deadline without an entry is flagged for our editors. It is never shown as certified.</p>
+        <p class="prose" style="font-size: 12.5px">A state that passes its deadline without an entry is flagged for our editors. It is never shown as certified.</p>
         <dc-import name="SourceLine" src="Official state certification pages, entered by Whitehall editors" asof="Nov 25, 2026, 6:30 PM ET" what="States certified" hint-size="100%,22px"></dc-import>
       </div>
     </div>
@@ -148,37 +148,37 @@ body{margin:0}
 
   <section class="sec">
     <div class="sec-h">
-      <h2 class="h2"><span class="sec-n">§3</span>Read the record</h2>
+      <h2 class="h2"><span class="sec-n">§3</span>Tools</h2>
     </div>
     <div style="display: grid; gap: 0 40px; grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr))">
       <button type="button" class="door" onClick="{{goReplay}}">
         <span class="eyebrow">Election night</span>
         <span class="h3">Replay the night, minute by minute</span>
-        <span class="prose" style="font-size: 15px">Results, calls and market prices together, from the first polls closing at 6:00 PM ET on Nov 3 to the last call on Nov 12.</span>
+        <span class="prose" style="font-size: 12.5px">Results, calls and market prices together, from the first polls closing at 6:00 PM ET on Nov 3 to the last call on Nov 12.</span>
         <span class="go">Open the replay →</span>
       </button>
       <button type="button" class="door" onClick="{{goSwing}}">
         <span class="eyebrow">Compare</span>
         <span class="h3">Set 2026 beside any election since 2018</span>
-        <span class="prose" style="font-size: 15px">Pick two elections from 2018 to 2026 and see the swing in every county and district. The median contested House seat moved 2.9 points toward Democrats against its 2024 presidential margin.</span>
+        <span class="prose" style="font-size: 12.5px">Pick two elections from 2018 to 2026 and see the swing in every county and district. The median contested House seat moved 2.9 points toward Democrats against its 2024 presidential margin.</span>
         <span class="go">Compare elections →</span>
       </button>
       <button type="button" class="door" onClick="{{goPlace}}">
         <span class="eyebrow">Places</span>
         <span class="h3">Every county and district, in full</span>
-        <span class="prose" style="font-size: 15px">One page per county and per congressional district: every federal result from 2018 to 2026, its population and its people.</span>
+        <span class="prose" style="font-size: 12.5px">One page per county and per congressional district: every federal result from 2018 to 2026, its population and its people.</span>
         <span class="go">Open a place →</span>
       </button>
       <button type="button" class="door" onClick="{{goScore}}">
         <span class="eyebrow">Scorecard</span>
         <span class="h3">How the signals did</span>
-        <span class="prose" style="font-size: 15px">Market prices and poll averages, scored on every race they covered at 6:00 PM ET on Nov 3. Coverage is shown beside each score.</span>
+        <span class="prose" style="font-size: 12.5px">Market prices and poll averages, scored on every race they covered at 6:00 PM ET on Nov 3. Coverage is shown beside each score.</span>
         <span class="go">Open the scorecard →</span>
       </button>
       <button type="button" class="door" onClick="{{goData}}">
         <span class="eyebrow">Data</span>
         <span class="h3">Download it, with sources</span>
-        <span class="prose" style="font-size: 15px">Nine datasets as CSV and Parquet, each with its source, licence, attribution text and update time.</span>
+        <span class="prose" style="font-size: 12.5px">Nine datasets as CSV and Parquet, each with its source, licence, attribution text and update time.</span>
         <span class="go">Open the data page →</span>
       </button>
     </div>

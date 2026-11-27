@@ -9,7 +9,7 @@
 <body>
 <x-dc>
 <helmet>
-<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400..600&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400..700&amp;family=JetBrains+Mono:wght@400..700&amp;display=swap" rel="stylesheet">
 <style>
 body{margin:0}
 </style>
@@ -19,37 +19,58 @@ body{margin:0}
   <div class="band">
     <div class="wrap">
       <span class="t">Illustrative data</span>
-      <span>Prototype. Every figure here is invented. Candidates are shown by party and role.</span>
+      <span>Prototype. Every figure is invented. Candidates shown by party and role.</span>
     </div>
   </div>
 
-  <header class="wrap" style="display: flex; flex-wrap: wrap; gap: 12px 32px; align-items: flex-end; justify-content: space-between; padding-top: 22px; padding-bottom: 18px">
-    <button type="button" onClick="{{goHome}}" aria-label="Whitehall, the result" style="display: flex; flex-direction: column; gap: 2px; align-items: flex-start; background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink)">
-      <span class="eyebrow">Mycroft</span>
-      <span style="font-weight: 800; font-stretch: 66%; font-size: 54px; line-height: .9; letter-spacing: -.01em">Whitehall</span>
+  <header class="wrap appbar">
+    <button type="button" class="brand" onClick="{{goHome}}" aria-label="Whitehall overview">
+      <span class="glyph" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+      <span>Whitehall</span>
+      <small>Mycroft · election analysis</small>
     </button>
-    <p style="flex: 1 1 260px; margin: 0; font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--ink-2); max-width: 44ch">The record of the 2026 U.S. federal elections: how each race was counted, how it moved, how it compares with every election since 2018, and how the forecasts did.</p>
-    <div style="display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center">
-      <div style="font-size: 13px; line-height: 1.3">
-        <div class="eyebrow">Record as of</div>
-        <div class="num" style="font-weight: 700">Nov 26, 2026, 9:00 AM ET</div>
-      </div>
+
+    <div class="search">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="7" cy="7" r="4.5"></circle><path d="m10.5 10.5 3.5 3.5"></path></svg>
+      <input type="search" value="{{q}}" onChange="{{onQ}}" placeholder="Find a race, county, district or tool" aria-label="Find a race, county, district or tool">
+      <sc-if value="{{hasResults}}" hint-placeholder-val="{{false}}">
+        <ul class="results">
+          <sc-for list="{{results}}" as="r" hint-placeholder-count="4">
+            <li><button type="button" onClick="{{r.go}}"><span style="font-weight: 600">{{r.label}}</span><span class="small">{{r.kind}}</span></button></li>
+          </sc-for>
+        </ul>
+      </sc-if>
+      <sc-if value="{{noResults}}" hint-placeholder-val="{{false}}">
+        <ul class="results"><li style="padding: 6px 8px" class="small">Nothing matches in the prototype's sample set. Try "NH-01", "Bucks" or "replay".</li></ul>
+      </sc-if>
+    </div>
+
+    <div class="ctx">
+      <label style="display: block"><span class="k">Cycle</span>
+        <select class="sel" defaultValue="2026" aria-label="Election cycle" style="min-height: 26px">
+          <option value="2026">2026 general</option>
+          <option value="2024" disabled>2024 general (in Compare)</option>
+          <option value="2022" disabled>2022 general (in Compare)</option>
+        </select>
+      </label>
+      <div><span class="k">Record as of</span><span class="num" style="font-weight: 600">Nov 26, 2026 09:00 ET</span></div>
+      <div><span class="k">Status</span><span class="chip dot">212 of 470 certified</span></div>
       <button type="button" class="btn sm" onClick="{{toggleTheme}}" aria-pressed="{{darkPressed}}">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6"></circle><path d="M8 2v12" ></path><path d="M8 2a6 6 0 0 1 0 12z" fill="currentColor"></path></svg>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6"></circle><path d="M8 2a6 6 0 0 1 0 12z" fill="currentColor"></path></svg>
         {{themeLabel}}
       </button>
     </div>
   </header>
 
-  <div class="wrap">
-    <nav class="nav" aria-label="Sections">
+  <nav class="nav" aria-label="Tools">
+    <div class="wrap" style="display: flex; width: 100%; padding-inline: min(20px, 3.4%)">
       <sc-for list="{{navItems}}" as="item" hint-placeholder-count="8">
         <button type="button" onClick="{{item.go}}" aria-current="{{item.cur}}">{{item.label}}</button>
       </sc-for>
-    </nav>
-  </div>
+    </div>
+  </nav>
 
-  <main class="wrap" style="padding-top: 8px">
+  <main class="wrap" style="padding-top: 4px; padding-bottom: 8px">
     <sc-if value="{{isHome}}" hint-placeholder-val="{{true}}">
       <dc-import name="Home" on-nav="{{nav}}" hint-size="100%,1800px"></dc-import>
     </sc-if>
@@ -77,25 +98,17 @@ body{margin:0}
   </main>
 
   <footer class="foot">
-    <div class="wrap cols-3">
-      <div class="stack">
-        <p class="eyebrow">How to read this record</p>
-        <p class="prose" style="font-size: 15px">Every number carries its source and an "as of" time. Market prices are prices, not forecasts. Race calls are civicAPI's decision desk's, not ours. Missing is never shown as zero.</p>
-      </div>
-      <div class="stack">
-        <p class="eyebrow">Trust</p>
-        <div class="stack" style="gap: 2px; align-items: flex-start">
-          <button type="button" class="lnk" style="min-height: 32px" onClick="{{goRace}}">Report a data error</button>
-          <button type="button" class="lnk" style="min-height: 32px" onClick="{{goData}}">Sources and attributions</button>
-          <span style="min-height: 32px; display: flex; align-items: center; font-weight: 600">Privacy</span>
-          <span style="min-height: 32px; display: flex; align-items: center; font-weight: 600">Terms</span>
-        </div>
-      </div>
-      <div class="stack">
-        <p class="eyebrow">Mycroft Whitehall</p>
-        <p class="prose" style="font-size: 15px">Free and nonpartisan. No endorsements. We never collect anyone's intended vote.</p>
-        <p class="small">Prototype for the Jan 15, 2027 release. Not live data.</p>
-      </div>
+    <div class="wrap statusbar">
+      <span><span class="dotk"></span><strong>Results</strong> civicAPI · state offices · <span class="num">09:00 ET</span></span>
+      <span><span class="dotk"></span><strong>Calls</strong> civicAPI decision desk · <span class="num">467 of 470</span></span>
+      <span><span class="dotk"></span><strong>Prices</strong> Kalshi, hourly · <span class="num">09:00 ET</span> · not forecasts</span>
+      <span><span class="dotk"></span><strong>Certification</strong> entered by editors · <span class="num">Nov 25 18:30 ET</span></span>
+      <span><span class="dotk stale"></span><strong>Exports</strong> 8 of 9 current · <span class="num">02:10 ET</span></span>
+      <span style="margin-left: auto; display: flex; flex-wrap: wrap; gap: 4px 14px">
+        <button type="button" class="lnk" style="font-size: 11px" onClick="{{goRace}}">Report a data error</button>
+        <button type="button" class="lnk" style="font-size: 11px" onClick="{{goData}}">Sources and licences</button>
+        <span>Privacy</span><span>Terms</span>
+      </span>
     </div>
   </footer>
 </div>
@@ -106,23 +119,41 @@ class Component extends DCLogic {
     const st = this.state || {};
     const screen = st.screen || this.props.start || 'home';
     const theme = st.theme || this.props.startTheme || 'light';
-    const nav = (id) => this.setState({ screen: id });
+    const q = st.q || '';
+    const nav = (id) => this.setState({ screen: id, q: '' });
     const items = [
-      ['home', 'The result'],
-      ['replay', 'Election night'],
+      ['home', 'Overview'],
+      ['replay', 'Night replay'],
       ['swing', 'Compare'],
       ['place', 'Places'],
       ['score', 'Scorecard'],
       ['race', 'Races'],
-      ['specials', 'Special elections'],
+      ['specials', 'Specials'],
       ['data', 'Data']
     ];
+    const index = [
+      ['NH-01 · U.S. House, New Hampshire', 'Race', 'race'],
+      ['Bucks County, Pennsylvania', 'County', 'place'],
+      ['PA-01 · congressional district', 'District', 'place'],
+      ['Compare 2024 President to 2026 House', 'Compare', 'swing'],
+      ['Pennsylvania counties, swing table', 'Compare', 'swing'],
+      ['Election-night replay, Nov 3 to 12', 'Replay', 'replay'],
+      ['NC Senate · biggest miss', 'Scorecard', 'score'],
+      ['Kalshi price calibration', 'Scorecard', 'score'],
+      ['Certification by state', 'Overview', 'home'],
+      ['Datasets: CSV and Parquet', 'Data', 'data'],
+      ['Special elections index', 'Specials', 'specials']
+    ];
+    const needle = q.trim().toLowerCase();
+    const results = needle ? index.filter((r) => (r[0] + ' ' + r[1]).toLowerCase().indexOf(needle) >= 0).slice(0, 6).map((r) => ({ label: r[0], kind: r[1], go: () => nav(r[2]) })) : [];
     return {
       theme,
-      themeLabel: theme === 'dark' ? 'Light theme' : 'Dark theme',
+      themeLabel: theme === 'dark' ? 'Light' : 'Dark',
       darkPressed: theme === 'dark' ? 'true' : 'false',
       toggleTheme: () => this.setState({ theme: theme === 'dark' ? 'light' : 'dark' }),
-      nav,
+      nav, q,
+      onQ: (e) => this.setState({ q: e.target.value }),
+      results, hasResults: results.length > 0, noResults: needle.length > 0 && results.length === 0,
       goHome: () => nav('home'),
       goRace: () => nav('race'),
       goData: () => nav('data'),
